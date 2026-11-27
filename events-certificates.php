@@ -3,7 +3,7 @@
  * Plugin Name:       Events Certificates
  * Plugin URI:        https://github.com/wpbrasil/events-certificates
  * Description:       Attendance certificates for meetups, courses and WordCamps, with an optional code and QR code anyone can verify. Participants typed, pasted, from a Meetup CSV, GatherPress or WordCamp.org's CampTix.
- * Version:           0.71-dev
+ * Version:           0.71
  * Requires at least: 7.1
  * Requires PHP:      7.4
  * Author:            camaleaun
@@ -20,7 +20,7 @@ namespace EventsCertificate;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION = '0.71-dev';
+const VERSION = '0.71';
 
 // Bundled libraries (dompdf, php-qrcode), copied under EventsCertificate\Vendor\ by `evcert deps` (bin/install.sh): docs/decisions/0032.
 if ( is_readable( __DIR__ . '/includes/third-party/autoload.php' ) ) {
