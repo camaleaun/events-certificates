@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Button, ColorPalette, DropdownMenu, MenuGroup, MenuItem, Popover, Snackbar, Spinner, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/components';
 import { store as commandsStore, useCommand } from '@wordpress/commands';
 import { dispatch as wpDispatch } from '@wordpress/data';
-import { check, chevronLeft, close, copy, download, drawerRight, external, lineSolid, listView, moreVertical, pages, plus, redo as redoIcon, seen, styles, trash, undo as undoIcon, upload } from '@wordpress/icons';
+import { check, chevronLeft, closeSmall, copy, download, drawerRight, external, lineSolid, listView, moreVertical, pages, plus, redo as redoIcon, seen, styles, trash, undo as undoIcon, upload } from '@wordpress/icons';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
@@ -697,7 +697,18 @@ export default function Editor() {
 						{ panel === 'insert' ? (
 							<Inserter onInsert={ insert } onClose={ () => setPanel( null ) } />
 						) : (
-							<BlockLayers />
+							<>
+								{ /* As the core's List View sidebar: the tab (one: the list) and the close button, then the list with a little room around it. */ }
+								<div className="evcert-sidebar-tabs">
+									<button type="button" role="tab" aria-selected="true" className="is-active">
+										{ __( 'Layers', 'events-certificates' ) }
+									</button>
+									<Button size="compact" icon={ closeSmall } className="evcert-sidebar-close" onClick={ () => setPanel( null ) } label={ __( 'Close', 'events-certificates' ) } />
+								</div>
+								<div className="evcert-layers-panel">
+									<BlockLayers />
+								</div>
+							</>
 						) }
 					</aside>
 				) }
@@ -814,8 +825,8 @@ export default function Editor() {
 							>
 								{ __( 'Element', 'events-certificates' ) }
 							</button>
-							{ /* As the core's: the close icon in a compact button, with a tooltip that has the shortcut. */ }
-							<Button size="compact" icon={ close } className="evcert-sidebar-close" onClick={ () => setSidebar( null ) } label={ __( 'Close settings', 'events-certificates' ) } shortcut={ displayShortcut.primaryShift( ',' ) } aria-controls="evcert-settings" />
+							{ /* As the core's: the small close icon in a compact button, with a tooltip that has the shortcut. */ }
+							<Button size="compact" icon={ closeSmall } className="evcert-sidebar-close" onClick={ () => setSidebar( null ) } label={ __( 'Close settings', 'events-certificates' ) } shortcut={ displayShortcut.primaryShift( ',' ) } aria-controls="evcert-settings" />
 						</div>
 						{ sidebarTab === 'element' && current && (
 							<Inspector el={ current } stored={ currentStored } design={ design } mode={ mode } tab={ tab } locale={ LOCALE } sample={ sample } onChange={ ( patch ) => update( current.id, patch ) } onBox={ ( b ) => setBox( current.id, b ) } onImage={ ( picked ) => pickImage( current.id, picked ) } />
