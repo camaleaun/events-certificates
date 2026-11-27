@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Button, ColorPalette, DropdownMenu, MenuGroup, MenuItem, Popover, Snackbar, Spinner, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/components';
 import { store as commandsStore, useCommand } from '@wordpress/commands';
 import { dispatch as wpDispatch } from '@wordpress/data';
-import { check, chevronLeft, copy, download, drawerRight, external, lineSolid, listView, moreVertical, pages, plus, redo as redoIcon, seen, styles, trash, undo as undoIcon, upload } from '@wordpress/icons';
+import { check, chevronLeft, close, copy, download, drawerRight, external, lineSolid, listView, moreVertical, pages, plus, redo as redoIcon, seen, styles, trash, undo as undoIcon, upload } from '@wordpress/icons';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
@@ -98,7 +98,9 @@ function historyReducer( state: History, action: Action ): History {
 
 /** A Cmd (Mac) or Ctrl shortcut as shown in menus. */
 const primary = ( key: string ) => ( /Mac|iP(hone|ad)/.test( navigator.platform ) ? `⌘${ key }` : `Ctrl+${ key }` );
-const displayShortcut = { primary };
+/** Shift + Cmd (Mac) or Ctrl + Shift, as the core shows them. */
+const primaryShift = ( key: string ) => ( /Mac|iP(hone|ad)/.test( navigator.platform ) ? `⇧⌘${ key }` : `Ctrl+Shift+${ key }` );
+const displayShortcut = { primary, primaryShift };
 
 
 /** The fits of the page, in the order of the menu (and of the palette). */
@@ -483,6 +485,12 @@ export default function Editor() {
 	// Keyboard: arrows nudge, Delete removes, Cmd/Ctrl+Z/Shift+Z/D/S.
 	useEffect( () => {
 		const onKey = ( event: KeyboardEvent ) => {
+			// Open or close the settings (the core's toggle-sidebar shortcut: Shift + Cmd/Ctrl + comma), wherever the focus is. With Shift the key is "<": the code is the comma's.
+			if ( ( event.metaKey || event.ctrlKey ) && event.shiftKey && event.code === 'Comma' ) {
+				event.preventDefault();
+				setSidebar( sidebarTab ? null : current ? 'element' : 'design' );
+				return;
+			}
 			const target = event.target as HTMLElement;
 			if ( target && ( target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable ) ) {
 				return;
@@ -643,7 +651,7 @@ export default function Editor() {
 					{ darkEnabled() && (
 						<Button size="compact" icon={ styles } isPressed={ mode === 'dark' } onClick={ () => setMode( mode === 'light' ? 'dark' : 'light' ) } label={ mode === 'light' ? __( 'Preview in dark mode', 'events-certificates' ) : __( 'Preview in light mode', 'events-certificates' ) } />
 					) }
-					<Button size="compact" icon={ drawerRight } isPressed={ !! sidebarTab } onClick={ () => setSidebar( sidebarTab ? null : current ? 'element' : 'design' ) } label={ __( 'Settings', 'events-certificates' ) } />
+					<Button size="compact" icon={ drawerRight } isPressed={ !! sidebarTab } onClick={ () => setSidebar( sidebarTab ? null : current ? 'element' : 'design' ) } label={ __( 'Settings', 'events-certificates' ) } shortcut={ displayShortcut.primaryShift( ',' ) } aria-controls="evcert-settings" aria-expanded={ !! sidebarTab } />
 					<Button
 						variant="primary"
 						size="compact"
@@ -791,7 +799,7 @@ export default function Editor() {
 				</div>
 
 				{ sidebarTab && (
-					<aside className="evcert-sidebar" aria-label={ __( 'Settings', 'events-certificates' ) }>
+					<aside id="evcert-settings" className="evcert-sidebar" aria-label={ __( 'Settings', 'events-certificates' ) }>
 						<div className="evcert-sidebar-tabs" role="tablist">
 							<button type="button" role="tab" aria-selected={ sidebarTab === 'design' } className={ sidebarTab === 'design' ? 'is-active' : '' } onClick={ () => setSidebar( 'design' ) }>
 								{ __( 'Certificate', 'events-certificates' ) }
@@ -806,9 +814,8 @@ export default function Editor() {
 							>
 								{ __( 'Element', 'events-certificates' ) }
 							</button>
-							<Button size="small" className="evcert-sidebar-close" onClick={ () => setSidebar( null ) } label={ __( 'Close settings', 'events-certificates' ) }>
-								×
-							</Button>
+							{ /* As the core's: the close icon in a compact button, with a tooltip that has the shortcut. */ }
+							<Button size="compact" icon={ close } className="evcert-sidebar-close" onClick={ () => setSidebar( null ) } label={ __( 'Close settings', 'events-certificates' ) } shortcut={ displayShortcut.primaryShift( ',' ) } aria-controls="evcert-settings" />
 						</div>
 						{ sidebarTab === 'element' && current && (
 							<Inspector el={ current } stored={ currentStored } design={ design } mode={ mode } tab={ tab } locale={ LOCALE } sample={ sample } onChange={ ( patch ) => update( current.id, patch ) } onBox={ ( b ) => setBox( current.id, b ) } onImage={ ( picked ) => pickImage( current.id, picked ) } />
