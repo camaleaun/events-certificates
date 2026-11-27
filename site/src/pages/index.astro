@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import { landing } from '@data/landing';
+import { site, href } from '@libs/site';
+import { Image } from 'astro:assets';
+import generator from '../assets/screenshots/generator.webp';
+---
+<Base title={ site.name } description={ site.tagline } markdown={ href( 'index.md' ) }>
+	<div class="wrap">
+		<section class="hero">
+			<h1>{ landing.h1 }</h1>
+			<p>{ landing.lead }</p>
+			<div class="actions">
+				<a class="button" href={ site.playground }>Try it in your browser</a>
+				<a class="button secondary" href={ href( 'docs/start/introduction/' ) }>Read the docs</a>
+				<a class="button secondary" href={ site.repo }>Get it on GitHub</a>
+			</div>
+		</section>
+		<section aria-label="The Generator">
+			<Image src={ generator } alt="The Generator: an event's participants on the right and the certificate of the one chosen on the left, with the download buttons above." widths={ [ 480, 960, 1440 ] } sizes="(min-width: 782px) 72rem, 100vw" loading="eager" fetchpriority="high" format="webp" />
+		</section>
+		<section class="features" aria-label="What it does">
+			{ landing.features.map( ( feature ) => (
+				<div>
+					<h2>{ feature.title }</h2>
+					<p>{ feature.text }</p>
+				</div>
+			) ) }
+		</section>
+		<section>
+			<h2>In three steps</h2>
+			<ol>{ landing.steps.map( ( step ) => <li>{ step }</li> ) }</ol>
+		</section>
+	</div>
+</Base>

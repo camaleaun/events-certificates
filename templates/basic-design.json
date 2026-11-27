@@ -1,0 +1,298 @@
+{
+	"page": {
+		"width": "297mm",
+		"height": "210mm",
+		"backgroundColor": "$background",
+		"safe": "10mm"
+	},
+	"colors": {
+		"background": {
+			"name": "Background",
+			"light": "#ffffff",
+			"dark": "#14161A"
+		},
+		"text": {
+			"name": "Text",
+			"light": "#1B1F2E",
+			"dark": "#F4F4F5"
+		},
+		"muted": {
+			"name": "Soft text",
+			"light": "#5D6478",
+			"dark": "#B4B8BE"
+		},
+		"line": {
+			"name": "Lines",
+			"light": "#C9CEE0",
+			"dark": "#3C424D"
+		}
+	},
+	"elements": [
+		{
+			"id": "background",
+			"name": "Background",
+			"type": "svg",
+			"x": 0,
+			"y": 0,
+			"w": 841.89,
+			"h": 595.28,
+			"vw": 1123,
+			"vh": 794,
+			"color": "$line",
+			"opacity": 0.5,
+			"paths": [
+				{
+					"d": "M0 261.4L1123 261.4L1123 360.1L0 360.1ZM18 18L1105 18L1105 776L18 776ZM24 770L1099 770L1099 24L24 24ZM34 34L1089 34L1089 760L34 760ZM36 758L1087 758L1087 36L36 36ZM233.5 409A328 328 0 1 1 889.5 409A328 328 0 1 1 233.5 409ZM238.5 409A323 323 0 1 0 884.5 409A323 323 0 1 0 238.5 409ZM289.5 409A272 272 0 1 1 833.5 409A272 272 0 1 1 289.5 409ZM303.5 409A258 258 0 1 0 819.5 409A258 258 0 1 0 303.5 409ZM346.5 409A215 215 0 1 1 776.5 409A215 215 0 1 1 346.5 409ZM350.5 409A211 211 0 1 0 772.5 409A211 211 0 1 0 350.5 409ZM403.5 409A158 158 0 1 1 719.5 409A158 158 0 1 1 403.5 409ZM-250 0A250 250 0 1 1 250 0A250 250 0 1 1 -250 0ZM-244 0A244 244 0 1 0 244 0A244 244 0 1 0 -244 0ZM-196 0A196 196 0 1 1 196 0A196 196 0 1 1 -196 0ZM-180 0A180 180 0 1 0 180 0A180 180 0 1 0 -180 0ZM-136 0A136 136 0 1 1 136 0A136 136 0 1 1 -136 0ZM-132 0A132 132 0 1 0 132 0A132 132 0 1 0 -132 0ZM-84 0A84 84 0 1 1 84 0A84 84 0 1 1 -84 0ZM873 0A250 250 0 1 1 1373 0A250 250 0 1 1 873 0ZM879 0A244 244 0 1 0 1367 0A244 244 0 1 0 879 0ZM927 0A196 196 0 1 1 1319 0A196 196 0 1 1 927 0ZM943 0A180 180 0 1 0 1303 0A180 180 0 1 0 943 0ZM987 0A136 136 0 1 1 1259 0A136 136 0 1 1 987 0ZM991 0A132 132 0 1 0 1255 0A132 132 0 1 0 991 0ZM1039 0A84 84 0 1 1 1207 0A84 84 0 1 1 1039 0ZM-250 794A250 250 0 1 1 250 794A250 250 0 1 1 -250 794ZM-244 794A244 244 0 1 0 244 794A244 244 0 1 0 -244 794ZM-196 794A196 196 0 1 1 196 794A196 196 0 1 1 -196 794ZM-180 794A180 180 0 1 0 180 794A180 180 0 1 0 -180 794ZM-136 794A136 136 0 1 1 136 794A136 136 0 1 1 -136 794ZM-132 794A132 132 0 1 0 132 794A132 132 0 1 0 -132 794ZM-84 794A84 84 0 1 1 84 794A84 84 0 1 1 -84 794ZM873 794A250 250 0 1 1 1373 794A250 250 0 1 1 873 794ZM879 794A244 244 0 1 0 1367 794A244 244 0 1 0 879 794ZM927 794A196 196 0 1 1 1319 794A196 196 0 1 1 927 794ZM943 794A180 180 0 1 0 1303 794A180 180 0 1 0 943 794ZM987 794A136 136 0 1 1 1259 794A136 136 0 1 1 987 794ZM991 794A132 132 0 1 0 1255 794A132 132 0 1 0 991 794ZM1039 794A84 84 0 1 1 1207 794A84 84 0 1 1 1039 794Z"
+				}
+			]
+		},
+		{
+			"id": "title",
+			"name": "Title",
+			"type": "text",
+			"x": 60.94,
+			"y": 96,
+			"w": 720,
+			"h": 36,
+			"runs": [
+				{
+					"field": "title_plain"
+				}
+			],
+			"font": "CertSans",
+			"weight": 600,
+			"size": 30,
+			"color": "$text",
+			"align": "center",
+			"lh": 1.0,
+			"slot": "title",
+			"upper": true,
+			"ls": 1.0
+		},
+		{
+			"id": "intro",
+			"name": "Intro",
+			"type": "text",
+			"x": 60.94,
+			"y": 168,
+			"w": 720,
+			"h": 20,
+			"runs": [
+				{
+					"field": "intro_text"
+				}
+			],
+			"font": "CertSans",
+			"weight": 400,
+			"size": 16,
+			"color": "$muted",
+			"align": "center",
+			"lh": 1.0
+		},
+		{
+			"id": "name",
+			"name": "Name",
+			"type": "text",
+			"x": 60.94,
+			"y": 217.7,
+			"w": 720,
+			"h": 44,
+			"runs": [
+				{
+					"field": "name"
+				}
+			],
+			"font": "CertSans",
+			"weight": 600,
+			"size": 30,
+			"color": "$text",
+			"align": "center",
+			"lh": 1.0,
+			"slot": "name",
+			"fit": true,
+			"min": 16
+		},
+		{
+			"id": "took-part",
+			"name": "Took part",
+			"type": "text",
+			"x": 60.94,
+			"y": 288,
+			"w": 720,
+			"h": 62,
+			"runs": [
+				{
+					"field": "took_part_text"
+				},
+				{
+					"text": " "
+				},
+				{
+					"field": "event"
+				}
+			],
+			"font": "CertSans",
+			"weight": 400,
+			"size": 18,
+			"color": "$text",
+			"align": "center",
+			"lh": 1.3,
+			"slot": "body"
+		},
+		{
+			"id": "hours-label",
+			"name": "Workload",
+			"type": "text",
+			"x": 60.94,
+			"y": 338,
+			"w": 720,
+			"h": 16,
+			"runs": [
+				{
+					"field": "hours_label"
+				},
+				{
+					"text": ":"
+				}
+			],
+			"font": "CertSans",
+			"weight": 400,
+			"size": 11,
+			"color": "$muted",
+			"align": "center",
+			"lh": 1.0
+		},
+		{
+			"id": "hours",
+			"name": "Hours",
+			"type": "text",
+			"x": 60.94,
+			"y": 355,
+			"w": 720,
+			"h": 24,
+			"runs": [
+				{
+					"field": "hours"
+				}
+			],
+			"font": "CertSans",
+			"weight": 600,
+			"size": 17,
+			"color": "$text",
+			"align": "center",
+			"lh": 1.0
+		},
+		{
+			"id": "signature",
+			"name": "Signature",
+			"type": "signature",
+			"x": 318.94,
+			"y": 398,
+			"w": 204,
+			"h": 68,
+			"color": "$text"
+		},
+		{
+			"id": "signature-line",
+			"name": "Signature line",
+			"type": "rect",
+			"x": 310.94,
+			"y": 462,
+			"w": 220,
+			"h": 0.85,
+			"fill": "$text",
+			"radius": [
+				0,
+				0,
+				0,
+				0
+			]
+		},
+		{
+			"id": "signer",
+			"name": "Signer",
+			"type": "text",
+			"x": 310.94,
+			"y": 468,
+			"w": 220,
+			"h": 18,
+			"runs": [
+				{
+					"field": "signer_name"
+				}
+			],
+			"font": "CertSans",
+			"weight": 600,
+			"size": 14,
+			"color": "$text",
+			"align": "center",
+			"lh": 1.0,
+			"slot": "signer"
+		},
+		{
+			"id": "signer-role",
+			"name": "Signer role",
+			"type": "text",
+			"x": 240.94,
+			"y": 488,
+			"w": 360,
+			"h": 14,
+			"runs": [
+				{
+					"field": "signer_role"
+				}
+			],
+			"font": "CertSans",
+			"weight": 400,
+			"size": 10.5,
+			"color": "$muted",
+			"align": "center",
+			"lh": 1.0
+		},
+		{
+			"id": "issued-on",
+			"name": "Issued on",
+			"type": "text",
+			"x": 220.94,
+			"y": 522,
+			"w": 400,
+			"h": 11,
+			"runs": [
+				{
+					"field": "issued_on"
+				}
+			],
+			"font": "CertSans",
+			"weight": 400,
+			"size": 8.5,
+			"color": "$muted",
+			"align": "center",
+			"lh": 1.0
+		}
+	],
+	"palette": [
+		{
+			"slug": "base",
+			"color": "#ffffff"
+		},
+		{
+			"slug": "contrast",
+			"color": "#000000"
+		},
+		{
+			"slug": "custom-1",
+			"name": "Text",
+			"color": "#1B1F2E"
+		},
+		{
+			"slug": "custom-4",
+			"name": "Soft text",
+			"color": "#5D6478"
+		},
+		{
+			"slug": "custom-5",
+			"name": "Lines",
+			"color": "#C9CEE0"
+		}
+	]
+}

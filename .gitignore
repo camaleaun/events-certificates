@@ -1,0 +1,19 @@
+.DS_Store
+*.log
+/vendor/
+.phpunit.result.cache
+/node_modules/
+/build/
+/build-signer/
+/build-blocks/
+/assets/css/
+/assets/js/
+
+# Made by bin/install.sh (docs/decisions/0032): the third-party libraries, PHP under the plugin's namespace and JS.
+/includes/third-party/
+/assets/third-party/
+
+# The product site (site/): its dependencies and what it builds.
+/site/node_modules/
+/site/dist/
+/site/.astro/

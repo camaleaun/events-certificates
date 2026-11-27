@@ -1,0 +1,28 @@
+# Publishes the Playground link of a pull request, from the zip PR Preview - Build made. A site with the plugin
+# active opens on the Generator, with a user logged in.
+name: PR Preview - Publish
+
+on:
+  workflow_run:
+    workflows: ["PR Preview - Build"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    if: github.event.workflow_run.event == 'pull_request'
+    uses: WordPress/action-wp-playground-pr-preview/.github/workflows/preview-publish.yml@v3
+    with:
+      blueprint: |
+        {
+          "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+          "landingPage": "/wp-admin/admin.php?page=evcert-generator",
+          "preferredVersions": { "php": "8.3", "wp": "latest" },
+          "login": true,
+          "steps": [
+            { "step": "installPlugin", "pluginData": { "resource": "url", "url": "{{ARTIFACT_URL:plugin-zip}}" }, "options": { "activate": true } }
+          ]
+        }

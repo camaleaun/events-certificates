@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+import { groups } from '@libs/docs';
+import { href } from '@libs/site';
+
+const nav = await groups();
+---
+<Base title="Docs" description="Guides and reference for Events Certificates: events, generators, templates, verification, export and import.">
+	<div class="wrap docs" style="display:block">
+		<h1>Docs</h1>
+		{ nav.map( ( group ) => (
+			<section>
+				<h2>{ group.title }</h2>
+				<ul>
+					{ group.docs.map( ( doc ) => <li><a href={ href( `docs/${ doc.id }/` ) }>{ doc.data.title }</a> — { doc.data.description }</li> ) }
+				</ul>
+			</section>
+		) ) }
+	</div>
+</Base>

@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "events-certificates/tutorial-step-image",
+	"version": "1.0.0",
+	"title": "Meetup step (picture)",
+	"category": "events-certificates",
+	"icon": "format-image",
+	"description": "One step of the Meetup tutorial, drawn in the visitor's language.",
+	"keywords": [
+		"meetup",
+		"tutorial",
+		"step"
+	],
+	"textdomain": "events-certificates",
+	"attributes": {
+		"step": {
+			"type": "integer",
+			"default": 1
+		}
+	},
+	"supports": {
+		"html": false,
+		"className": false
+	},
+	"editorScript": "evcert-blocks-editor",
+	"style": "evcert-tutorial-step-image",
+	"viewScript": "evcert-tutorial-step-image-view",
+	"render": "file:./render.php"
+}

@@ -1,0 +1,22 @@
+# Builds the plugin's zip for a pull request (what bin/package.sh makes from the PR's commit) and hands it to
+# PR Preview - Publish, which comments a WordPress Playground link where the PR can be tried. The two steps
+# are apart so the PR's code never runs with the token that can comment.
+name: PR Preview - Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  build:
+    uses: WordPress/action-wp-playground-pr-preview/.github/workflows/preview-build.yml@v3
+    with:
+      # Relative to the checkout: the action prefixes the working directory.
+      artifacts: plugin-zip=pr-preview/events-certificates.zip
+      build-command: |
+        composer install --no-dev --no-interaction --prefer-dist
+        npm ci
+        curl -fsSL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+        mkdir -p pr-preview
+        WP="php /tmp/wp-cli.phar" bash bin/package.sh /tmp/evcert-pr
+        cp /tmp/evcert-pr/events-certificates-*.zip pr-preview/events-certificates.zip

@@ -1,0 +1,523 @@
+[
+	{
+		"name": "already in order: a transparent Light is kept as it is, the order is the one stored",
+		"input": {
+			"version": 1,
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": "$background"
+			},
+			"colors": {
+				"primary": {
+					"name": "Primary",
+					"light": "#3858E9",
+					"dark": "#8EA2FF"
+				},
+				"text": {
+					"name": "Text",
+					"light": "#1B1F2E",
+					"dark": "#F4F4F5"
+				},
+				"background": {
+					"name": "Background",
+					"light": "transparent",
+					"dark": "#14161A"
+				}
+			},
+			"elements": []
+		},
+		"colors": {
+			"primary": {
+				"name": "Primary",
+				"light": "#3858E9",
+				"dark": "#8EA2FF"
+			},
+			"text": {
+				"name": "Text",
+				"light": "#1B1F2E",
+				"dark": "#F4F4F5"
+			},
+			"background": {
+				"name": "Background",
+				"light": "transparent",
+				"dark": "#14161A"
+			}
+		},
+		"bg": "$background",
+		"palette": [
+			{
+				"slug": "base",
+				"color": "#ffffff"
+			},
+			{
+				"slug": "contrast",
+				"color": "#000000"
+			},
+			{
+				"slug": "custom-1",
+				"name": "Primary",
+				"color": "#3858E9"
+			},
+			{
+				"slug": "custom-2",
+				"name": "Text",
+				"color": "#1B1F2E"
+			}
+		]
+	},
+	{
+		"name": "a page color per mode with no light one is the Background",
+		"input": {
+			"version": 1,
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": {
+					"light": "",
+					"dark": "#111111"
+				}
+			},
+			"colors": {},
+			"elements": []
+		},
+		"colors": {},
+		"bg": "$background",
+		"palette": [
+			{
+				"slug": "base",
+				"color": "#ffffff"
+			},
+			{
+				"slug": "contrast",
+				"color": "#000000"
+			}
+		]
+	},
+	{
+		"name": "a palette that is there is kept, cleaned of what has no usable value",
+		"input": {
+			"version": 1,
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": "$background"
+			},
+			"colors": {
+				"background": {
+					"name": "Background",
+					"light": "#ffffff"
+				},
+				"text": {
+					"name": "Text",
+					"light": "#000000"
+				}
+			},
+			"elements": [],
+			"palette": [
+				{
+					"name": " Brand ",
+					"color": "#1D2A6B"
+				},
+				{
+					"name": "x",
+					"color": "nope"
+				},
+				{
+					"color": "#ABCDEF"
+				}
+			]
+		},
+		"colors": {
+			"background": {
+				"name": "Background",
+				"light": "#ffffff"
+			},
+			"text": {
+				"name": "Text",
+				"light": "#000000"
+			}
+		},
+		"bg": "$background",
+		"palette": [
+			{
+				"slug": "custom-1",
+				"name": "Brand",
+				"color": "#1D2A6B"
+			},
+			{
+				"slug": "custom-2",
+				"name": "#ABCDEF",
+				"color": "#ABCDEF"
+			}
+		]
+	},
+	{
+		"name": "an empty palette stays empty",
+		"input": {
+			"version": 1,
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": "$background"
+			},
+			"colors": {
+				"background": {
+					"name": "Background",
+					"light": "#ffffff"
+				},
+				"text": {
+					"name": "Text",
+					"light": "#000000"
+				}
+			},
+			"elements": [],
+			"palette": []
+		},
+		"colors": {
+			"background": {
+				"name": "Background",
+				"light": "#ffffff"
+			},
+			"text": {
+				"name": "Text",
+				"light": "#000000"
+			}
+		},
+		"bg": "$background",
+		"palette": []
+	},
+	{
+		"name": "Base and Contrast are as any swatch: kept in order, a repeated slug is made again",
+		"input": {
+			"version": 1,
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": "$background"
+			},
+			"colors": {
+				"background": {
+					"name": "Background",
+					"light": "#ffffff"
+				},
+				"text": {
+					"name": "Text",
+					"light": "#000000"
+				}
+			},
+			"elements": [],
+			"palette": [
+				{
+					"slug": "base",
+					"color": "#f5f5f5"
+				},
+				{
+					"slug": "contrast",
+					"color": "#111111"
+				},
+				{
+					"slug": "contrast",
+					"color": "#222222"
+				}
+			]
+		},
+		"colors": {
+			"background": {
+				"name": "Background",
+				"light": "#ffffff"
+			},
+			"text": {
+				"name": "Text",
+				"light": "#000000"
+			}
+		},
+		"bg": "$background",
+		"palette": [
+			{
+				"slug": "base",
+				"color": "#f5f5f5"
+			},
+			{
+				"slug": "contrast",
+				"color": "#111111"
+			},
+			{
+				"slug": "custom-1",
+				"name": "#222222",
+				"color": "#222222"
+			}
+		]
+	},
+	{
+		"name": "own slugs that are invalid or repeated are made again",
+		"input": {
+			"version": 1,
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": "$background"
+			},
+			"colors": {
+				"background": {
+					"name": "Background",
+					"light": "#ffffff"
+				},
+				"text": {
+					"name": "Text",
+					"light": "#000000"
+				}
+			},
+			"elements": [],
+			"palette": [
+				{
+					"slug": "Bad Slug",
+					"name": "A",
+					"color": "#111111"
+				},
+				{
+					"slug": "custom-1",
+					"name": "B",
+					"color": "#222222"
+				},
+				{
+					"slug": "custom-1",
+					"name": "C",
+					"color": "#333333"
+				}
+			]
+		},
+		"colors": {
+			"background": {
+				"name": "Background",
+				"light": "#ffffff"
+			},
+			"text": {
+				"name": "Text",
+				"light": "#000000"
+			}
+		},
+		"bg": "$background",
+		"palette": [
+			{
+				"slug": "custom-2",
+				"name": "A",
+				"color": "#111111"
+			},
+			{
+				"slug": "custom-1",
+				"name": "B",
+				"color": "#222222"
+			},
+			{
+				"slug": "custom-3",
+				"name": "C",
+				"color": "#333333"
+			}
+		]
+	},
+	{
+		"name": "a derived theme has one swatch per color, from the Light value only",
+		"input": {
+			"version": 1,
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": "$background"
+			},
+			"colors": {
+				"background": {
+					"name": "Background",
+					"light": "#ffffff",
+					"dark": "#000000"
+				},
+				"text": {
+					"name": "Text",
+					"light": "#000000",
+					"dark": "#ffffff"
+				},
+				"brand": {
+					"name": "Brand",
+					"light": "#1D2A6B",
+					"dark": "#8EA2FF"
+				},
+				"line": {
+					"name": "Lines",
+					"light": "transparent"
+				},
+				"band": {
+					"name": "Band",
+					"light": "#1d2a6b"
+				}
+			},
+			"elements": []
+		},
+		"colors": {
+			"background": {
+				"name": "Background",
+				"light": "#ffffff",
+				"dark": "#000000"
+			},
+			"text": {
+				"name": "Text",
+				"light": "#000000",
+				"dark": "#ffffff"
+			},
+			"brand": {
+				"name": "Brand",
+				"light": "#1D2A6B",
+				"dark": "#8EA2FF"
+			},
+			"line": {
+				"name": "Lines",
+				"light": "transparent"
+			},
+			"band": {
+				"name": "Band",
+				"light": "#1d2a6b"
+			}
+		},
+		"bg": "$background",
+		"palette": [
+			{
+				"slug": "base",
+				"color": "#ffffff"
+			},
+			{
+				"slug": "contrast",
+				"color": "#000000"
+			},
+			{
+				"slug": "custom-1",
+				"name": "Brand",
+				"color": "#1D2A6B"
+			}
+		]
+	},
+	{
+		"name": "a swatch that has the slug of a color gets another slug (one name is never in both)",
+		"input": {
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": "$background"
+			},
+			"colors": {
+				"background": {
+					"name": "Background",
+					"light": "#ffffff"
+				},
+				"text": {
+					"name": "Text",
+					"light": "#000000"
+				}
+			},
+			"palette": [
+				{
+					"slug": "text",
+					"name": "Ink",
+					"color": "#111111"
+				},
+				{
+					"slug": "base",
+					"color": "#ffffff"
+				}
+			],
+			"elements": []
+		},
+		"colors": {
+			"background": {
+				"name": "Background",
+				"light": "#ffffff"
+			},
+			"text": {
+				"name": "Text",
+				"light": "#000000"
+			}
+		},
+		"bg": "$background",
+		"palette": [
+			{
+				"slug": "custom-1",
+				"name": "Ink",
+				"color": "#111111"
+			},
+			{
+				"slug": "base",
+				"color": "#ffffff"
+			}
+		]
+	},
+	{
+		"name": "a page that says another color is kept: a color of the Theme, an Element, or a literal",
+		"input": {
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": "$base"
+			},
+			"colors": {
+				"text": {
+					"name": "Text",
+					"light": "#000000"
+				}
+			},
+			"palette": [
+				{
+					"slug": "base",
+					"color": "#fafafa"
+				}
+			],
+			"elements": []
+		},
+		"colors": {
+			"text": {
+				"name": "Text",
+				"light": "#000000"
+			}
+		},
+		"bg": "$base",
+		"palette": [
+			{
+				"slug": "base",
+				"color": "#fafafa"
+			}
+		]
+	},
+	{
+		"name": "a page with no color is the Background",
+		"input": {
+			"page": {
+				"w": 100,
+				"h": 100,
+				"safe": 0,
+				"bleed": 0,
+				"bg": ""
+			},
+			"colors": {},
+			"palette": [],
+			"elements": []
+		},
+		"colors": {},
+		"bg": "$background",
+		"palette": []
+	}
+]

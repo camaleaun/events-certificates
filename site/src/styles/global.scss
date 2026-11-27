@@ -1,0 +1,267 @@
+// WordPress admin blue and grays, the breakpoints of @wordpress/base-styles (600, 782, 960, 1280), mobile first, light and dark.
+:root {
+	color-scheme: light dark;
+	--bg: light-dark(#fff, #151515);
+	--bg-soft: light-dark(#f6f7f7, #1e1e1e);
+	--text: light-dark(#1e1e1e, #f0f0f0);
+	--muted: light-dark(#50575e, #b4b9be);
+	--line: light-dark(#dcdcde, #3c3c3c);
+	--accent: light-dark(#3858e9, #8ea2ff);
+	--accent-text: light-dark(#fff, #151515);
+	--code-bg: light-dark(#f6f7f7, #232323);
+	--max: 72rem;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+	font: 1rem/1.65 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+a {
+	color: var(--accent);
+}
+
+a:hover {
+	text-decoration-thickness: 2px;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+code,
+pre {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.9em;
+}
+
+:not(pre) > code {
+	padding: 0.1em 0.35em;
+	border-radius: 3px;
+	background: var(--code-bg);
+}
+
+pre {
+	overflow: auto;
+	padding: 1rem;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+	.astro-code,
+	.astro-code span {
+		color: var(--shiki-dark) !important;
+		background-color: var(--shiki-dark-bg) !important;
+	}
+}
+
+.wrap {
+	width: min(100% - 2rem, var(--max));
+	margin-inline: auto;
+}
+
+.skip {
+	position: absolute;
+	left: -999px;
+}
+
+.skip:focus {
+	left: 1rem;
+	top: 1rem;
+	z-index: 10;
+	padding: 0.5rem 1rem;
+	background: var(--bg);
+}
+
+.top {
+	border-bottom: 1px solid var(--line);
+}
+
+.top .wrap {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem 1.5rem;
+	min-height: 4rem;
+}
+
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6rem;
+	min-height: 40px;
+	color: var(--text);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.brand img {
+	width: 32px;
+	height: 32px;
+}
+
+.top nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 1rem;
+}
+
+.top nav a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 40px;
+	color: var(--text);
+	text-decoration: none;
+}
+
+.top nav a:hover {
+	color: var(--accent);
+}
+
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	padding: 0 1.25rem;
+	border: 1px solid var(--accent);
+	border-radius: 4px;
+	background: var(--accent);
+	color: var(--accent-text);
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.button.secondary {
+	background: transparent;
+	color: var(--accent);
+}
+
+.hero {
+	padding: 3rem 0 2rem;
+}
+
+.hero h1 {
+	margin: 0 0 1rem;
+	font-size: clamp(2rem, 6vw, 3.5rem);
+	line-height: 1.1;
+}
+
+.hero p {
+	max-width: 42rem;
+	color: var(--muted);
+	font-size: 1.2rem;
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 1.5rem;
+}
+
+.features {
+	display: grid;
+	gap: 1.5rem;
+	padding: 2rem 0 3rem;
+	grid-template-columns: 1fr;
+}
+
+@media (min-width: 782px) {
+	.features {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+.features h2 {
+	margin: 0 0 0.25rem;
+	font-size: 1.15rem;
+}
+
+.features p {
+	margin: 0;
+	color: var(--muted);
+}
+
+.docs {
+	display: grid;
+	gap: 2rem;
+	padding: 2rem 0 4rem;
+}
+
+@media (min-width: 960px) {
+	.docs {
+		grid-template-columns: 16rem minmax(0, 1fr);
+	}
+}
+
+.docs aside h2 {
+	margin: 1.25rem 0 0.25rem;
+	font-size: 0.8rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.docs aside ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.docs aside a {
+	display: flex;
+	align-items: center;
+	min-height: 40px;
+	color: var(--text);
+	text-decoration: none;
+}
+
+.docs aside a[aria-current='page'] {
+	color: var(--accent);
+	font-weight: 700;
+}
+
+.docs article {
+	min-width: 0;
+	max-width: 48rem;
+}
+
+.docs article h1 {
+	margin-top: 0;
+}
+
+.docs article table {
+	display: block;
+	overflow-x: auto;
+	border-collapse: collapse;
+}
+
+.docs article th,
+.docs article td {
+	padding: 0.4rem 0.8rem;
+	border: 1px solid var(--line);
+	text-align: left;
+}
+
+.md-link {
+	margin-top: 2rem;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+footer.bottom {
+	padding: 2rem 0;
+	border-top: 1px solid var(--line);
+	color: var(--muted);
+}

@@ -1,0 +1,112 @@
+@use 'image';
+
+/* The event and the signature as the editor's Document panel shows its summary: a title on top, then rows
+ * of a label and a value that opens a popover with the field. */
+.evcert-summary {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 2px;
+	min-width: 0;
+}
+
+.evcert-summary__title {
+	display: grid;
+	gap: 8px;
+	justify-items: start;
+	min-width: 0;
+	margin-bottom: 8px;
+}
+
+.evcert-summary .evcert-summary__title-text {
+	height: auto;
+	min-height: 32px;
+	padding: 4px 8px;
+	margin-left: -8px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 20px;
+	color: #1e1e1e;
+	text-align: left;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+/* Like the "Add a summary…" link of the Post tab. */
+.evcert-summary__title .components-button.is-link {
+	text-align: left;
+}
+
+.evcert-summary__row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	width: 100%;
+	min-width: 0;
+	min-height: 32px;
+}
+
+.evcert-summary__label {
+	display: flex;
+	box-sizing: border-box;
+	flex: 0 0 38%;
+	align-items: center;
+	min-height: 32px;
+	padding: 6px 0;
+	font-size: 13px;
+	line-height: 20px;
+	color: #757575;
+	hyphens: auto;
+	overflow-wrap: anywhere;
+}
+
+.evcert-summary__dropdown {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	min-width: 0;
+	min-height: 32px;
+	max-width: 100%;
+}
+
+.evcert-summary .evcert-summary__value {
+	max-width: 100%;
+	height: auto;
+	min-height: 32px;
+	align-items: center;
+	justify-content: flex-start;
+	text-align: left;
+	white-space: normal;
+	overflow-wrap: anywhere;
+	text-wrap: pretty;
+	font-weight: 400;
+}
+
+.evcert-summary__empty {
+	color: #757575;
+}
+
+/* The value is the accent color, like the editor's Status and Publish rows. */
+.evcert-summary .evcert-summary__value {
+	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+}
+.evcert-summary .evcert-summary__value .evcert-summary__empty {
+	color: #757575;
+}
+
+.evcert-summary__editor {
+	width: 320px;
+	padding: 16px;
+	box-sizing: border-box;
+}
+
+.evcert-summary__editor-header {
+	margin-bottom: 16px;
+}
+
+.evcert-summary__editor-title {
+	flex: 1;
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+}

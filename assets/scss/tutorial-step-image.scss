@@ -1,0 +1,5 @@
+// The pictures of the Meetup tutorial (includes/tutorial-step-image.php). The base rules come first and the
+// rules made from the blocks' layout and custom CSS attributes (bin/tutorial-css.php) after them, as
+// WordPress orders them: of two rules of the same weight, the later wins.
+@use 'tutorial-step-image-base';
+@use 'tutorial-step-image-blocks';

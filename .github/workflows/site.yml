@@ -1,0 +1,58 @@
+# The product site (site/): a landing page and the Markdown docs, built with Astro and published on GitHub Pages.
+# Only what is released is published: it runs on a version tag and by hand (Actions > Site > Run workflow, with the ref to
+# publish, trunk by default), never on a push to trunk. SITE and BASE (repository variables) set the address: the
+# repository's own Pages now, the organization's later.
+name: Site
+
+on:
+  push:
+    tags: [ '[0-9]+.[0-9]+*' ]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or tag to publish'
+        default: trunk
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+        working-directory: site
+      - run: npx astro check
+        working-directory: site
+      - run: npx astro build
+        working-directory: site
+        env:
+          SITE: ${{ vars.SITE || 'https://camaleaun.github.io' }}
+          BASE: ${{ vars.BASE || '/events-certificates' }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

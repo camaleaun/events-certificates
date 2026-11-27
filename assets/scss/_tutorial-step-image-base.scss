@@ -1,0 +1,199 @@
+// The pictures of the Meetup tutorial (includes/tutorial-step-image.php): Meetup's screens
+// drawn with core blocks inside an SVG. Everything is scoped to .evcert-tsi, so the theme
+// and the screen (page, editor, admin) do not change the drawing.
+
+
+.evcert-tsi {
+	display: block;
+	max-width: 100%;
+	margin: 0;
+}
+
+.evcert-tsi__open {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	cursor: zoom-in;
+	font: inherit;
+	line-height: 0;
+}
+
+.evcert-tsi__svg {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+// The drawing's own typography: a site that has Meetup's typeface sets --evcert-tsi-font.
+.evcert-tsi__fo {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	// Meetup's page color.
+	background: #fcfcfd;
+	color: #232326;
+	font-family: var(--evcert-tsi-font, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+	font-size: 16px;
+	line-height: 1.5;
+	text-align: left;
+	// Meetup draws its text in grayscale, not with colored edges.
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	p,
+	figure {
+		margin: 0;
+	}
+
+	img {
+		display: block;
+		max-width: 100%;
+		height: auto;
+	}
+
+	// The Group block's own CSS (WordPress prints it with the block): a constrained group is the
+	// containing block of what is positioned inside it, the badges on a card's picture.
+	.wp-block-group {
+		box-sizing: border-box;
+	}
+
+	// Without weight, like WordPress's own: a block's custom CSS (position: absolute) wins over it.
+	@at-root :where(.evcert-tsi__fo .wp-block-group.evcert-tsi-wp-block-group-is-layout-constrained) {
+		position: relative;
+	}
+
+	// Meetup's column: the content of a constrained group is 696 units wide, centered, and the first
+	// container has 20 units of padding at each side (the rules WordPress makes from a theme's content
+	// size and root padding, with the numbers of the drawing, not of the theme).
+	.evcert-tsi-is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+		max-width: 696px;
+		margin-right: auto !important;
+		margin-left: auto !important;
+	}
+
+	.evcert-tsi-is-layout-constrained > .alignwide {
+		max-width: 1200px;
+	}
+
+	.evcert-tsi-has-global-padding {
+		padding-right: 20px;
+		padding-left: 20px;
+	}
+
+	.evcert-tsi-has-global-padding :where(:not(.alignfull.evcert-tsi-is-layout-flow) > .evcert-tsi-has-global-padding:not(.wp-block-block, .alignfull)) {
+		padding-right: 0;
+		padding-left: 0;
+	}
+
+	// The base layout CSS of WordPress's blocks, under the drawing's prefix (isolate() renames the
+	// classes, so the theme's own rules for them no longer apply).
+	.evcert-tsi-is-layout-flex {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.evcert-tsi-is-layout-grid {
+		display: grid;
+	}
+
+	.evcert-tsi-is-layout-flex > :is(*, div),
+	.evcert-tsi-is-layout-grid > :is(*, div) {
+		margin: 0;
+	}
+
+	:where(.evcert-tsi-is-layout-flex, .evcert-tsi-is-layout-grid) {
+		gap: 0.5em;
+	}
+
+	.evcert-tsi-is-nowrap {
+		flex-wrap: nowrap;
+	}
+
+	.evcert-tsi-is-vertical {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.evcert-tsi-is-content-justification-left {
+		justify-content: flex-start;
+	}
+
+	.evcert-tsi-is-content-justification-center {
+		justify-content: center;
+	}
+
+	.evcert-tsi-is-content-justification-right {
+		justify-content: flex-end;
+	}
+
+	.evcert-tsi-is-content-justification-space-between {
+		justify-content: space-between;
+	}
+
+	// In a column the justification is across: the buttons' icon and label are centered.
+	.evcert-tsi-is-vertical.evcert-tsi-is-content-justification-left {
+		align-items: flex-start;
+	}
+
+	.evcert-tsi-is-vertical.evcert-tsi-is-content-justification-center {
+		align-items: center;
+	}
+
+	.evcert-tsi-is-vertical.evcert-tsi-is-content-justification-right {
+		align-items: flex-end;
+	}
+
+	.evcert-tsi-is-vertical.evcert-tsi-is-content-justification-stretch {
+		align-items: stretch;
+	}
+
+	// The Icon block's own CSS (WordPress prints it with the block, not inside the drawing).
+	.wp-block-icon {
+		line-height: 0;
+	}
+
+	// Core gives the Columns block a bottom margin; the drawing has none, wherever it is printed.
+	.wp-block-columns {
+		margin: 0;
+	}
+
+	.wp-block-icon svg {
+		box-sizing: border-box;
+		fill: currentColor;
+	}
+}
+
+// The enlarged view, like the generator's step-by-step: a dark layer, the drawing centered up to
+// 1000 units wide, a click anywhere closes it (assets/es/tutorial-step-image.js).
+.evcert-tsi-lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	display: grid;
+	place-items: center;
+	padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+	background: rgba(10, 12, 20, 0.82);
+	cursor: zoom-out;
+
+	.evcert-tsi {
+		width: min(1000px, 100%);
+		max-height: 100%;
+	}
+
+	.evcert-tsi__svg {
+		border-radius: 6px;
+		background: #fcfcfd;
+	}
+}

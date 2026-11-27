@@ -1,0 +1,108 @@
+/* The Inspector sidebar (evcert-sidebar), 280px like the editor's: grey stage
+ * with white panel cards above it, collapsible Gutenberg panels, the native
+ * 16px gap between fields. */
+.evcert-generator__sidebar {
+	width: 280px;
+	flex: none;
+	border-left: 1px solid #e0e0e0;
+	background: #fff;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+.evcert-generator__sidebar > #evcert-generator-root {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
+.evcert-generator__panel-group {
+	padding: 1px 0;
+}
+
+/* The submit buttons live in the header (top right, like the editor Save). */
+
+/* The error notice, on the canvas like a block editor notice. */
+.evcert-generator__error {
+	margin: 0 0 16px;
+	padding: 8px 12px;
+	background: #fff4e5;
+	color: #6b3b00;
+	border-left: 4px solid #f0a24b;
+	font-size: 13px;
+	border-radius: 0 2px 2px 0;
+}
+
+.evcert-generator__help {
+	font-size: 13px;
+	line-height: 1.5;
+	color: #1e1e1e;
+}
+.evcert-generator__help p {
+	margin: 0 0 16px;
+}
+.evcert-generator__help h4 {
+	margin: 0 0 8px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #1e1e1e;
+}
+.evcert-generator__help ol,
+.evcert-generator__help ul {
+	margin: 0 0 20px;
+	padding-left: 20px;
+}
+.evcert-generator__help li {
+	margin-bottom: 6px;
+}
+
+/* The sidebar's tabs (Event | Signature), like the editor's Post | Block tabs, and the participants view. */
+.evcert-generator__tabs .components-tab-panel__tabs {
+	border-bottom: 1px solid #ddd;
+}
+.evcert-generator__tab-body {
+	padding: 16px;
+}
+.evcert-generator__pane-title {
+	margin: 0 0 16px;
+	font-size: 13px;
+	font-weight: 600;
+	text-transform: uppercase;
+	color: #1e1e1e;
+}
+
+.evcert-generator__sidebar.is-closed {
+	display: none;
+}
+
+/* The X of the sidebar, at the end of the tabs row like the editor's. */
+.evcert-generator__sidebar {
+	position: relative;
+}
+.evcert-generator__sidebar .evcert-generator__sidebar-close {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	z-index: 1;
+}
+
+/* The panels already pad their content. */
+.evcert-generator__tab-body.is-flush {
+	padding: 0;
+}
+
+/* The event is always open, like the post's title and summary at the top of the Post tab. */
+.evcert-generator__event {
+	padding: 16px;
+}
+
+/* One soft line between the sections, as in the Post tab (the Panel's own frame and the tabs' line are not doubled). */
+.evcert-generator__tab-body .components-panel {
+	border: 0;
+}
+.evcert-generator__tab-body .components-panel__body {
+	border-top: 1px solid #ddd;
+	border-bottom: 0;
+}
+.evcert-generator__tab-body .components-panel__body:last-child {
+	border-bottom: 1px solid #ddd;
+}

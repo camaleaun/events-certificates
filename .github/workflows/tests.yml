@@ -1,0 +1,125 @@
+# PHPUnit in the scenarios (none, CampTix, GatherPress, both), Plugin Check and the debug log, on PHP 7.4 and 8.3
+# (GatherPress needs PHP 8.1, so on 7.4 only the scenarios without it run),
+# and the tests on a network (the main site and a subsite). WordPress runs in wp-env (Docker): .wp-env.json.
+# The tests load that site (WP_LOAD) and write nothing to it for good. docs/decisions/0031 and CONTRIBUTING.
+name: Tests
+
+on:
+  push:
+    branches: [ trunk, 'release/**' ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHPUnit and Plugin Check (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '7.4'
+            scenarios: 'none camptix'
+          - php: '8.3'
+            scenarios: 'none camptix gatherpress both'
+    env:
+      WP_ENV_PHP_VERSION: ${{ matrix.php }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: composer
+
+      # setup-php's wp-cli tool downloads wp-cli.phar from the release, whose file is named wp-cli-<version>.phar since 2.12.
+      - name: WP-CLI
+        run: |
+          curl -fsSL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          sudo install -m 755 /tmp/wp-cli.phar /usr/local/bin/wp
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install and build
+        run: |
+          composer install --no-progress --prefer-dist
+          npm ci
+          wp --require=bin/deps.php evcert deps
+          npm run build
+
+      - name: Start WordPress (wp-env)
+        run: npx wp-env start
+
+      - name: PHPUnit, the scenarios of this PHP
+        run: |
+          npx wp-env run tests-cli --env-cwd=wp-content/plugins/events-certificates bash -c '
+            for scenario in ${{ matrix.scenarios }}; do
+              echo "::group::$scenario"
+              EVCERT_INTEGRATIONS=$scenario WP_LOAD=/var/www/html/wp-load.php vendor/bin/phpunit || exit 1
+              echo "::endgroup::"
+            done'
+
+      - name: Plugin Check
+        run: |
+          npx wp-env run cli wp plugin install plugin-check --activate
+          # On what ships: the script leaves out what .distignore does.
+          bash bin/plugin-check.sh npx wp-env run cli wp
+
+      # Nothing of the plugin's may be in the debug log (WP_DEBUG_LOG is on in .wp-env.json).
+      - name: Debug log
+        run: |
+          npx wp-env run cli bash -c 'f=wp-content/debug.log; if [ -f "$f" ] && grep -i "events-certificates" "$f"; then echo "::error::The plugin wrote to the debug log."; exit 1; fi; echo "The debug log has nothing of the plugin."'
+
+  multisite:
+    name: PHPUnit on a network (PHP 8.3)
+    runs-on: ubuntu-latest
+    env:
+      WP_ENV_PHP_VERSION: '8.3'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: composer
+
+      # setup-php's wp-cli tool downloads wp-cli.phar from the release, whose file is named wp-cli-<version>.phar since 2.12.
+      - name: WP-CLI
+        run: |
+          curl -fsSL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          sudo install -m 755 /tmp/wp-cli.phar /usr/local/bin/wp
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install and build
+        run: |
+          composer install --no-progress --prefer-dist
+          npm ci
+          wp --require=bin/deps.php evcert deps
+          npm run build
+
+      - name: Start WordPress as a network (wp-env)
+        run: |
+          npx wp-env start
+          npx wp-env run tests-cli wp core multisite-convert --title="Events Certificates network"
+          npx wp-env run tests-cli wp site create --slug=b --title="Site B"
+          npx wp-env run tests-cli wp plugin activate events-certificates camptix gatherpress --network
+
+      - name: PHPUnit on the main site and on a subsite
+        run: |
+          npx wp-env run tests-cli --env-cwd=wp-content/plugins/events-certificates bash -c '
+            for scenario in none both; do
+              for url in "" "http://localhost:8889/b/"; do
+                echo "::group::$scenario $url"
+                EVCERT_INTEGRATIONS=$scenario WP_LOAD=/var/www/html/wp-load.php WP_TEST_URL=$url vendor/bin/phpunit || exit 1
+                echo "::endgroup::"
+              done
+            done'

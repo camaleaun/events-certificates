@@ -1,0 +1,264 @@
+// The signature on the Settings screen: the field (a preview, the buttons) and its dialog (tabs: Upload files, Media Library,
+// Edit SVG). The Edit SVG tab is the design editor's SVG component, so the editor's rules come along (all scoped by evcert-).
+@use '../../src/editor/style';
+
+.evcert-signature-field__current {
+	display: inline-block;
+	margin: 0 0 8px;
+	padding: 8px 12px;
+	border: 1px solid #c3c4c7;
+	border-radius: 2px;
+	background: #fff;
+	color: #1d2327;
+}
+
+.evcert-signature-field__preview {
+	display: block;
+	width: auto;
+	max-width: 240px;
+	height: 72px;
+	object-fit: contain;
+}
+
+// The Edit SVG tab of the media modal: the modal's own toolbar is for pictures, so it is hidden there.
+.media-modal .evcert-signature-svgtab {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	background: #fff;
+}
+
+// The content scrolls; the buttons stay at the base of the modal, full width, in both states of the tab.
+// (the same body as the editor's modal: it takes the whole height, the preview and the fields filling it)
+.evcert-svg-tab__content {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	// Only the column of fields scrolls (as in the editor's dialog), and it has the sidebar's width, groups and paddings.
+	padding: 0;
+	overflow: hidden;
+
+	.evcert-svg-editor__body {
+		flex: 1;
+	}
+}
+
+// With no toolbar here, the content goes down to the base of the modal.
+.evcert-svg-mode .media-frame-toolbar {
+	display: none;
+}
+
+.evcert-svg-mode .media-frame-content {
+	bottom: 0;
+}
+
+// A toast over the modal: an SVG is copied, paste it.
+.evcert-toast-host {
+	position: absolute;
+	right: 0;
+	bottom: 16px;
+	left: 0;
+	z-index: 200000;
+	display: flex;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.evcert-toast {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 14px;
+	border-radius: 4px;
+	background: #1d2327;
+	color: #fff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	pointer-events: auto;
+	animation: evcert-toast-in 0.2s ease-out;
+
+	&.is-leaving {
+		animation: evcert-toast-out 0.2s ease-in forwards;
+	}
+
+	.button-link {
+		color: #72aee6;
+		font-weight: 600;
+	}
+
+	.evcert-toast__close {
+		padding: 0 4px;
+		border: 0;
+		background: transparent;
+		color: #fff;
+		font-size: 18px;
+		line-height: 1;
+		cursor: pointer;
+	}
+}
+
+// The buttons of the Edit SVG tab are at the base of the modal: the toast goes above them.
+.media-modal:has(.evcert-svg-mode) .evcert-toast-host {
+	bottom: 88px;
+}
+
+@keyframes evcert-toast-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes evcert-toast-out {
+	from {
+		opacity: 1;
+		transform: none;
+	}
+
+	to {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.evcert-toast,
+	.evcert-toast.is-leaving {
+		animation: none;
+	}
+}
+
+.evcert-signature-modal .evcert-toast {
+	position: absolute;
+	right: 24px;
+	bottom: 16px;
+	z-index: 10;
+}
+
+.evcert-signature-modal {
+	width: min(960px, 96vw);
+}
+
+.evcert-signature-modal__tabs {
+	display: flex;
+	gap: 4px;
+	margin: 0 0 16px;
+	border-bottom: 1px solid #dcdcde;
+
+	button {
+		margin: 0 0 -1px;
+		padding: 10px 14px;
+		border: 0;
+		border-bottom: 2px solid transparent;
+		background: transparent;
+		color: #1d2327;
+		font-size: 14px;
+		cursor: pointer;
+
+		&:hover {
+			color: #2271b1;
+		}
+
+		&.is-active {
+			border-bottom-color: #2271b1;
+			font-weight: 600;
+		}
+	}
+}
+
+.evcert-signature-modal__panel {
+	min-height: 340px;
+}
+
+.evcert-signature-upload {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 300px;
+	text-align: center;
+
+	p {
+		margin: 0;
+	}
+}
+
+.evcert-signature-upload__title {
+	font-size: 20px;
+}
+
+.evcert-signature-upload__error {
+	color: #d63638;
+}
+
+.evcert-signature-library__search {
+	width: 100%;
+	max-width: 320px;
+	margin: 0 0 12px;
+}
+
+.evcert-signature-library__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+	gap: 8px;
+	margin: 0 0 12px;
+	padding: 0;
+	list-style: none;
+
+	li {
+		margin: 0;
+	}
+
+	button {
+		display: block;
+		width: 100%;
+		aspect-ratio: 1;
+		padding: 4px;
+		border: 1px solid #c3c4c7;
+		border-radius: 2px;
+		background: #fff;
+		cursor: pointer;
+
+		&:hover,
+		&:focus {
+			border-color: #2271b1;
+			box-shadow: 0 0 0 1px #2271b1;
+		}
+	}
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+}
+
+// Remove: red text and outline, filled red on hover.
+#evcert-signature-field .evcert-remove {
+	border-color: #d63638;
+	color: #d63638;
+
+	&:hover,
+	&:focus {
+		border-color: #d63638;
+		background: #d63638;
+		color: #fff;
+	}
+}
+
+// The Edit SVG tab's buttons: a line above, as the editor's own dialog has.
+.evcert-signature-svgtab .evcert-svg-editor__footer {
+	flex: none;
+	margin: 0;
+	padding: 16px;
+	border-top: 1px solid #dcdcde;
+	background: #fff;
+}

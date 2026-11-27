@@ -1,0 +1,90 @@
+/* The people the list holds, and the three downloads under it. */
+.evcert-people__bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 0 0 8px;
+	font-size: 12px;
+	color: #757575;
+}
+
+.evcert-people__empty {
+	margin: 0;
+	font-size: 12px;
+	color: #757575;
+}
+
+.evcert-people__list {
+	display: grid;
+	gap: 4px;
+	max-height: 320px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	overflow: auto;
+}
+
+.evcert-people__row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	margin: 0;
+	padding: 4px 6px;
+	border: 1px solid transparent;
+	border-radius: 2px;
+}
+
+.evcert-people__row.is-current {
+	border-color: #c5d9ed;
+	background: #f0f6fc;
+}
+
+.evcert-people__row input[type='checkbox'] {
+	flex: none;
+	margin: 0;
+}
+
+.evcert-people__name {
+	flex: 1;
+	min-width: 0;
+}
+
+.evcert-people__tag {
+	padding: 2px 6px;
+	border-radius: 2px;
+	background: #e0e0e0;
+	font-size: 11px;
+	color: #1e1e1e;
+}
+
+.evcert-generator__need {
+	min-height: 1.4em;
+	margin: 0;
+	font-size: 12px;
+	color: #757575;
+}
+
+/* Like the editor's "Add category": a link that opens its small form below the list. */
+.evcert-people__add {
+	display: grid;
+	gap: 12px;
+	justify-items: start;
+}
+.evcert-people__add > .components-v-stack {
+	width: 100%;
+}
+.evcert-people__list {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 2px;
+}
+
+.evcert-people__list[hidden] {
+	display: none;
+}
+
+/* Like the editor's Add category: the button of the form sits at the start, at its own width. */
+.evcert-people__add .components-v-stack > .components-button {
+	align-self: flex-start;
+}

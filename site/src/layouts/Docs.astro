@@ -1,0 +1,32 @@
+---
+import Base from './Base.astro';
+import { groups, type Doc } from '@libs/docs';
+import { href } from '@libs/site';
+
+interface Props {
+	doc: Doc;
+}
+const { doc } = Astro.props;
+const nav = await groups();
+---
+<Base title={ doc.data.title } description={ doc.data.description } markdown={ href( `docs/${ doc.id }.md` ) }>
+	<div class="wrap docs">
+		<aside aria-label="Docs">
+			{ nav.map( ( group ) => (
+				<>
+					<h2>{ group.title }</h2>
+					<ul>
+						{ group.docs.map( ( item ) => (
+							<li><a href={ href( `docs/${ item.id }/` ) } aria-current={ item.id === doc.id ? 'page' : undefined }>{ item.data.title }</a></li>
+						) ) }
+					</ul>
+				</>
+			) ) }
+		</aside>
+		<article>
+			<h1>{ doc.data.title }</h1>
+			<slot />
+			<p class="md-link"><a href={ href( `docs/${ doc.id }.md` ) }>View as Markdown</a></p>
+		</article>
+	</div>
+</Base>
