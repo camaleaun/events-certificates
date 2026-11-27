@@ -50,3 +50,7 @@ no way to say so. And the Colors section had a "Reset colors" to undo what could
 
 - A design file may have no `colors` and no `palette`; a design written before this reads the same (its colors are all there).
 - `tests/fixtures/palette-cases.json` is shared by the editor and the server and now says what is *not* done (no Text added, an empty palette stays empty).
+
+## Addendum (0052)
+
+A new rectangle starts with a `#000000` fill and no stroke; "empty" is no value. `currentColor` (the Text color) and `#00000000` (nothing painted) are understood but are not defaults.

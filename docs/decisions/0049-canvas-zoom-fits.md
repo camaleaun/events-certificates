@@ -28,3 +28,7 @@ Settings aside or the left panel did not. The aside started open, and a certific
   already fitted, and the Base design that the editor holds meanwhile is never shown.
 - Entering a fit shows the page from its top, centred; when the area changes inside a fit the same part of the page stays in view.
 - The **Settings aside starts closed** and is not remembered; selecting an element still opens it (on its Element tab), so a fit refits then.
+
+## Addendum (0052)
+
+The close button of the aside is the core's (icon, tooltip, Shift + Cmd/Ctrl + comma), and the Settings button of the top bar has the same shortcut.
