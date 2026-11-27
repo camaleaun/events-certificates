@@ -116,3 +116,7 @@ jobs:
         run: |
           composer lint
           composer phpcs
+
+      # Level 5 with the WordPress and WP-CLI stubs (phpstan.neon.dist): what it finds is fixed or, when it is noise, ignored there with the reason.
+      - name: Static analysis
+        run: composer analyse

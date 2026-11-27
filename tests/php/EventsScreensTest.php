@@ -353,4 +353,38 @@ class EventsScreensTest extends Test_Case {
 		$this->assertSame( 'evcert-certificate', \EventsCertificate\Admin\SLUG );
 		$this->assertSame( 'evcert-options', \EventsCertificate\Admin\SLUG_SETTINGS );
 	}
+
+	/**
+	 * Applying a bulk action with no action chosen, or no event ticked, goes back to the list: it used to call back() with no argument, a fatal error.
+	 */
+	public function test_a_bulk_action_with_nothing_chosen_goes_back_to_the_list() {
+		wp_set_current_user( 1 );
+		foreach ( array(
+			'no action chosen' => array(
+				'action'        => '-1',
+				'evcert_events' => array( '1' ),
+			),
+			'no event ticked'  => array(
+				'action' => 'trash',
+			),
+		) as $what => $request ) {
+			$location = '';
+			$catch    = static function ( $to ) use ( &$location ) {
+				$location = $to;
+				throw new \RuntimeException( 'redirected' );
+			};
+			add_filter( 'wp_redirect', $catch );
+			$_REQUEST = $request + array( '_wpnonce' => wp_create_nonce( 'bulk-evcert_events' ) );
+			try {
+				EventsAdmin\bulk_events();
+				$this->fail( 'It must redirect: ' . $what );
+			} catch ( \RuntimeException $e ) {
+				$this->assertSame( 'redirected', $e->getMessage(), $what );
+			} finally {
+				remove_filter( 'wp_redirect', $catch );
+				$_REQUEST = array();
+			}
+			$this->assertStringContainsString( 'page=', $location, $what );
+		}
+	}
 }

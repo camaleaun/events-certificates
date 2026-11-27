@@ -20,11 +20,16 @@
         "phpcompatibility/phpcompatibility-wp": "*",
         "php-parallel-lint/php-parallel-lint": "^1",
         "phpunit/phpunit": "^9.6",
-        "yoast/phpunit-polyfills": "^2"
+        "yoast/phpunit-polyfills": "^2",
+        "phpstan/phpstan": "^2.3",
+        "szepeviktor/phpstan-wordpress": "^2.0",
+        "phpstan/extension-installer": "^1.4",
+        "php-stubs/wp-cli-stubs": "^2.12"
     },
     "config": {
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
         },
         "platform": {
             "php": "7.4.33"
@@ -63,7 +68,8 @@
             "@phpcs",
             "@check-pot",
             "@test:all"
-        ]
+        ],
+        "analyse": "phpstan analyse --no-progress --memory-limit=1G"
     },
     "scripts-descriptions": {
         "lint": "PHP syntax check of every file.",
@@ -73,9 +79,11 @@
         "check-pot": "Fail when languages/events-certificates.pot is out of date (run npm run build first).",
         "check": "Lint, PHPCS, the translation template and tests."
     },
-    "repositories": [{
-        "name": "draw",
-        "type": "vcs",
-        "url": "https://github.com/camaleaun/draw"
-    }]
+    "repositories": [
+        {
+            "name": "draw",
+            "type": "vcs",
+            "url": "https://github.com/camaleaun/draw"
+        }
+    ]
 }

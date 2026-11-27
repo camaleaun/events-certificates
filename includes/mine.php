@@ -41,11 +41,7 @@ const GET_ARG     = 'evcert_mine_get';
 const FORGET_ARG  = 'evcert_mine_forget';
 const VIEW_ARG    = 'evcert_mine_view';
 
-/**
- * What the request did, for the form to draw (set by handle()).
- *
- * @var array<string, mixed>
- */
+// What the request did, for the form to draw (set by handle()): an array<string, mixed>.
 $GLOBALS['evcert_mine_outcome'] = array();
 
 /**

@@ -1,0 +1,50 @@
+# Static analysis of the plugin's own PHP (not the third-party libraries, not the tests): composer analyse.
+# Level 5 with the WordPress and WP-CLI stubs. CampTix and GatherPress are optional plugins: their classes are not known here.
+parameters:
+    level: 5
+    paths:
+        - events-certificates.php
+        - uninstall.php
+        - includes
+    excludePaths:
+        analyse:
+            - includes/third-party/*
+    scanDirectories:
+        - includes/third-party
+    scanFiles:
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-commands-stubs.php
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-i18n-stubs.php
+    bootstrapFiles:
+        - bin/phpstan-bootstrap.php
+    treatPhpDocTypesAsCertain: false
+    # WordPress sets these when it runs: the bootstrap gives them a value, which is not the one they have.
+    dynamicConstantNames:
+        - WPINC
+        - COOKIEPATH
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # Optional integrations, loaded only when their plugin is active.
+        - identifier: class.notFound
+          path: includes/compat/*
+        # A list of strings filtered by strlen: the stub wants a callable of a string and the list is typed loosely.
+        - message: '#array_filter expects \(callable\(string\): bool\)\|null, ''strlen'' given#'
+        # PHP turns the CampTix attendee's post ID into the string the certificate table keeps (no strict types).
+        - message: '#source_ref of function EventsCertificate\\Certificates\\(find|latest)_by_source expects string, int<0, max> given#'
+        # Event::hours_by_role is always an array after Events\get() (a JSON string only in the stored meta).
+        - message: '#Parameter \#2 \$array of function array_map expects array, string given#'
+          path: includes/abilities.php
+        # A fallback on a table of known keys, for a value that came from a design or a setting.
+        - identifier: nullCoalesce.offset
+        # An action callback that returns a bool nobody reads.
+        - identifier: return.void
+          path: includes/install.php
+        # CampTix is optional: its class is only used when the plugin is active.
+        - message: '#unknown class CampTix_Plugin#'
+          path: includes/mine-auth.php
+        # The function is made in the generated template file (a name built from the template's slug).
+        - message: '#call_user_func expects callable\(\): mixed#'
+          path: includes/templates.php
+        # WP_HTML_Tag_Processor::next_tag() takes more queries than the stub's shape says.
+        - message: '#WP_HTML_Tag_Processor::next_tag\(\) expects array#'
+          path: includes/tutorial-step-image.php

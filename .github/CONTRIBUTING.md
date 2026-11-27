@@ -39,6 +39,8 @@ gh pr create --base trunk           # squash-merged: one commit per change
 
 - `composer check`: lint, PHPCS, the translation template (`bin/make-pot.sh --check`, after `npm run build`) and the tests in
   the four scenarios (none, CampTix, GatherPress, both) against the WordPress site the plugin is in (`WP_LOAD` picks another).
+- `composer analyse`: PHPStan, level 5, with the WordPress and WP-CLI stubs (`phpstan.neon.dist`; CampTix and GatherPress are optional, so their classes are not known
+  to it). A finding is fixed or, when it is noise, ignored in the neon file with the reason; CI runs it.
 - CI (`.github/workflows/`): `ci.yml` (build, `.pot`, README.md, types, JS tests, lint, PHPCS, the third-party libraries),
   `tests.yml` (PHPUnit on PHP 7.4 (none, CampTix: GatherPress needs 8.1) and 8.3 (the four scenarios) and on a network, Plugin Check and the debug log, in `wp-env`: Docker,
   `.wp-env.json`), `pr-preview-*.yml` (a WordPress Playground link on each pull request) and `release.yml`.

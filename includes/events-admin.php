@@ -837,7 +837,7 @@ function bulk_events() {
 		'delete'  => array( 'EventsCertificate\Events\delete', 'events_deleted' ),
 	);
 	if ( ! isset( $functions[ $action ] ) || ! $ids ) {
-		back();
+		back( array() );
 	}
 	$n = 0;
 	foreach ( $ids as $id ) {
