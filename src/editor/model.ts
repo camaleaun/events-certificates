@@ -352,7 +352,8 @@ export function runsIn( el: { runs?: Run[]; text?: string; variants?: Record< st
 	return variant && variant.length ? variant : runsOf( el );
 }
 
-const esc = ( v: string ) => v.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
+// Text and attribute values alike: the quotes are escaped too, so a value can never close an attribute.
+const esc = ( v: string ) => v.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' ).replace( /"/g, '&quot;' ).replace( /'/g, '&#39;' );
 
 /** Formats a field's sample value. */
 export function fieldValue( field: string, format: string | undefined, sample: Record< string, string >, locale: string ): string {

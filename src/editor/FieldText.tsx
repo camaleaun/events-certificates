@@ -109,7 +109,8 @@ function toggleMark( chip: HTMLElement, root: HTMLElement | null, mark: 'b' | 'i
 	}
 }
 
-const esc = ( v: string ) => v.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
+// Text and attribute values alike: the quotes are escaped too, so a value can never close an attribute.
+const esc = ( v: string ) => v.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' ).replace( /"/g, '&quot;' ).replace( /'/g, '&#39;' );
 
 /**
  * A text that is only fields (the code, the date, the verification address,

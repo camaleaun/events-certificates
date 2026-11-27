@@ -218,3 +218,9 @@ test( 'renaming a swatch is followed by the colors that point at it', () => {
 	assert.equal( m.color( out, '$fundo', 'light' ), '#ffffff' );
 } );
 
+test( 'what a text says is escaped as text and as an attribute value: <, >, &, " and \'', () => {
+	const html = m.runsHtml( [ { text: `<img src=x onerror="a()"> & 'b'` } ], {}, 'en_US' );
+	assert.equal( html, '&lt;img src=x onerror=&quot;a()&quot;&gt; &amp; &#39;b&#39;' );
+	assert.equal( html.includes( '<' ), false );
+} );
+
