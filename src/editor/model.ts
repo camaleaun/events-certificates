@@ -442,9 +442,9 @@ export function create( type: Element[ 'type' ] | 'logo', design: Design ): Elem
 		case 'text':
 			return { id, type, name: 'Text', x: cx - 120, y: cy - 10, w: 240, h: 20, runs: [ { text: 'Text' } ], font: 'CertSans', weight: 400, size: 14, color: '$text', align: 'center', lh: 1.3 };
 		case 'rect':
-			return { id, type, name: 'Rectangle', x: cx - 60, y: cy - 40, w: 120, h: 80, fill: 'currentColor', stroke: '#00000000', strokeWidth: 1, radius: [ 0, 0, 0, 0 ] };
+			return { id, type, name: 'Rectangle', x: cx - 60, y: cy - 40, w: 120, h: 80, fill: '#000000', stroke: '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ] };
 		case 'ellipse':
-			return { id, type, name: 'Ellipse', x: cx - 40, y: cy - 40, w: 80, h: 80, fill: 'currentColor', stroke: '#00000000', strokeWidth: 1 };
+			return { id, type, name: 'Ellipse', x: cx - 40, y: cy - 40, w: 80, h: 80, fill: '#000000', stroke: '', strokeWidth: 1 };
 		case 'line':
 			return { id, type, name: 'Line', x1: cx - 100, y1: cy, x2: cx + 100, y2: cy, stroke: '$line', strokeWidth: 1, dash: 'solid' };
 		case 'signature':

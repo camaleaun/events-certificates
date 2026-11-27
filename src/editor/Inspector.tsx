@@ -306,11 +306,11 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 				<ToolsPanel label={ __( 'Color', 'events-certificates' ) } resetAll={ () => {} } className="color-block-support-panel">
 					<div className="evcert-color-items">
 						{ el.type === 'text' && <ColorItem label={ __( 'Text', 'events-certificates' ) } value={ el.color } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
-						{ ( el.type === 'rect' || el.type === 'ellipse' || el.type === 'path' ) && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.fill } clearTo="currentColor" design={ design } mode={ mode } onChange={ ( fill ) => onChange( { fill } ) } /> }
+						{ ( el.type === 'rect' || el.type === 'ellipse' || el.type === 'path' ) && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.fill } clearTo="" design={ design } mode={ mode } onChange={ ( fill ) => onChange( { fill } ) } /> }
 						{ el.type === 'signature' && <ColorItem label={ __( 'Signature color', 'events-certificates' ) } value={ el.color || '$text' } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
 						{ /* An SVG that picks no color draws in the current color: an empty circle; Clear goes back to that. */ }
 						{ el.type === 'svg' && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.color } clearTo="" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c || undefined } as Partial< Element > ) } /> }
-						{ el.type !== 'text' && el.type !== 'svg' && el.type !== 'signature' && <ColorItem label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Stroke', 'events-certificates' ) } value={ ( el as any ).stroke } clearTo={ el.type === 'line' ? '' : '#00000000' } design={ design } mode={ mode } onChange={ ( stroke ) => onChange( { stroke } as Partial< Element > ) } /> }
+						{ el.type !== 'text' && el.type !== 'svg' && el.type !== 'signature' && <ColorItem label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Stroke', 'events-certificates' ) } value={ ( el as any ).stroke } clearTo="" design={ design } mode={ mode } onChange={ ( stroke ) => onChange( { stroke } as Partial< Element > ) } /> }
 					</div>
 				</ToolsPanel>
 			) }

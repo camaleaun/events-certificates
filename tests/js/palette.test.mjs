@@ -241,9 +241,9 @@ test( 'currentColor is the document text color in the mode, and a fully transpar
 	assert.equal( m.color( design, '#ff000080', 'light' ), '#ff000080', 'half transparent is a color' );
 } );
 
-test( 'a new rectangle and ellipse fill with the current color and have no stroke', () => {
+test( 'a new rectangle starts with a black fill and an empty stroke', () => {
 	const rect = m.create( 'rect', { colors: {}, elements: [], page: { w: 842, h: 595, safe: 0, bleed: 0 } } );
-	assert.equal( rect.fill, 'currentColor' );
-	assert.equal( rect.stroke, '#00000000' );
+	assert.equal( rect.fill, '#000000' );
+	assert.equal( rect.stroke, '' );
 } );
 
