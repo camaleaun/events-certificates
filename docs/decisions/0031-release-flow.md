@@ -39,3 +39,11 @@ manual `bin/package.sh` and a tag. Nothing says what is in development and what 
 - A change to what ships needs a changelog file, or the pull request fails.
 - The first release is cut from `trunk` as `release/0.71`; the history before it has no changelog files, so
   `0.71`'s Changelog stays as written in `readme.txt` and new entries are added to it.
+
+## Addendum (2026-11-27): the Playground demo uses the release zip
+
+The README's demo (the blueprint in `.wordpress-org/blueprints/`) installs the plugin in the browser, and a release asset cannot be fetched from there (no CORS
+headers: github.com redirects to release-assets.githubusercontent.com). A file of a branch on `raw.githubusercontent.com` can. So `release.yml` copies the zip of every
+**final** release, as it is, to the orphan `playground` branch (a README and `events-certificates.zip`, a single commit each time), and the demo cannot run an older
+build than the release. Once the plugin is in the directory the blueprint can install it by slug and the branch can go.
+
