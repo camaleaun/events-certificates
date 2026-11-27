@@ -7,9 +7,6 @@
 import { DEFAULT_FONT, fallbackOf, fontFamilies, fontLabel } from './fonts';
 import {
 	Button,
-	ColorIndicator,
-	ColorPalette,
-	Dropdown,
 	FontSizePicker,
 	RangeControl,
 	SelectControl,
@@ -32,10 +29,12 @@ import { elementIcon } from './icons';
 import { naturalSize, type Picked } from './media';
 import SvgPanel from './SvgPanel';
 import { ElementSize } from './SizeRow';
+import { alignAxis } from './size';
 import { fields, tokenOnly } from './FieldText';
 import TextByLanguage from './TextByLanguage';
-import { box as boxOf, color, colorGroups, colorIn, swatchName, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, fieldValue, runsOf } from './model';
+import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, fieldValue, runsOf } from './model';
 import { stockName } from './base';
+import { ColorItem } from './ColorChoices';
 
 type Props = {
 	el: Element;
@@ -65,94 +64,6 @@ function fontOptions( current: string ) {
 const FONT_SIZES = [ 8, 10, 12, 14, 16, 18, 24, 32, 42 ].map( ( size ) => ( { name: `${ size } pt`, slug: String( size ), size } ) );
 const num = ( v: number ) => Math.round( v * 100 ) / 100;
 const PT = [ { value: 'pt', label: 'pt', default: 0 } ];
-
-/**
- * The colors to choose from, in a popover: the colors of the design are one group, Elements; for what is not an element (the page's
- * background) `theme` adds the Theme before them: a name is in one or the other, so a reference ("$base", "$background") says which. Then a
- * custom color, and Clear (back to `clearTo`).
- */
-export function ColorChoices( { value, design, mode, onChange, clearTo = '', theme = false }: { value?: string; design: Design; mode: Mode; onChange: ( v: string ) => void; clearTo?: string; theme?: boolean } ) {
-	const key = value?.startsWith( '$' ) ? value.slice( 1 ) : '';
-	const hex = ( c: string ) => ( c === 'transparent' ? '#ffffff00' : c );
-	type Item = { slug: string; name: string; color: string };
-	const groups: Array< { name: 'theme' | 'elements'; items: Item[] } > = [
-		...( theme && design.palette?.length ? [ { name: 'theme' as const, items: design.palette.map( ( s ) => ( { slug: s.slug, name: stockName( swatchName( s ) ), color: s.color } ) ) } ] : [] ),
-		...colorGroups( design ).map( ( group ) => ( { name: group.name, items: group.keys.map( ( k ) => ( { slug: k, name: stockName( design.colors[ k ].name ), color: hex( colorIn( design, design.colors[ k ], mode ) ) } ) ) } ) ),
-	];
-	// The page's background (not an element): the same popover as a color of the Colors section (the preview with its name, the groups at the base
-	// and Clear), with the Theme and the Elements as its two groups. A slug is in one or the other, so it says which was picked.
-	if ( theme ) {
-		const current = color( design, value, mode );
-		return (
-			<div className="evcert-colors__plain">
-				<ColorPalette
-					colors={ groups.map( ( group ) => ( { name: group.name === 'theme' ? __( 'Theme', 'events-certificates' ) : __( 'Elements', 'events-certificates' ), colors: group.items } ) ) }
-					value={ current === 'none' ? undefined : current }
-					enableAlpha
-					clearable={ !! value && value !== clearTo }
-					onChange={ ( picked, _group, slug ) => onChange( slug ? `$${ slug }` : picked || clearTo ) }
-				/>
-			</div>
-		);
-	}
-	return (
-		<div className="evcert-color-popover">
-			{ groups.map( ( group ) => (
-				<div key={ group.name }>
-					<p className="evcert-color-popover__label">{ group.name === 'theme' ? __( 'Theme', 'events-certificates' ) : __( 'Elements', 'events-certificates' ) }</p>
-					<ColorPalette
-						colors={ group.items }
-						value={ key && group.items.some( ( i ) => i.slug === key ) ? group.items.find( ( i ) => i.slug === key )?.color : undefined }
-						disableCustomColors
-						clearable={ false }
-						// By position, not by value: two entries can share one (Background and On primary are both white).
-						onChange={ ( picked, index ) => {
-							const item = index === undefined ? undefined : group.items[ index ];
-							onChange( item ? `$${ item.slug }` : picked || '' );
-						} }
-					/>
-				</div>
-			) ) }
-			<p className="evcert-color-popover__label">{ __( 'Custom', 'events-certificates' ) }</p>
-			<ColorPalette value={ value?.startsWith( '$' ) ? undefined : value } onChange={ ( c ) => onChange( c || clearTo ) } clearable={ false } />
-			{ /* One Clear for any color, theme or custom: back to the default (none, or the text color). */ }
-			<div className="evcert-color-popover__footer">
-				<Button variant="tertiary" size="small" disabled={ ( value || '' ) === clearTo } accessibleWhenDisabled onClick={ () => onChange( clearTo ) }>
-					{ __( 'Clear', 'events-certificates' ) }
-				</Button>
-			</div>
-		</div>
-	);
-}
-
-/** What a color value is called: the name of the color of the design or of the theme, "Default" for a built-in one, else the value. */
-export function colorLabel( design: Design, value?: string ): string {
-	const key = value?.startsWith( '$' ) ? value.slice( 1 ) : '';
-	const variable = key ? design.colors[ key ] : null;
-	const swatch = key && ! variable ? ( design.palette || [] ).find( ( s ) => s.slug === key ) : null;
-	return variable ? stockName( variable.name ) : swatch ? stockName( swatchName( swatch ) ) : key === 'background' ? __( 'Transparent', 'events-certificates' ) : key ? __( 'Default', 'events-certificates' ) : value || __( 'None', 'events-certificates' );
-}
-
-/** A color item like the block editor's ColorGradientDropdown (indicator + name, the choices in a dropdown). */
-export function ColorItem( { label, value, design, mode, onChange, clearTo = '', theme = false }: { label: string; value?: string; design: Design; mode: Mode; onChange: ( v: string ) => void; clearTo?: string; theme?: boolean } ) {
-	const shown = color( design, value, mode );
-	return (
-		<Dropdown
-			className="evcert-color-item"
-			popoverProps={ { placement: 'left-start', offset: 36, shift: true, className: 'evcert-colors__popover-wrap' } }
-			renderToggle={ ( { isOpen, onToggle } ) => (
-				<Button __next40pxDefaultSize className={ `evcert-color-item__toggle${ isOpen ? ' is-open' : '' }` } onClick={ onToggle } aria-expanded={ isOpen }>
-					<HStack justify="flex-start">
-						<ColorIndicator colorValue={ shown === 'none' ? undefined : shown } />
-						<span className="evcert-color-item__name">{ label }</span>
-						<span className="evcert-color-item__value">{ colorLabel( design, value ) }</span>
-					</HStack>
-				</Button>
-			) }
-			renderContent={ () => <ColorChoices value={ value } design={ design } mode={ mode } onChange={ onChange } clearTo={ clearTo } theme={ theme } /> }
-		/>
-	);
-}
 
 export default function Inspector( { el, stored, design, mode, tab, locale, sample, onChange, onImage, onBox }: Props ) {
 	const [ linked, setLinked ] = useState( true );
@@ -374,7 +285,8 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 						{ el.type === 'text' && <ColorItem label={ __( 'Text', 'events-certificates' ) } value={ el.color } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
 						{ ( el.type === 'rect' || el.type === 'ellipse' || el.type === 'path' ) && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.fill } design={ design } mode={ mode } onChange={ ( fill ) => onChange( { fill } ) } /> }
 						{ el.type === 'signature' && <ColorItem label={ __( 'Signature color', 'events-certificates' ) } value={ el.color || '$text' } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
-						{ el.type === 'svg' && <ColorItem label={ __( 'Current color', 'events-certificates' ) } value={ el.color || '$text' } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c === '$text' ? undefined : c } as Partial< Element > ) } /> }
+						{ /* An SVG that picks no color draws in the current color: an empty circle; Clear goes back to that. */ }
+						{ el.type === 'svg' && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.color } clearTo="" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c || undefined } as Partial< Element > ) } /> }
 						{ el.type !== 'text' && el.type !== 'svg' && el.type !== 'signature' && <ColorItem label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Stroke', 'events-certificates' ) } value={ ( el as any ).stroke } design={ design } mode={ mode } onChange={ ( stroke ) => onChange( { stroke } as Partial< Element > ) } /> }
 					</div>
 				</ToolsPanel>
@@ -504,13 +416,14 @@ const AXIS_LABELS = () => ( {
 } );
 
 const LEN_UNITS = [
-	{ value: 'pt', label: 'pt', step: 1 },
-	{ value: 'mm', label: 'mm', step: 1 },
-	{ value: 'cm', label: 'cm', step: 0.1 },
-	{ value: 'in', label: 'in', step: 0.01 },
-	{ value: '%', label: '%', step: 1 },
+	{ value: 'pt', label: 'pt', step: 0.01 },
+	{ value: 'px', label: 'px', step: 0.01 },
+	{ value: 'mm', label: 'mm', step: 0.01 },
+	{ value: 'cm', label: 'cm', step: 0.01 },
+	{ value: 'in', label: 'in', step: 0.001 },
+	{ value: '%', label: '%', step: 0.1 },
 ];
-const SIMPLE = /^-?\d*\.?\d+(pt|mm|cm|in|%)$/;
+const SIMPLE = /^-?\d*\.?\d+(pt|px|mm|cm|in|%)$/;
 
 /**
  * A length: a value and a unit, like the block editor's dimension fields
@@ -587,8 +500,10 @@ function Anchors( { el, stored, page, onChange, withSize = true }: { el: Element
 	const b = { x: el.x as number, y: el.y as number, w: el.w as number, h: el.h as number };
 	const layout: Layout = stored.layout || layoutFrom( { h: { mode: 'start' }, v: { mode: 'start' }, ref: 'page' }, b, page );
 	const ref = refBox( page, layout.ref );
+	const sameBox = ! ( page.safe > 0 );
 	const set = ( next: Layout ) => onChange( { layout: next } as Partial< Element > );
-	const setMode = ( axis: 'h' | 'v', mode: AxisMode ) => set( layoutFrom( { ...layout, [ axis ]: { mode } }, b, page ) );
+	// Left, center, right or fill: the offsets are zero in the unit of the axis, and the element keeps its size (not the place it had).
+	const setMode = ( axis: 'h' | 'v', mode: AxisMode ) => set( { ...layout, [ axis ]: alignAxis( mode, axis === 'h' ? b.w : b.h, layout[ axis ], axis === 'h' ? ref.w : ref.h ) } );
 	const setRef = ( r: 'page' | 'safe' ) => set( layoutFrom( { ...layout, ref: r }, b, page ) );
 	const ratio = lockedRatio( stored );
 	const side = ratio ? lockedSide( layout ) : null;
@@ -647,9 +562,10 @@ function Anchors( { el, stored, page, onChange, withSize = true }: { el: Element
 	const fills = { h: layout.h.mode === 'stretch', v: layout.v.mode === 'stretch' };
 	return (
 		<div className="evcert-anchors">
-			<ToggleGroupControl __next40pxDefaultSize __nextHasNoMarginBottom isBlock label={ __( 'Relative to', 'events-certificates' ) } value={ layout.ref || 'page' } onChange={ ( v ) => setRef( v as 'page' ) }>
-				<ToggleGroupControlOption value="page" label={ __( 'Page', 'events-certificates' ) } />
-				<ToggleGroupControlOption value="safe" label={ __( 'Margin', 'events-certificates' ) } aria-label={ __( 'Safe margin', 'events-certificates' ) } showTooltip />
+			{ /* With no safe margin the page and the margin are the same box: nothing to choose, so nothing is selected (what is stored stays). */ }
+			<ToggleGroupControl __next40pxDefaultSize __nextHasNoMarginBottom isBlock label={ __( 'Relative to', 'events-certificates' ) } value={ sameBox ? undefined : layout.ref || 'page' } onChange={ ( v ) => ! sameBox && setRef( v as 'page' ) }>
+				<ToggleGroupControlOption value="page" label={ __( 'Page', 'events-certificates' ) } disabled={ sameBox } />
+				<ToggleGroupControlOption value="safe" label={ __( 'Margin', 'events-certificates' ) } aria-label={ __( 'Safe margin', 'events-certificates' ) } disabled={ sameBox } showTooltip />
 			</ToggleGroupControl>
 			<ToggleGroupControl
 				__next40pxDefaultSize

@@ -8,7 +8,6 @@
 import {
 	Button,
 	ColorIndicator,
-	ColorPalette,
 	Dropdown,
 	DropdownMenu,
 	MenuGroup,
@@ -24,8 +23,9 @@ import { __, sprintf } from '@wordpress/i18n';
 import { chevronDown, chevronUp, copy, moreVertical, plus, trash } from '@wordpress/icons';
 import { ElementSize } from './SizeRow';
 import SvgGroups, { ViewBoxRow } from './SvgGroups';
-import { emptiedElement, inkOn } from './svg-draft';
-import { color, colorGroups, colorIn, isPathData, sanitizeSvg, svgPaths, type Design, type Mode, type SvgEl, type SvgPath } from './model';
+import { emptiedElement } from './svg-draft';
+import { ColorChoices, colorLabel } from './ColorChoices';
+import { color, isPathData, sanitizeSvg, svgPaths, type Design, type Mode, type SvgEl, type SvgPath } from './model';
 
 type Props = {
 	el: SvgEl;
@@ -34,13 +34,9 @@ type Props = {
 	onChange: ( patch: Partial< SvgEl > ) => void;
 };
 
-const TRANSPARENT = '#ffffff00';
-
-/** The fill swatch: current color, a palette color or a custom one. */
-export function FillSwatch( { value, current, design, mode, onChange }: { value?: string; current: string; design: Design; mode: Mode; onChange: ( fill?: string ) => void } ) {
-	const variable = value?.startsWith( '$' ) ? design.colors[ value.slice( 1 ) ] : null;
-	const shown = value ? color( design, value, mode ) : color( design, current, mode );
-	const palette = Object.entries( design.colors ).map( ( [ slug, v ] ) => ( { slug, name: v.name, color: colorIn( design, v, mode ) === 'transparent' ? TRANSPARENT : colorIn( design, v, mode ) } ) );
+/** The fill swatch of a path: no fill (the current color: an empty circle), a color of the Theme or the Elements, or a custom one. */
+export function FillSwatch( { value, design, mode, onChange }: { value?: string; design: Design; mode: Mode; onChange: ( fill?: string ) => void } ) {
+	const shown = value ? color( design, value, mode ) : 'none';
 	return (
 		<Dropdown
 			popoverProps={ { placement: 'left-start', offset: 36, shift: true, className: 'evcert-colors__popover-wrap' } }
@@ -49,46 +45,14 @@ export function FillSwatch( { value, current, design, mode, onChange }: { value?
 					className="evcert-svg-path__swatch"
 					onClick={ onToggle }
 					aria-expanded={ isOpen }
-					label={ sprintf( /* translators: %s: color name. */ __( 'Fill: %s', 'events-certificates' ), value ? variable?.name || value : __( 'Current color', 'events-certificates' ) ) }
+					label={ sprintf( /* translators: %s: color name. */ __( 'Fill: %s', 'events-certificates' ), value ? colorLabel( design, value ) : __( 'Current color', 'events-certificates' ) ) }
 					showTooltip
 				>
-					{ value ? (
-						<ColorIndicator colorValue={ shown === 'none' ? undefined : shown } />
-					) : (
-						// The current color is a circle in that color cut across by a stroke that shows on it: as the "no color" of the palette,
-						// which is an empty circle with a slash (the style of .is-current has it).
-						<ColorIndicator colorValue="" className="is-current" style={ { '--evcert-fill': shown === 'none' ? '#fff' : shown, '--evcert-ink': shown === 'none' ? '#949494' : inkOn( shown ) } as React.CSSProperties } />
-					) }
+					{ /* No fill is the current color: a plain empty circle, not that color. */ }
+					<ColorIndicator colorValue={ shown === 'none' ? undefined : shown } />
 				</Button>
 			) }
-			renderContent={ () => (
-				<div className="evcert-color-popover">
-					{ colorGroups( design ).map( ( group ) => (
-						<div key={ group.name }>
-							<p className="evcert-color-popover__label">{ __( 'Elements', 'events-certificates' ) }</p>
-							<ColorPalette
-								colors={ group.keys.map( ( key ) => palette.find( ( c ) => c.slug === key ) as { slug: string; name: string; color: string } ) }
-								value={ variable ? group.keys.map( ( key ) => palette.find( ( c ) => c.slug === key ) ).find( ( c ) => `$${ c?.slug }` === value )?.color : undefined }
-								disableCustomColors
-								clearable={ false }
-								// By position, not by value: two entries can share one.
-								onChange={ ( picked, index ) => {
-									const key = index === undefined ? undefined : group.keys[ index ];
-									onChange( key ? `$${ key }` : picked || undefined );
-								} }
-							/>
-						</div>
-					) ) }
-					<p className="evcert-color-popover__label">{ __( 'Custom', 'events-certificates' ) }</p>
-					<ColorPalette value={ value && ! variable ? value : undefined } clearable={ false } onChange={ ( c ) => onChange( c || undefined ) } />
-					{ /* One Clear for any color (theme or custom): no fill means the current color. */ }
-					<div className="evcert-color-popover__footer">
-						<Button variant="tertiary" size="small" disabled={ ! value } accessibleWhenDisabled onClick={ () => onChange( undefined ) }>
-							{ __( 'Clear', 'events-certificates' ) }
-						</Button>
-					</div>
-				</div>
-			) }
+			renderContent={ () => <ColorChoices theme value={ value } clearTo="" design={ design } mode={ mode } onChange={ ( fill ) => onChange( fill || undefined ) } /> }
 		/>
 	);
 }
@@ -183,7 +147,7 @@ export function PathList( { paths, current, design, mode, onPaths, onImport, onF
 				{ paths.map( ( p, i ) => (
 					<Item key={ `${ version }-${ i }` } className="evcert-svg-path" onMouseEnter={ () => onFocus?.( i ) } onMouseLeave={ () => onFocus?.( null ) }>
 						<HStack spacing={ 2 }>
-							<FillSwatch value={ p.fill } current={ current } design={ design } mode={ mode } onChange={ ( fill ) => setPath( i, { fill } ) } />
+							<FillSwatch value={ p.fill } design={ design } mode={ mode } onChange={ ( fill ) => setPath( i, { fill } ) } />
 							<Dropdown
 								className="evcert-svg-path__link"
 								popoverProps={ { placement, offset: placement === 'left-start' ? 36 : 8, shift: true } }

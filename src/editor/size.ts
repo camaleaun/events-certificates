@@ -2,7 +2,7 @@
  * The size typed in the SVG editor's Size row, as the patch of the element it is for: the new width and height, and its layout (a layout
  * keeps the sizes as lengths) made again for the box it has now. Nothing when there is no size or it is the one the element already has.
  */
-import { layoutFrom, lockedSide, type Layout, type PageBox } from '@camaleaun/draw';
+import { layoutFrom, lockedSide, parseLen, UNITS, type Axis, type AxisMode, type Layout, type PageBox } from '@camaleaun/draw';
 
 type Sized = { x: number; y: number; w: number; h: number; layout?: Layout; lock?: number };
 
@@ -51,3 +51,86 @@ export function resizeSide( el: Sized, side: 'w' | 'h', value: number, page: Pag
 	}
 	return sizePatch( el, round2( w ), round2( h ), page );
 }
+
+export type Unit = 'pt' | 'px' | 'mm' | 'cm' | 'in' | '%';
+
+/** The unit a length is written in (pt when it has none, or is a calc()). */
+export function unitOf( length?: string ): Unit {
+	const m = length && ! /calc/i.test( length ) ? /(pt|px|mm|cm|in|%)\s*$/i.exec( length ) : null;
+	return ( m ? m[ 1 ].toLowerCase() : 'pt' ) as Unit;
+}
+
+/** A length in points written in a unit: two decimals (three in inches); % is of `total`. The same as lenLike() of camaleaun/draw. */
+export function lengthIn( pt: number, unit: Unit, total = 0, digits?: number ): string {
+	const round = ( n: number, d: number ) => Math.round( n * 10 ** d ) / 10 ** d;
+	if ( unit === '%' ) {
+		return `${ round( total ? ( pt / total ) * 100 : 0, digits ?? 2 ) }%`;
+	}
+	return `${ round( pt / ( UNITS[ unit ] || 1 ), digits ?? ( unit === 'in' ? 3 : 2 ) ) }${ unit }`;
+}
+
+/**
+ * An axis aligned to the start, the center, the end or the whole of its box: the offsets are zero ("0 left", "0 center", "0 right", "0 and 0
+ * fill") in the unit the axis was written in, and the element keeps its size (not the place it had). `total` is the length of the box on that axis.
+ */
+export function alignAxis( mode: AxisMode, sizePt: number, previous: Axis | undefined, total: number ): Axis {
+	const unit = unitOf( previous?.size ?? previous?.start ?? previous?.end );
+	const zero = `0${ unit }`;
+	if ( mode === 'stretch' ) {
+		return { mode, start: zero, end: zero };
+	}
+	const size = lengthIn( sizePt, unit, total );
+	return mode === 'end' ? { mode, end: zero, size } : { mode, start: zero, size };
+}
+
+/** The layout an element has, or the one that holds it where it is (anchored to the start of the page). */
+function layoutOf( el: Sized, page: PageBox ): Layout {
+	return el.layout || layoutFrom( { h: { mode: 'start' }, v: { mode: 'start' }, ref: 'page' }, { x: el.x, y: el.y, w: el.w, h: el.h }, page );
+}
+
+/** The size of an element on a side as the unit of its layout shows it: the number and the unit (pt with no layout). */
+export function sizeIn( el: Sized, side: 'w' | 'h' ): { value: number; unit: Unit } {
+	const axis = side === 'w' ? el.layout?.h : el.layout?.v;
+	const unit = unitOf( axis?.size );
+	const pt = side === 'w' ? el.w : el.h;
+	const digits = unit === 'in' ? 3 : 2;
+	return { value: Math.round( ( pt / ( unit === '%' ? 1 : UNITS[ unit ] || 1 ) ) * 10 ** digits ) / 10 ** digits, unit };
+}
+
+/**
+ * The patch of an element for a width or a height typed in its Size row with a unit ("42.5mm"): the size follows the ratio when it is kept, and
+ * the layout is made again with the size written in that unit. The same unit as the layout's, or another one: a change of unit alone (the
+ * value is the size the element has) only rewrites how the size is written.
+ */
+export function resizeSideLen( el: Sized, side: 'w' | 'h', text: string, page: PageBox ): Partial< Sized > {
+	const unit = unitOf( text );
+	const axisKey = side === 'w' ? 'h' : 'v';
+	const base = layoutOf( el, page );
+	if ( base[ axisKey ].mode === 'stretch' ) {
+		return {};
+	}
+	const pt = unit === '%' ? 0 : parseLen( text, 0 );
+	const writtenIn: Layout = { ...base, [ axisKey ]: { ...base[ axisKey ], size: `0${ unit }` } };
+	const current = side === 'w' ? el.w : el.h;
+	// A unit alone: the number is the size the element has, in that unit (rounded as it is written): the layout says it in the new unit.
+	if ( ! ( pt > 0 ) || Number.parseFloat( lengthIn( current, unit ) ) === Number.parseFloat( text ) ) {
+		return { layout: layoutFrom( writtenIn, { x: el.x, y: el.y, w: el.w, h: el.h }, page ) };
+	}
+	const patch = resizeSide( { ...el, layout: writtenIn }, side, pt, page );
+	return patch.layout || ! Object.keys( patch ).length ? patch : { ...patch, layout: layoutFrom( writtenIn, { x: el.x, y: el.y, w: patch.w ?? el.w, h: patch.h ?? el.h }, page ) };
+}
+
+/**
+ * The patch of an element for another unit of a size (the size is the same): the layout says it in that unit with more decimals than a typed
+ * length has, so the size does not drift (0.01 cm is 0.28 pt) however often the unit changes. Nothing for a size that fills.
+ */
+export function unitPatch( el: Sized, side: 'w' | 'h', unit: Unit, page: PageBox ): Partial< Sized > {
+	const key = side === 'w' ? 'h' : 'v';
+	const base = layoutOf( el, page );
+	if ( base[ key ].mode === 'stretch' ) {
+		return {};
+	}
+	const box = base.ref === 'safe' ? { w: page.w - page.safe * 2, h: page.h - page.safe * 2 } : { w: page.w, h: page.h };
+	return { layout: { ...base, [ key ]: { ...base[ key ], size: lengthIn( side === 'w' ? el.w : el.h, unit, side === 'w' ? box.w : box.h, 4 ) } } };
+}
+

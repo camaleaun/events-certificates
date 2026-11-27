@@ -18,7 +18,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Icon, page as pageIcon } from '@wordpress/icons';
 import ColorsSection from './ColorsSection';
 import { pageSize } from '@camaleaun/draw';
-import { ColorChoices, colorLabel } from './Inspector';
+import { ColorChoices, colorLabel } from './ColorChoices';
 import type { Design, Mode } from './model';
 
 const MM = 2.83465;

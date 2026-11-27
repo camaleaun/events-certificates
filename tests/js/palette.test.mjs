@@ -224,3 +224,9 @@ test( 'what a text says is escaped as text and as an attribute value: <, >, &, "
 	assert.equal( html.includes( '<' ), false );
 } );
 
+
+test( 'a fill that is a color of the Theme goes to the file and comes back, with the Elements and a literal beside it', () => {
+	// The pickers keep a color of the Theme as "$slug"; the file says it as a preset and reads it back (docs/decisions/0050, 0051).
+	assert.equal( m.color( { page: { bg: '$background' }, colors: {}, palette: [ { slug: 'white', color: '#ffffff' } ], elements: [] }, '$white', 'light' ), '#ffffff' );
+	assert.equal( m.color( { page: { bg: '$background' }, colors: {}, palette: [], elements: [] }, '', 'light' ), 'none', 'no fill is no color' );
+} );

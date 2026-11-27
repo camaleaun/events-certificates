@@ -690,11 +690,6 @@ $evcert-sidebar-width: 280px;
 .evcert-color-item__toggle.components-button {
 	width: 100%;
 }
-.evcert-color-item__value {
-	margin-left: auto;
-	color: #757575;
-	font-size: 12px;
-}
 .evcert-color-popover {
 	// As the Styles' color popover: 260px wide with 16px around (the popover itself has no padding: evcert-colors__popover-wrap).
 	box-sizing: border-box;
@@ -930,13 +925,6 @@ $evcert-sidebar-width: 280px;
 	min-width: 0;
 	height: auto;
 	flex-shrink: 0;
-}
-// The current color (a path with no fill of its own): a circle in that color, cut across by a stroke that shows on it (--evcert-ink), as
-// the "no color" of the palettes is an empty circle with a slash.
-.evcert-svg-path__swatch .component-color-indicator.is-current {
-	// The core's empty circle (a thin slash across it, -45deg) in the current color, the slash in the ink that shows on it.
-	background: linear-gradient(-45deg, transparent 48%, var(--evcert-ink, #fff) 48%, var(--evcert-ink, #fff) 52%, transparent 52%) var(--evcert-fill, #1e1e1e);
-	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
 }
 .evcert-svg-path__d {
 	flex: 1;
