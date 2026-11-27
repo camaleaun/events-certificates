@@ -38,9 +38,9 @@ export function registerBlocks( titles: Record< string, string > ) {
 	} );
 }
 
-/** Elements as blocks, front of the canvas first (the order the layers list them in). */
+/** Elements as blocks, in the order of the design: the first is the back of the canvas, the last the front (the order they were added in; the layers list them so). */
 export function toBlocks( elements: Element[] ): Instance[] {
-	return [ ...elements ].reverse().map( ( element ) => {
+	return elements.map( ( element ) => {
 		const { type, id, name, ...attributes } = element;
 		return {
 			clientId: id,
@@ -53,9 +53,9 @@ export function toBlocks( elements: Element[] ): Instance[] {
 	} );
 }
 
-/** Blocks back to elements, in the order of the design. */
+/** Blocks back to elements: the same order. */
 export function toElements( blocks: Instance[] ): Element[] {
-	return [ ...blocks ].reverse().map( ( block ) => {
+	return blocks.map( ( block ) => {
 		const type = TYPE_OF[ block.name ] || ( block.attributes.type as string );
 		const { metadata, ...attributes } = block.attributes as Record< string, unknown > & { metadata?: { name?: string } };
 		delete attributes.type;
