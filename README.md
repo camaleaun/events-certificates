@@ -117,7 +117,7 @@ Yes. The generator page is made of blocks, and the block editor works with a cla
 
 The PHP is in the plugin, readable. The editor's JavaScript in `build/`, `build-signer/` and `build-blocks/` is compiled; its source (TypeScript, in `src/` and `routes/`) is at https://github.com/wpbrasil/events-certificates. The scripts and styles in `assets/js/` and `assets/css/` come with a readable copy next to each `.min` file; their source is in `assets/es/` and `assets/scss/` in the same repository. Build it all with `npm ci && npm run build`.
 
-The libraries in `assets/third-party/` are the ones their authors publish, copied from npm by that build: jsPDF (https://github.com/parallax/jsPDF), JSZip (https://github.com/Stuk/jszip) and SheetJS (https://github.com/SheetJS/sheetjs). The PHP libraries in `includes/third-party/` are readable and come from Composer (dompdf, php-font-lib, php-svg-lib, html5-php, PHP CSS Parser, php-qrcode and php-settings-container).
+The libraries in `assets/third-party/` are the ones their authors publish, copied from npm by that build: jsPDF (https://github.com/parallax/jsPDF), JSZip (https://github.com/Stuk/jszip) and SheetJS (https://github.com/SheetJS/sheetjs). The PHP libraries in `includes/third-party/` are readable and come from Composer (dompdf, php-font-lib, php-svg-lib, html5-php, PHP CSS Parser, php-qrcode, php-settings-container and camaleaun/draw, whose TypeScript source, compiled into `build/`, is at https://github.com/camaleaun/draw).
 
 ## Credits ##
 
@@ -151,6 +151,7 @@ Sensei's certificates extension, [Sensei Certificates](https://github.com/woocom
 
 * dompdf 3.1 (LGPL-2.1), php-font-lib (LGPL-2.1-or-later), php-svg-lib (LGPL-3.0-or-later), html5-php (MIT) and PHP CSS Parser (MIT): PDF output.
 * php-qrcode and php-settings-container (MIT): QR codes.
+* camaleaun/draw 0.14 (GPL-2.0-or-later, by the plugin's author, https://github.com/camaleaun/draw): reads and writes a certificate design as block markup, in PHP (`includes/third-party/camaleaun/draw/`) and in TypeScript (compiled into `build/`).
 * IBM Plex Sans and Instrument Serif (SIL Open Font License 1.1, subsets in `fonts/`): the generator's certificate. The plugin ships no other font: the ones a template uses are installed in WordPress.
 * jsPDF 2.5.1 (MIT), JSZip 3.10.1 (MIT or GPL-3.0-or-later) and SheetJS Community Edition 0.18.5 (Apache-2.0), in `assets/third-party/`: the generator's PDF, ZIP and spreadsheet reading in the browser. They are plugin files; nothing is loaded from a CDN.
 * Lucide icons (ISC), redrawn as filled shapes, in `assets/images/tutorial-step-image/icons/`: the Generator's step by step.
