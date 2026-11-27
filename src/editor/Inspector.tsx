@@ -29,7 +29,7 @@ import { elementIcon } from './icons';
 import { naturalSize, type Picked } from './media';
 import SvgPanel from './SvgPanel';
 import { ElementSize } from './SizeRow';
-import { alignAxis } from './size';
+import { alignAxis, radiusConvert, radiusFrom, radiusNumber, radiusUnit, unitOf, type RadiusUnit } from './size';
 import { fields, tokenOnly } from './FieldText';
 import TextByLanguage from './TextByLanguage';
 import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, fieldValue, runsOf } from './model';
@@ -64,9 +64,32 @@ function fontOptions( current: string ) {
 const FONT_SIZES = [ 8, 10, 12, 14, 16, 18, 24, 32, 42 ].map( ( size ) => ( { name: `${ size } pt`, slug: String( size ), size } ) );
 const num = ( v: number ) => Math.round( v * 100 ) / 100;
 const PT = [ { value: 'pt', label: 'pt', default: 0 } ];
+/** A corner radius is in points or in percent of the shorter side. */
+const RADIUS_UNITS = [
+	{ value: 'pt', label: 'pt', step: 0.01 },
+	{ value: '%', label: '%', step: 0.1 },
+];
+const STROKE_UNITS = [ { value: 'px', label: 'px', step: 0.25 } ];
 
 export default function Inspector( { el, stored, design, mode, tab, locale, sample, onChange, onImage, onBox }: Props ) {
 	const [ linked, setLinked ] = useState( true );
+	// A corner's radius typed in a unit ("25%", "12pt"). Another unit than the corner has keeps the corner (96pt of a 120 x 80 box is 120%: 50 at most) and
+	// says it in that unit; the same unit takes the number.
+	const radii = ( ( el as { radius?: Array< number | string > } ).radius || [ 0, 0, 0, 0 ] );
+	const radiusAt = ( i: number ) => ( radii[ i ] ?? 0 ) as number | string;
+	const radiusFromText = ( i: number, text: string ): number | string => {
+		const unit = unitOf( text ) === '%' ? '%' : 'pt';
+		return unit !== radiusUnit( radiusAt( i ) ) ? radiusConvert( radiusAt( i ), unit as RadiusUnit, el.w as number, el.h as number ) : radiusFrom( parseFloat( text ) || 0, unit as RadiusUnit );
+	};
+	const setRadius = ( i: number, text: string ) => {
+		const radius = [ 0, 1, 2, 3 ].map( ( k ) => radiusAt( k ) );
+		radius[ i ] = radiusFromText( i, text );
+		onChange( { radius } as Partial< Element > );
+	};
+	const setAllRadii = ( text: string ) => {
+		const r = radiusFromText( 0, text );
+		onChange( { radius: [ r, r, r, r ] } as Partial< Element > );
+	};
 	const required = !! el.slot && REQUIRED_SLOTS.includes( el.slot );
 	const typeLabel = {
 		text: __( 'Text', 'events-certificates' ),
@@ -283,11 +306,11 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 				<ToolsPanel label={ __( 'Color', 'events-certificates' ) } resetAll={ () => {} } className="color-block-support-panel">
 					<div className="evcert-color-items">
 						{ el.type === 'text' && <ColorItem label={ __( 'Text', 'events-certificates' ) } value={ el.color } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
-						{ ( el.type === 'rect' || el.type === 'ellipse' || el.type === 'path' ) && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.fill } design={ design } mode={ mode } onChange={ ( fill ) => onChange( { fill } ) } /> }
+						{ ( el.type === 'rect' || el.type === 'ellipse' || el.type === 'path' ) && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.fill } clearTo="currentColor" design={ design } mode={ mode } onChange={ ( fill ) => onChange( { fill } ) } /> }
 						{ el.type === 'signature' && <ColorItem label={ __( 'Signature color', 'events-certificates' ) } value={ el.color || '$text' } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
 						{ /* An SVG that picks no color draws in the current color: an empty circle; Clear goes back to that. */ }
 						{ el.type === 'svg' && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.color } clearTo="" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c || undefined } as Partial< Element > ) } /> }
-						{ el.type !== 'text' && el.type !== 'svg' && el.type !== 'signature' && <ColorItem label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Stroke', 'events-certificates' ) } value={ ( el as any ).stroke } design={ design } mode={ mode } onChange={ ( stroke ) => onChange( { stroke } as Partial< Element > ) } /> }
+						{ el.type !== 'text' && el.type !== 'svg' && el.type !== 'signature' && <ColorItem label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Stroke', 'events-certificates' ) } value={ ( el as any ).stroke } clearTo={ el.type === 'line' ? '' : '#00000000' } design={ design } mode={ mode } onChange={ ( stroke ) => onChange( { stroke } as Partial< Element > ) } /> }
 					</div>
 				</ToolsPanel>
 			) }
@@ -295,7 +318,16 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 			{ tab === 'art' && ( el.type === 'rect' || el.type === 'ellipse' || el.type === 'path' || el.type === 'line' ) && (
 				<ToolsPanel label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Border', 'events-certificates' ) } resetAll={ () => onChange( { strokeWidth: 1 } as Partial< Element > ) } className="border-block-support-panel">
 					<ToolsPanelItem label={ __( 'Width', 'events-certificates' ) } hasValue={ () => true } onDeselect={ () => onChange( { strokeWidth: 1 } as Partial< Element > ) } isShownByDefault>
-						<RangeControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Width', 'events-certificates' ) } value={ ( el as any ).strokeWidth || 0 } min={ 0 } max={ 60 } step={ 0.25 } onChange={ ( v ) => onChange( { strokeWidth: v ?? 0 } as Partial< Element > ) } />
+						<div className="evcert-radius">
+							<HStack className="evcert-radius__header">
+								<span className="evcert-radius__legend">{ __( 'Width', 'events-certificates' ) }</span>
+							</HStack>
+							<HStack className="evcert-radius__linked" alignment="center">
+							{ /* The width is in px (a pixel is a point here, as in the drawing package), like the core's border width. */ }
+							<UnitControl __next40pxDefaultSize label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision units={ STROKE_UNITS } min={ 0 } value={ `${ ( el as any ).strokeWidth || 0 }px` } onChange={ ( v ) => onChange( { strokeWidth: Math.max( 0, parseFloat( v || '0' ) || 0 ) } as Partial< Element > ) } />
+							<RangeControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision withInputField={ false } value={ ( el as any ).strokeWidth || 0 } min={ 0 } max={ 60 } step={ 0.25 } onChange={ ( v ) => onChange( { strokeWidth: v ?? 0 } as Partial< Element > ) } />
+						</HStack>
+						</div>
 					</ToolsPanelItem>
 					{ el.type === 'line' && (
 						<ToolsPanelItem label={ __( 'Style', 'events-certificates' ) } hasValue={ () => ( el.dash || 'solid' ) !== 'solid' } onDeselect={ () => onChange( { dash: 'solid' } as Partial< Element > ) } isShownByDefault>
@@ -319,15 +351,12 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 											__next40pxDefaultSize
 											label={ __( 'All corners', 'events-certificates' ) }
 											hideLabelFromVision
-											units={ PT }
+											units={ RADIUS_UNITS }
 											min={ 0 }
-											value={ `${ ( el.radius || [ 0 ] )[ 0 ] || 0 }pt` }
-											onChange={ ( v ) => {
-												const n = parseFloat( v || '0' ) || 0;
-												onChange( { radius: [ n, n, n, n ] } );
-											} }
+											value={ `${ radiusNumber( ( el.radius || [ 0 ] )[ 0 ] ) }${ radiusUnit( ( el.radius || [ 0 ] )[ 0 ] ) }` }
+											onChange={ ( v ) => setAllRadii( v || '0pt' ) }
 										/>
-										<RangeControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'All corners', 'events-certificates' ) } hideLabelFromVision withInputField={ false } value={ ( el.radius || [ 0 ] )[ 0 ] || 0 } min={ 0 } max={ Math.round( Math.min( el.w, el.h ) / 2 ) } onChange={ ( v ) => onChange( { radius: [ v ?? 0, v ?? 0, v ?? 0, v ?? 0 ] } ) } />
+										<RangeControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'All corners', 'events-certificates' ) } hideLabelFromVision withInputField={ false } value={ radiusNumber( ( el.radius || [ 0 ] )[ 0 ] ) } min={ 0 } max={ radiusUnit( ( el.radius || [ 0 ] )[ 0 ] ) === '%' ? 50 : Math.round( Math.min( el.w, el.h ) / 2 ) } step={ radiusUnit( ( el.radius || [ 0 ] )[ 0 ] ) === '%' ? 1 : 0.25 } onChange={ ( n ) => setAllRadii( `${ n ?? 0 }${ radiusUnit( ( el.radius || [ 0 ] )[ 0 ] ) }` ) } />
 									</HStack>
 								) : (
 									<div className="evcert-radius__corners">
@@ -338,14 +367,10 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 													__next40pxDefaultSize
 													label={ [ __( 'Top left', 'events-certificates' ), __( 'Top right', 'events-certificates' ), __( 'Bottom right', 'events-certificates' ), __( 'Bottom left', 'events-certificates' ) ][ i ] }
 													hideLabelFromVision
-													units={ PT }
+													units={ RADIUS_UNITS }
 													min={ 0 }
-													value={ `${ ( el.radius || [ 0, 0, 0, 0 ] )[ i ] || 0 }pt` }
-													onChange={ ( v ) => {
-														const radius = [ ...( el.radius || [ 0, 0, 0, 0 ] ) ];
-														radius[ i ] = parseFloat( v || '0' ) || 0;
-														onChange( { radius } );
-													} }
+													value={ `${ radiusNumber( ( el.radius || [ 0, 0, 0, 0 ] )[ i ] ) }${ radiusUnit( ( el.radius || [ 0, 0, 0, 0 ] )[ i ] ) }` }
+													onChange={ ( v ) => setRadius( i, v || '0pt' ) }
 												/>
 											</HStack>
 										) ) }

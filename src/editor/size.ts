@@ -134,3 +134,23 @@ export function unitPatch( el: Sized, side: 'w' | 'h', unit: Unit, page: PageBox
 	return { layout: { ...base, [ key ]: { ...base[ key ], size: lengthIn( side === 'w' ? el.w : el.h, unit, side === 'w' ? box.w : box.h, 4 ) } } };
 }
 
+/** A corner radius is a number (points) or a percentage of the shorter side ("25%", 0 to 50: 50% makes a pill). */
+export type Radius = number | string;
+export type RadiusUnit = 'pt' | '%';
+
+export const radiusUnit = ( v?: Radius ): RadiusUnit => ( typeof v === 'string' && /%\s*$/.test( v ) ? '%' : 'pt' );
+export const radiusNumber = ( v?: Radius ): number => ( typeof v === 'string' ? Number.parseFloat( v ) || 0 : v || 0 );
+
+/** A radius for a number typed in a unit: a number in points, a string with % (kept between 0 and 50). */
+export function radiusFrom( n: number, unit: RadiusUnit ): Radius {
+	return unit === '%' ? `${ Math.max( 0, Math.min( n, 50 ) ) }%` : Math.max( 0, n );
+}
+
+/** The same radius in the other unit: the corner is the same (a % is of the shorter side of the box). */
+export function radiusConvert( v: Radius | undefined, to: RadiusUnit, w: number, h: number ): Radius {
+	const side = Math.min( w, h ) || 1;
+	const pt = radiusUnit( v ) === '%' ? ( radiusNumber( v ) / 100 ) * side : radiusNumber( v );
+	const round = ( n: number ) => Math.round( n * 100 ) / 100;
+	return to === '%' ? radiusFrom( round( ( pt / side ) * 100 ), '%' ) : round( pt );
+}
+

@@ -247,6 +247,10 @@ function color( array $design, $value, $mode = 'light', $depth = 0 ) {
 	if ( '' === $value ) {
 		return 'none';
 	}
+	// currentColor is the document's text color ($text): in an image the browser or the PDF would take it for black, whatever the mode.
+	if ( 0 === strcasecmp( $value, 'currentColor' ) ) {
+		return $depth < 5 ? color( $design, '$text', $mode, $depth + 1 ) : 'none';
+	}
 	if ( '$' === $value[0] ) {
 		// One name for a color, in the Elements or in the Theme (a slug is never in both): the element's own Light and Dark values, the swatch's one
 		// value, else the built-in one.
@@ -265,6 +269,11 @@ function color( array $design, $value, $mode = 'light', $depth = 0 ) {
 				}
 			}
 		}
+	}
+
+	// A fully transparent color (#00000000) paints nothing, as no color does.
+	if ( 1 === preg_match( '/^#(?:[0-9a-f]{3}0|[0-9a-f]{6}00)$/i', $value ) ) {
+		return 'none';
 	}
 
 	// Only color values: the result goes into CSS and SVG attributes.
@@ -1870,9 +1879,16 @@ function element_html( array $el, array $design, array $values, array $options )
 			return sprintf( '<div class="evcert-t" style="%s">%s</div>', esc_attr( $style ), runs_html( $el, $values ) );
 
 		case 'rect':
-			$d   = rect_path( 0, 0, $el['w'], $el['h'], (array) ( $el['radius'] ?? array() ), (string) ( $el['corner'] ?? 'round' ) );
-			$sw  = (float) ( $el['strokeWidth'] ?? 0 );
-			$svg = sprintf(
+			// A radius is points or a percentage of the shorter side ("25%": camaleaun/draw's Svg::radius()).
+			$radius = array_map(
+				static function ( $r ) use ( $el ) {
+					return \EventsCertificate\Vendor\Camaleaun\Draw\Svg::radius( $r, (float) $el['w'], (float) $el['h'] );
+				},
+				array_slice( array_values( (array) ( $el['radius'] ?? array() ) ), 0, 4 )
+			);
+			$d      = rect_path( 0, 0, $el['w'], $el['h'], $radius, (string) ( $el['corner'] ?? 'round' ) );
+			$sw     = (float) ( $el['strokeWidth'] ?? 0 );
+			$svg    = sprintf(
 				'<svg xmlns="http://www.w3.org/2000/svg" width="%1$.2F" height="%2$.2F" viewBox="%3$.2F %3$.2F %4$.2F %5$.2F"><path d="%6$s" fill="%7$s" stroke="%8$s" stroke-width="%9$.2F"/></svg>',
 				$el['w'] + $sw,
 				$el['h'] + $sw,

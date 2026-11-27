@@ -230,3 +230,20 @@ test( 'a fill that is a color of the Theme goes to the file and comes back, with
 	assert.equal( m.color( { page: { bg: '$background' }, colors: {}, palette: [ { slug: 'white', color: '#ffffff' } ], elements: [] }, '$white', 'light' ), '#ffffff' );
 	assert.equal( m.color( { page: { bg: '$background' }, colors: {}, palette: [], elements: [] }, '', 'light' ), 'none', 'no fill is no color' );
 } );
+
+test( 'currentColor is the document text color in the mode, and a fully transparent color paints nothing', () => {
+	const design = { page: { bg: '$background' }, colors: { text: { name: 'Text', light: '#112233', dark: '#eeeeee' } }, palette: [], elements: [] };
+	assert.equal( m.color( design, 'currentColor', 'light' ), '#112233' );
+	assert.equal( m.color( design, 'CURRENTCOLOR', 'dark' ), '#eeeeee' );
+	assert.equal( m.color( { ...design, colors: {} }, 'currentColor', 'light' ), '#000000', 'no Text color: the built-in black' );
+	assert.equal( m.color( design, '#00000000', 'light' ), 'none' );
+	assert.equal( m.color( design, '#0000', 'light' ), 'none' );
+	assert.equal( m.color( design, '#ff000080', 'light' ), '#ff000080', 'half transparent is a color' );
+} );
+
+test( 'a new rectangle and ellipse fill with the current color and have no stroke', () => {
+	const rect = m.create( 'rect', { colors: {}, elements: [], page: { w: 842, h: 595, safe: 0, bleed: 0 } } );
+	assert.equal( rect.fill, 'currentColor' );
+	assert.equal( rect.stroke, '#00000000' );
+} );
+

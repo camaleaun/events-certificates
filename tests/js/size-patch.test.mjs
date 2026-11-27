@@ -88,7 +88,7 @@ test( 'the layout keeps its unit when the size is typed', () => {
 	assert.equal( patch.layout.v.size, '96pt' );
 } );
 
-const { alignAxis, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch } = sandbox.size;
+const { alignAxis, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
 
 test( 'a length says its unit, and a length in points is written in it', () => {
 	assert.deepEqual( [ '12mm', '3.5in', '10px', '5', 'calc(1pt + 1pt)', '50%' ].map( unitOf ), [ 'mm', 'in', 'px', 'pt', 'pt', '%' ] );
@@ -139,5 +139,15 @@ test( 'another unit for the same size is written with more decimals, so the size
 	assert.equal( lengthIn( 96, 'in', 0, 4 ), '1.3333in' );
 	assert.deepEqual( plain( unitPatch( { ...el, layout: { ...el.layout, h: { mode: 'stretch', start: '0pt', end: '0pt' } } }, 'w', 'mm', page ) ), {} );
 	assert.equal( plain( unitPatch( { x: 5, y: 5, w: 96, h: 96 }, 'h', 'mm', page ) ).layout.v.size, '33.8666mm', 'an element with no layout gets one' );
+} );
+
+test( 'a corner radius is points or a percentage of the shorter side, converted without moving the corner', () => {
+	assert.deepEqual( [ radiusUnit( 12 ), radiusUnit( '25%' ), radiusUnit( undefined ) ], [ 'pt', '%', 'pt' ] );
+	assert.deepEqual( [ radiusNumber( 12 ), radiusNumber( '25%' ), radiusNumber( undefined ) ], [ 12, 25, 0 ] );
+	assert.equal( radiusFrom( 80, '%' ), '50%', 'no more than 50%' );
+	assert.equal( radiusFrom( 12, 'pt' ), 12 );
+	assert.equal( radiusConvert( 20, '%', 100, 40 ), '50%' );
+	assert.equal( radiusConvert( '25%', 'pt', 100, 40 ), 10 );
+	assert.equal( radiusConvert( 60, '%', 100, 40 ), '50%', 'a corner larger than half the side is the largest there is' );
 } );
 

@@ -201,4 +201,29 @@ class PaletteTest extends Test_Case {
 		);
 		$this->assertSame( array(), Render\clean_palette( array() ) );
 	}
+
+	/**
+	 * The current color is the document's text color in the mode (an image would take currentColor for black), and a fully transparent color paints nothing.
+	 */
+	public function test_current_color_is_the_text_color() {
+		$design = array(
+			'page'     => array( 'bg' => '$background' ),
+			'colors'   => array(
+				'text' => array(
+					'name'  => 'Text',
+					'light' => '#112233',
+					'dark'  => '#eeeeee',
+				),
+			),
+			'palette'  => array(),
+			'elements' => array(),
+		);
+
+		$this->assertSame( '#112233', Render\color( $design, 'currentColor' ) );
+		$this->assertSame( '#eeeeee', Render\color( $design, 'CURRENTCOLOR', 'dark' ) );
+		$this->assertSame( '#000000', Render\color( array( 'colors' => array() ), 'currentColor' ), 'No Text color: the built-in one.' );
+		$this->assertSame( 'none', Render\color( $design, '#00000000' ) );
+		$this->assertSame( 'none', Render\color( $design, '#0000' ) );
+		$this->assertSame( '#ff000080', Render\color( $design, '#ff000080' ) );
+	}
 }

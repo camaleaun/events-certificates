@@ -99,7 +99,7 @@ export type TextEl = Base & {
 	fit?: boolean;
 	min?: number;
 };
-export type RectEl = Base & { type: 'rect'; fill?: string; stroke?: string; strokeWidth?: number; radius?: number[]; corner?: CornerShape };
+export type RectEl = Base & { type: 'rect'; fill?: string; stroke?: string; strokeWidth?: number; radius?: Array< number | string >; corner?: CornerShape };
 /** One path of an SVG element: its outline (path data) and fill (a color or a $variable; none = the current color). */
 /** An SVG drawing kept as fields, never as markup: a viewBox size and a list of filled paths. */
 /** title: names the drawing (the SVG's <title> and the image's alt text); empty for decoration. */
@@ -262,10 +262,24 @@ export function isWhite( value: string | undefined ): boolean {
 	return /^#(f{3,4}|f{6}|f{8})$/.test( v ) || v === 'white' || v === 'rgb(255,255,255)' || v === 'rgba(255,255,255,1)';
 }
 
-/** A color value: "$name" reads the variable in the mode; anything else is literal. */
+/** A fully transparent color in hex (#00000000, #0000): it paints nothing, as no color does. */
+const CLEAR_HEX = /^#(?:[0-9a-f]{3}0|[0-9a-f]{6}00)$/i;
+
+/**
+ * A color value: "$name" reads the variable in the mode, "currentColor" is the document's text color ($text), anything else is literal; a fully
+ * transparent color (#00000000) is 'none'. The same as color() in includes/render.php.
+ */
 export function color( design: Design, value: string | undefined, mode: Mode, depth = 0 ): string {
+	const out = resolveColor( design, value, mode, depth );
+	return CLEAR_HEX.test( out ) ? 'none' : out;
+}
+
+function resolveColor( design: Design, value: string | undefined, mode: Mode, depth: number ): string {
 	if ( ! value ) {
 		return 'none';
+	}
+	if ( value.toLowerCase() === 'currentcolor' ) {
+		return depth < 5 ? color( design, '$text', mode, depth + 1 ) : 'none';
 	}
 	if ( value.startsWith( '$' ) ) {
 		// One name for a color, in the Elements or in the Theme (a slug is never in both): the element's own Light and Dark values, the swatch's one
@@ -428,9 +442,9 @@ export function create( type: Element[ 'type' ] | 'logo', design: Design ): Elem
 		case 'text':
 			return { id, type, name: 'Text', x: cx - 120, y: cy - 10, w: 240, h: 20, runs: [ { text: 'Text' } ], font: 'CertSans', weight: 400, size: 14, color: '$text', align: 'center', lh: 1.3 };
 		case 'rect':
-			return { id, type, name: 'Rectangle', x: cx - 60, y: cy - 40, w: 120, h: 80, fill: '$primary', stroke: '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ] };
+			return { id, type, name: 'Rectangle', x: cx - 60, y: cy - 40, w: 120, h: 80, fill: 'currentColor', stroke: '#00000000', strokeWidth: 1, radius: [ 0, 0, 0, 0 ] };
 		case 'ellipse':
-			return { id, type, name: 'Ellipse', x: cx - 40, y: cy - 40, w: 80, h: 80, fill: '$primary', stroke: '', strokeWidth: 1 };
+			return { id, type, name: 'Ellipse', x: cx - 40, y: cy - 40, w: 80, h: 80, fill: 'currentColor', stroke: '#00000000', strokeWidth: 1 };
 		case 'line':
 			return { id, type, name: 'Line', x1: cx - 100, y1: cy, x2: cx + 100, y2: cy, stroke: '$line', strokeWidth: 1, dash: 'solid' };
 		case 'signature':

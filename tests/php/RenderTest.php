@@ -310,4 +310,40 @@ class RenderTest extends Test_Case {
 			)
 		);
 	}
+
+	/**
+	 * A rectangle's corner radius may be a percentage of its shorter side: 50% is a pill (the same path as half the shorter side in points).
+	 */
+	public function test_a_rect_radius_may_be_a_percentage() {
+		$design                          = array(
+			'page'     => array(
+				'w'  => 200,
+				'h'  => 100,
+				'bg' => '$background',
+			),
+			'colors'   => array(),
+			'elements' => array(
+				array(
+					'id'     => 'pill',
+					'type'   => 'rect',
+					'x'      => 10,
+					'y'      => 10,
+					'w'      => 100,
+					'h'      => 40,
+					'fill'   => '#112233',
+					'radius' => array( '50%', '50%', '50%', '50%' ),
+				),
+			),
+		);
+		$percent                         = Render\artwork( $design, array(), array() );
+		$design['elements'][0]['radius'] = array( 20, 20, 20, 20 );
+		$points                          = Render\artwork( $design, array(), array() );
+
+		$this->assertSame( $points, $percent, '50% of the shorter side (40) is 20 points.' );
+		$design['elements'][0]['radius'] = array( '25%', '25%', '25%', '25%' );
+		$quarter                         = Render\artwork( $design, array(), array() );
+		$design['elements'][0]['radius'] = array( 10, 10, 10, 10 );
+		$this->assertSame( Render\artwork( $design, array(), array() ), $quarter, '25% of the shorter side (40) is 10 points.' );
+		$this->assertNotSame( $points, $quarter );
+	}
 }

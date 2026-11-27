@@ -37,6 +37,12 @@ function strings(): Record< string, string > {
 		'Signer name': __( 'Signer name', 'events-certificates' ),
 		'Signer role': __( 'Signer role', 'events-certificates' ),
 		Text: __( 'Text', 'events-certificates' ),
+		// What a new element is called (create() in model.ts).
+		Rectangle: __( 'Rectangle', 'events-certificates' ),
+		Ellipse: __( 'Ellipse', 'events-certificates' ),
+		Line: __( 'Line', 'events-certificates' ),
+		Image: __( 'Image', 'events-certificates' ),
+		SVG: __( 'SVG', 'events-certificates' ),
 		'Took part': __( 'Took part', 'events-certificates' ),
 		Verification: __( 'Verification', 'events-certificates' ),
 		Title: __( 'Title', 'events-certificates' ),

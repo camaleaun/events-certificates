@@ -71,6 +71,12 @@ export function colorLabel( design: Design, value?: string ): string {
 	const key = value?.startsWith( '$' ) ? value.slice( 1 ) : '';
 	const variable = key ? design.colors[ key ] : null;
 	const swatch = key && ! variable ? ( design.palette || [] ).find( ( s ) => s.slug === key ) : null;
+	if ( value && /^#(?:[0-9a-f]{3}0|[0-9a-f]{6}00)$/i.test( value ) ) {
+		return __( 'Transparent', 'events-certificates' );
+	}
+	if ( value?.toLowerCase() === 'currentcolor' ) {
+		return __( 'Current color', 'events-certificates' );
+	}
 	return variable ? stockName( variable.name ) : swatch ? stockName( swatchName( swatch ) ) : key === 'background' ? __( 'Transparent', 'events-certificates' ) : key ? __( 'Default', 'events-certificates' ) : value || __( 'None', 'events-certificates' );
 }
 
@@ -92,7 +98,8 @@ export function ColorItem( { label, value, design, mode, onChange, clearTo = '',
 					showTooltip
 				>
 					<HStack justify="flex-start">
-						<ColorIndicator colorValue={ shown === 'none' ? undefined : shown } />
+						{ /* No color, a transparent one and the current color are the plain empty circle. */ }
+						<ColorIndicator colorValue={ shown === 'none' || value?.toLowerCase() === 'currentcolor' ? undefined : shown } />
 						<span className="evcert-color-item__name">{ label }</span>
 					</HStack>
 				</Button>
