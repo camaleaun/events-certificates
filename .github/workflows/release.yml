@@ -90,3 +90,25 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" "$zip_file" --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md" ${flags[@]+"${flags[@]}"}
           fi
+
+      # WordPress Playground fetches the blueprint's zip from the browser, and a release asset has no CORS headers (github.com redirects to
+      # release-assets.githubusercontent.com, which sends none), while a file of a branch on raw.githubusercontent.com has them. So the zip of a
+      # final release is copied, as it is, to the `playground` branch (a README and the zip, one commit each time, nothing else): the blueprint
+      # (.wordpress-org/blueprints/blueprint.json) installs it from there, and the demo never runs an older build than the release.
+      - name: The release zip for the Playground demo
+        if: ${{ !contains(github.ref_name, '-') }}
+        run: |
+          zip_file="$(ls "$RUNNER_TEMP"/release/*.zip)"
+          dir="$RUNNER_TEMP/playground"
+          mkdir -p "$dir"
+          git fetch origin playground
+          git show origin/playground:README.md > "$dir/README.md"
+          cp "$zip_file" "$dir/events-certificates.zip"
+          cd "$dir"
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md events-certificates.zip
+          git commit -q -m "Playground build of $GITHUB_REF_NAME"
+          git push --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/playground
+
