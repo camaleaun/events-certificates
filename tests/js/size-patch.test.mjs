@@ -98,7 +98,7 @@ test( 'the layout keeps its unit when the size is typed', () => {
 	assert.equal( patch.layout.v.size, '96pt' );
 } );
 
-const { alignAxis, anchorAxis, axisAt, fontSizePt, fontSizeText, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
+const { alignAxis, anchorAxis, axisAt, decimalSeparator, localizedNumbers, fontSizePt, fontSizeText, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
 
 test( 'a length says its unit, and a length in points is written in it', () => {
 	assert.deepEqual( [ '12mm', '3.5in', '10px', '5', 'calc(1pt + 1pt)', '50%' ].map( unitOf ), [ 'mm', 'in', 'px', 'pt', 'pt', '%' ] );
@@ -285,4 +285,17 @@ test( 'a font size is shown in its unit with up to three decimals and no zeros a
 	assert.equal( fontSizeText( 12.472, 'mm' ), '4.4mm' );
 	assert.equal( fontSizeText( 72, 'in' ), '1in' );
 	assert.equal( fontSizeText( 12.5, 'px' ), '12.5px' );
+} );
+
+test( 'a length is shown with the decimal separator of the language: a comma in pt-BR, a dot in English', () => {
+	assert.equal( decimalSeparator( 'pt-BR' ), ',' );
+	assert.equal( decimalSeparator( 'en-US' ), '.' );
+	assert.equal( decimalSeparator( 'de' ), ',' );
+	assert.equal( decimalSeparator( 'not a language' ), '.', 'an unknown language is English' );
+	assert.equal( localizedNumbers( '8.47mm', 'pt-BR' ), '8,47mm' );
+	assert.equal( localizedNumbers( '8.47mm', 'en-US' ), '8.47mm' );
+	assert.equal( localizedNumbers( '1.25in', 'es-ES' ), '1,25in' );
+	assert.equal( localizedNumbers( '297mm', 'pt-BR' ), '297mm', 'a whole number has none' );
+	assert.equal( localizedNumbers( '3.5.2 x', 'pt-BR' ), '3,5,2 x', 'only digits around a dot are a decimal' );
+	assert.equal( localizedNumbers( 'A4. Landscape', 'pt-BR' ), 'A4. Landscape', 'a sentence is left as it is' );
 } );

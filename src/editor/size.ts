@@ -114,6 +114,21 @@ export function alignAxis( side: 'start' | 'center' | 'end', sizePt: number, pre
 	return axisAt( mode, pos, sizePt, previous, origin, total );
 }
 
+/** The decimal separator of a language ("," for pt-BR, "." for English); English when the language is not known. */
+export function decimalSeparator( locale: string ): string {
+	try {
+		return new Intl.NumberFormat( locale ).formatToParts( 1.1 ).find( ( part ) => part.type === 'decimal' )?.value ?? '.';
+	} catch {
+		return '.';
+	}
+}
+
+/** A text with its decimal numbers in the separator of the language ("8.47mm" is "8,47mm" in pt-BR): for what is shown, never for what is stored. */
+export function localizedNumbers( text: string, locale: string ): string {
+	const separator = decimalSeparator( locale );
+	return separator === '.' ? text : text.replace( /(\d)\.(?=\d)/g, `$1${ separator }` );
+}
+
 /** The units a font size may be typed in (the unit of the field; px is the point). */
 export const FONT_SIZE_UNITS = [ 'pt', 'px', 'mm', 'cm', 'in' ] as const;
 

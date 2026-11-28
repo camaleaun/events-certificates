@@ -21,7 +21,7 @@ import ColorsSection from './ColorsSection';
 import { pageSize } from '@camaleaun/draw';
 import { ColorChoices, colorLabel } from './ColorChoices';
 import { SIZE_UNITS } from './SizeRow';
-import { lengthIn, unitOf } from './size';
+import { lengthIn, localizedNumbers, unitOf } from './size';
 import type { LengthUnit } from './model';
 import type { Design, Mode } from './model';
 
@@ -106,6 +106,9 @@ function Row( { label, children }: { label: string; children: React.ReactNode } 
 		</HStack>
 	);
 }
+
+/** A length as the row shows it: in its unit, with the decimal separator of the admin's language ("8,47mm" in pt-BR). What is stored keeps the dot. */
+const shownLength = ( pt: number, unit: Parameters< typeof lengthIn >[ 1 ] ) => localizedNumbers( lengthIn( pt, unit ), document.documentElement.lang || 'en' );
 
 /** A row whose value is a tertiary button opening a dropdown, like PostStatus/PostSchedule. */
 /** A row with a label and a value that opens a popover; `plain` leaves the popover's padding and width to what it shows (a color picker is 260px with its own 16px). */
@@ -207,14 +210,14 @@ export default function DesignPanel( { design, mode, title, status, roles, roleL
 						</>
 					) }
 				</DropdownRow>
-				<DropdownRow label={ __( 'Safe margin', 'events-certificates' ) } value={ lengthIn( page.safe, page.safeUnit || 'mm' ) }>
+				<DropdownRow label={ __( 'Safe margin', 'events-certificates' ) } value={ shownLength( page.safe, page.safeUnit || 'mm' ) }>
 					{ () => <Margin label={ __( 'Safe margin', 'events-certificates' ) } pt={ page.safe } unit={ page.safeUnit || 'mm' } onChange={ ( safe, safeUnit ) => setPage( { safe, safeUnit } ) } /> }
 				</DropdownRow>
 				{ /* The page is not an element: its color is chosen here, from the Theme or the Elements (the Background by default). */ }
 				<DropdownRow plain label={ __( 'Background', 'events-certificates' ) } value={ colorLabel( design, page.bg as string ) }>
 					{ () => <ColorChoices theme value={ typeof page.bg === 'string' ? page.bg : '$background' } clearTo="$background" design={ design } mode={ mode } onChange={ ( bg ) => setPage( { bg } ) } /> }
 				</DropdownRow>
-				<DropdownRow label={ __( 'Bleed', 'events-certificates' ) } value={ lengthIn( page.bleed, page.bleedUnit || 'mm' ) }>
+				<DropdownRow label={ __( 'Bleed', 'events-certificates' ) } value={ shownLength( page.bleed, page.bleedUnit || 'mm' ) }>
 					{ () => <Margin label={ __( 'Bleed', 'events-certificates' ) } pt={ page.bleed } unit={ page.bleedUnit || 'mm' } onChange={ ( bleed, bleedUnit ) => setPage( { bleed, bleedUnit } ) } /> }
 				</DropdownRow>
 			</div>
