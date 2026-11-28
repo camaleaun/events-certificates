@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T15:37:57+00:00\n"
+"POT-Creation-Date: 2026-11-28T15:56:10+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: events-certificates\n"
@@ -409,7 +409,7 @@ msgid "Edit certificate"
 msgstr ""
 
 #: includes/admin-app.php:230
-#: includes/admin-app.php:263
+#: includes/admin-app.php:264
 #: includes/admin-settings.php:546
 msgid "City, Country"
 msgstr ""
@@ -444,7 +444,7 @@ msgstr ""
 #. translators: %s: number of hours, e.g. "1 hour" or "8 hours".
 #: includes/admin-app.php:247
 #: includes/admin-app.php:249
-#: includes/admin-app.php:266
+#: includes/admin-app.php:267
 #: includes/render.php:1518
 #, php-format
 msgid "%s hour"
@@ -452,36 +452,36 @@ msgid_plural "%s hours"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin-app.php:250
-#: includes/designs.php:61
-#: includes/events-admin.php:1378
-msgid "Speaker"
+#: includes/admin-app.php:251
+#: includes/class-list-table.php:432
+#: includes/designs.php:60
+msgid "Attendee"
 msgstr ""
 
-#: includes/admin-app.php:251
-#: includes/admin-app.php:255
+#: includes/admin-app.php:252
 #: includes/admin-app.php:256
+#: includes/admin-app.php:257
 #: includes/preview.php:184
 msgid "Building accessible blocks"
 msgstr ""
 
-#: includes/admin-app.php:253
-#: includes/admin-app.php:256
-#: includes/admin-app.php:264
+#: includes/admin-app.php:254
+#: includes/admin-app.php:257
+#: includes/admin-app.php:265
 #: includes/preview.php:183
 #: includes/preview.php:184
 msgid "Conference"
 msgstr ""
 
 #. translators: 1: person (name and document), 2: event, 3: place, 4: days, 5: workload.
-#: includes/admin-app.php:260
+#: includes/admin-app.php:261
 #: includes/render.php:1008
 #: includes/render.php:1179
 #, php-format
 msgid "We declare that %1$s took part in %2$s, held in %3$s, on %4$s, with a self-declared workload of %5$s, in the activities below."
 msgstr ""
 
-#: includes/admin-app.php:270
+#: includes/admin-app.php:271
 #: build-signer/index.js:981
 msgid "Event Coordinator"
 msgstr ""
@@ -502,9 +502,9 @@ msgstr ""
 #: build/routes/editor/content.js:2563
 #: build/routes/editor/content.js:3371
 #: build/routes/editor/content.js:4267
-#: build/routes/editor/content.js:5372
-#: build/routes/editor/content.js:5529
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5380
+#: build/routes/editor/content.js:5537
+#: build/routes/editor/content.js:7228
 msgid "Verification"
 msgstr ""
 
@@ -884,7 +884,7 @@ msgid "Printed certificates would no longer be verifiable. Leave it off unless y
 msgstr ""
 
 #: includes/admin-settings.php:872
-#: build/routes/editor/content.js:7889
+#: build/routes/editor/content.js:7897
 msgid "Declaration"
 msgstr ""
 
@@ -899,9 +899,9 @@ msgstr ""
 #: includes/generator.php:488
 #: build-blocks/blocks.js:165
 #: build-blocks/blocks.js:181
-#: build/routes/editor/content.js:5387
-#: build/routes/editor/content.js:7892
-#: build/routes/editor/content.js:8057
+#: build/routes/editor/content.js:5395
+#: build/routes/editor/content.js:7900
+#: build/routes/editor/content.js:8065
 msgid "Settings"
 msgstr ""
 
@@ -1043,8 +1043,8 @@ msgstr ""
 #: includes/events-admin.php:1114
 #: includes/events-admin.php:1121
 #: includes/events-admin.php:1467
-#: build/routes/editor/content.js:7829
-#: build/routes/editor/content.js:7905
+#: build/routes/editor/content.js:7837
+#: build/routes/editor/content.js:7913
 msgid "Save"
 msgstr ""
 
@@ -1064,8 +1064,8 @@ msgstr ""
 #: includes/bundle-admin.php:132
 #: includes/bundle-admin.php:217
 #: includes/restrictions.php:34
-#: build/routes/editor/content.js:7846
-#: build/routes/editor/content.js:7912
+#: build/routes/editor/content.js:7854
+#: build/routes/editor/content.js:7920
 msgid "Export"
 msgstr ""
 
@@ -1325,7 +1325,7 @@ msgstr ""
 
 #: includes/bundle-admin.php:567
 #: includes/bundle-admin.php:629
-#: build/routes/editor/content.js:4429
+#: build/routes/editor/content.js:4437
 msgid "Choose another file"
 msgstr ""
 
@@ -1620,9 +1620,9 @@ msgstr ""
 #: includes/class-people-list-table.php:320
 #: includes/class-templates-list-table.php:67
 #: includes/class-templates-list-table.php:194
-#: build/routes/editor/content.js:7849
-#: build/routes/editor/content.js:7920
-#: build/routes/editor/content.js:8178
+#: build/routes/editor/content.js:7857
+#: build/routes/editor/content.js:7928
+#: build/routes/editor/content.js:8186
 msgid "Restore"
 msgstr ""
 
@@ -1863,7 +1863,7 @@ msgstr ""
 #: includes/class-list-table.php:348
 #: includes/class-people-list-table.php:410
 #: includes/mine.php:601
-#: build/routes/editor/content.js:5907
+#: build/routes/editor/content.js:5915
 msgid "View"
 msgstr ""
 
@@ -1882,11 +1882,6 @@ msgstr ""
 #: includes/class-list-table.php:403
 #, php-format
 msgid "Replaced by %s"
-msgstr ""
-
-#: includes/class-list-table.php:432
-#: includes/designs.php:60
-msgid "Attendee"
 msgstr ""
 
 #: includes/class-list-table.php:437
@@ -2020,8 +2015,8 @@ msgstr ""
 #: build-blocks/settings-signature.js:680
 #: build-signer/index.js:724
 #: build/routes/editor/content.js:4215
-#: build/routes/editor/content.js:4688
-#: build/routes/editor/content.js:6647
+#: build/routes/editor/content.js:4696
+#: build/routes/editor/content.js:6655
 msgid "Duplicate"
 msgstr ""
 
@@ -2038,7 +2033,7 @@ msgstr ""
 #: build-blocks/screen.js:1297
 #: build-blocks/settings-signature.js:664
 #: build-signer/index.js:708
-#: build/routes/editor/content.js:4672
+#: build/routes/editor/content.js:4680
 msgid "Move up"
 msgstr ""
 
@@ -2047,7 +2042,7 @@ msgstr ""
 #: build-blocks/screen.js:1298
 #: build-blocks/settings-signature.js:665
 #: build-signer/index.js:709
-#: build/routes/editor/content.js:4673
+#: build/routes/editor/content.js:4681
 msgid "Move down"
 msgstr ""
 
@@ -2210,9 +2205,9 @@ msgstr ""
 #: build-blocks/settings-signature.js:972
 #: build-blocks/settings-signature.js:1220
 #: build-signer/index.js:882
-#: build/routes/editor/content.js:4441
-#: build/routes/editor/content.js:6105
-#: build/routes/editor/content.js:8179
+#: build/routes/editor/content.js:4449
+#: build/routes/editor/content.js:6113
+#: build/routes/editor/content.js:8187
 msgid "Cancel"
 msgstr ""
 
@@ -2227,9 +2222,9 @@ msgstr ""
 #: build/routes/editor/content.js:3362
 #: build/routes/editor/content.js:3367
 #: build/routes/editor/content.js:3554
-#: build/routes/editor/content.js:7881
-#: build/routes/editor/content.js:8059
-#: build/routes/editor/content.js:8146
+#: build/routes/editor/content.js:7889
+#: build/routes/editor/content.js:8067
+#: build/routes/editor/content.js:8154
 msgid "Certificate"
 msgstr ""
 
@@ -2474,6 +2469,11 @@ msgstr ""
 msgid "That CSV has no rows: the first row is the column names, then one row for each."
 msgstr ""
 
+#: includes/designs.php:61
+#: includes/events-admin.php:1378
+msgid "Speaker"
+msgstr ""
+
 #: includes/designs.php:62
 msgid "Organizer"
 msgstr ""
@@ -2497,28 +2497,28 @@ msgstr ""
 msgid "New template"
 msgstr ""
 
-#: includes/designs.php:579
+#: includes/designs.php:594
 #: includes/templates.php:68
 #: includes/templates.php:102
 #: includes/templates.php:299
 msgid "Certificate templates"
 msgstr ""
 
-#: includes/designs.php:580
+#: includes/designs.php:595
 msgid "Certificate template"
 msgstr ""
 
-#: includes/designs.php:663
-#: includes/designs.php:696
-#: includes/designs.php:722
-#: includes/designs.php:753
+#: includes/designs.php:678
+#: includes/designs.php:711
+#: includes/designs.php:737
+#: includes/designs.php:768
 #: includes/tools.php:96
 msgid "Meetup WordPress"
 msgstr ""
 
-#: includes/designs.php:683
-#: includes/designs.php:722
-#: includes/designs.php:752
+#: includes/designs.php:698
+#: includes/designs.php:737
+#: includes/designs.php:767
 #: includes/tools.php:96
 msgid "Basic"
 msgstr ""
@@ -2858,8 +2858,8 @@ msgstr ""
 #: build/routes/editor/content.js:1717
 #: build/routes/editor/content.js:2549
 #: build/routes/editor/content.js:4266
-#: build/routes/editor/content.js:5370
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5378
+#: build/routes/editor/content.js:7228
 msgid "Signature"
 msgstr ""
 
@@ -3232,8 +3232,8 @@ msgstr ""
 #: build-blocks/settings-signature.js:781
 #: build-signer/index.js:752
 #: build-signer/index.js:825
-#: build/routes/editor/content.js:5975
-#: build/routes/editor/content.js:6048
+#: build/routes/editor/content.js:5983
+#: build/routes/editor/content.js:6056
 msgid "Preview"
 msgstr ""
 
@@ -3834,8 +3834,8 @@ msgstr ""
 #: build/routes/editor/content.js:2538
 #: build/routes/editor/content.js:3556
 #: build/routes/editor/content.js:4265
-#: build/routes/editor/content.js:5362
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5370
+#: build/routes/editor/content.js:7228
 msgid "Date of emission"
 msgstr ""
 
@@ -4264,7 +4264,7 @@ msgstr ""
 
 #: includes/tutorial-step-image.php:72
 #: build/routes/editor/content.js:4207
-#: build/routes/editor/content.js:6639
+#: build/routes/editor/content.js:6647
 msgid "Copy"
 msgstr ""
 
@@ -4898,7 +4898,7 @@ msgstr ""
 #: build-blocks/screen.js:903
 #: build-blocks/settings-signature.js:248
 #: build-signer/index.js:538
-#: build/routes/editor/content.js:4529
+#: build/routes/editor/content.js:4537
 msgid "That is not SVG code: it should start with <svg>."
 msgstr ""
 
@@ -4906,7 +4906,7 @@ msgstr ""
 #: build-blocks/screen.js:905
 #: build-blocks/settings-signature.js:250
 #: build-signer/index.js:540
-#: build/routes/editor/content.js:4531
+#: build/routes/editor/content.js:4539
 msgid "That SVG has parts that are not allowed (a script, an event handler, a DOCTYPE or an entity)."
 msgstr ""
 
@@ -4914,7 +4914,7 @@ msgstr ""
 #: build-blocks/screen.js:907
 #: build-blocks/settings-signature.js:252
 #: build-signer/index.js:542
-#: build/routes/editor/content.js:4533
+#: build/routes/editor/content.js:4541
 msgid "That SVG is too big."
 msgstr ""
 
@@ -4922,7 +4922,7 @@ msgstr ""
 #: build-blocks/screen.js:909
 #: build-blocks/settings-signature.js:254
 #: build-signer/index.js:544
-#: build/routes/editor/content.js:4535
+#: build/routes/editor/content.js:4543
 msgid "That SVG has no paths: only its <path> elements are read, so shapes and text must be converted to paths first."
 msgstr ""
 
@@ -4931,7 +4931,7 @@ msgstr ""
 #: build-blocks/screen.js:917
 #: build-blocks/settings-signature.js:262
 #: build-signer/index.js:552
-#: build/routes/editor/content.js:4543
+#: build/routes/editor/content.js:4551
 #, js-format
 msgid "%d path was left out: it is too long, or not made of path commands."
 msgid_plural "%d paths were left out: they are too long, or not made of path commands."
@@ -4959,7 +4959,7 @@ msgstr ""
 #: build-blocks/settings-signature.js:347
 #: build-signer/index.js:318
 #: build/routes/editor/content.js:2533
-#: build/routes/editor/content.js:5371
+#: build/routes/editor/content.js:5379
 msgid "Authenticity"
 msgstr ""
 
@@ -5074,10 +5074,10 @@ msgstr ""
 #: build-signer/index.js:916
 #: build/routes/editor/content.js:2554
 #: build/routes/editor/content.js:4257
-#: build/routes/editor/content.js:5362
-#: build/routes/editor/content.js:5555
-#: build/routes/editor/content.js:7220
-#: build/routes/editor/content.js:8021
+#: build/routes/editor/content.js:5370
+#: build/routes/editor/content.js:5563
+#: build/routes/editor/content.js:7228
+#: build/routes/editor/content.js:8029
 msgid "Text"
 msgstr ""
 
@@ -5087,8 +5087,8 @@ msgstr ""
 #: build-signer/index.js:341
 #: build/routes/editor/content.js:2556
 #: build/routes/editor/content.js:4259
-#: build/routes/editor/content.js:5364
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5372
+#: build/routes/editor/content.js:7228
 msgid "Rectangle"
 msgstr ""
 
@@ -5098,8 +5098,8 @@ msgstr ""
 #: build-signer/index.js:342
 #: build/routes/editor/content.js:2557
 #: build/routes/editor/content.js:4260
-#: build/routes/editor/content.js:5365
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5373
+#: build/routes/editor/content.js:7228
 msgid "Ellipse"
 msgstr ""
 
@@ -5109,10 +5109,10 @@ msgstr ""
 #: build-signer/index.js:343
 #: build/routes/editor/content.js:2558
 #: build/routes/editor/content.js:4258
-#: build/routes/editor/content.js:5363
-#: build/routes/editor/content.js:5562
-#: build/routes/editor/content.js:5571
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5371
+#: build/routes/editor/content.js:5570
+#: build/routes/editor/content.js:5579
+#: build/routes/editor/content.js:7228
 msgid "Line"
 msgstr ""
 
@@ -5123,8 +5123,8 @@ msgstr ""
 #: build/routes/editor/content.js:2559
 #: build/routes/editor/content.js:4093
 #: build/routes/editor/content.js:4262
-#: build/routes/editor/content.js:5368
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5376
+#: build/routes/editor/content.js:7228
 msgid "Image"
 msgstr ""
 
@@ -5137,8 +5137,8 @@ msgstr ""
 #: build-signer/index.js:345
 #: build/routes/editor/content.js:2560
 #: build/routes/editor/content.js:4263
-#: build/routes/editor/content.js:5369
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5377
+#: build/routes/editor/content.js:7228
 msgid "SVG"
 msgstr ""
 
@@ -5149,11 +5149,11 @@ msgstr ""
 #: build/routes/editor/content.js:2561
 #: build/routes/editor/content.js:4200
 #: build/routes/editor/content.js:4261
-#: build/routes/editor/content.js:4776
-#: build/routes/editor/content.js:5366
-#: build/routes/editor/content.js:6407
-#: build/routes/editor/content.js:6667
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:4784
+#: build/routes/editor/content.js:5374
+#: build/routes/editor/content.js:6415
+#: build/routes/editor/content.js:6675
+#: build/routes/editor/content.js:7228
 msgid "Group"
 msgstr ""
 
@@ -5266,7 +5266,7 @@ msgstr ""
 #: build-blocks/settings-signature.js:444
 #: build-signer/index.js:415
 #: build/routes/editor/content.js:2976
-#: build/routes/editor/content.js:4838
+#: build/routes/editor/content.js:4846
 msgid "Custom"
 msgstr ""
 
@@ -5275,7 +5275,7 @@ msgstr ""
 #: build-blocks/settings-signature.js:446
 #: build-signer/index.js:417
 #: build/routes/editor/content.js:2978
-#: build/routes/editor/content.js:7925
+#: build/routes/editor/content.js:7933
 msgid "Clear"
 msgstr ""
 
@@ -5301,7 +5301,7 @@ msgstr ""
 #: build-signer/index.js:428
 #: build-signer/index.js:622
 #: build/routes/editor/content.js:2989
-#: build/routes/editor/content.js:4586
+#: build/routes/editor/content.js:4594
 msgid "Current color"
 msgstr ""
 
@@ -5310,7 +5310,7 @@ msgstr ""
 #: build-blocks/settings-signature.js:459
 #: build-signer/index.js:430
 #: build/routes/editor/content.js:2991
-#: build/routes/editor/content.js:5522
+#: build/routes/editor/content.js:5530
 msgid "None"
 msgstr ""
 
@@ -5320,10 +5320,10 @@ msgstr ""
 #: build-signer/index.js:491
 #: build/routes/editor/content.js:3249
 #: build/routes/editor/content.js:3404
-#: build/routes/editor/content.js:4836
-#: build/routes/editor/content.js:4868
-#: build/routes/editor/content.js:5502
-#: build/routes/editor/content.js:5549
+#: build/routes/editor/content.js:4844
+#: build/routes/editor/content.js:4876
+#: build/routes/editor/content.js:5510
+#: build/routes/editor/content.js:5557
 msgid "Size"
 msgstr ""
 
@@ -5337,16 +5337,16 @@ msgstr ""
 #: build-signer/index.js:588
 #: build-signer/index.js:989
 #: build/routes/editor/content.js:3251
-#: build/routes/editor/content.js:4508
-#: build/routes/editor/content.js:4994
-#: build/routes/editor/content.js:5572
-#: build/routes/editor/content.js:5573
-#: build/routes/editor/content.js:5575
-#: build/routes/editor/content.js:5576
-#: build/routes/editor/content.js:5651
-#: build/routes/editor/content.js:5652
-#: build/routes/editor/content.js:5653
-#: build/routes/editor/content.js:5849
+#: build/routes/editor/content.js:4516
+#: build/routes/editor/content.js:5002
+#: build/routes/editor/content.js:5580
+#: build/routes/editor/content.js:5581
+#: build/routes/editor/content.js:5583
+#: build/routes/editor/content.js:5584
+#: build/routes/editor/content.js:5659
+#: build/routes/editor/content.js:5660
+#: build/routes/editor/content.js:5661
+#: build/routes/editor/content.js:5857
 msgid "Width"
 msgstr ""
 
@@ -5360,12 +5360,12 @@ msgstr ""
 #: build-signer/index.js:589
 #: build-signer/index.js:990
 #: build/routes/editor/content.js:3252
-#: build/routes/editor/content.js:4509
-#: build/routes/editor/content.js:4995
-#: build/routes/editor/content.js:5657
-#: build/routes/editor/content.js:5658
-#: build/routes/editor/content.js:5659
-#: build/routes/editor/content.js:5850
+#: build/routes/editor/content.js:4517
+#: build/routes/editor/content.js:5003
+#: build/routes/editor/content.js:5665
+#: build/routes/editor/content.js:5666
+#: build/routes/editor/content.js:5667
+#: build/routes/editor/content.js:5858
 msgid "Height"
 msgstr ""
 
@@ -5374,7 +5374,7 @@ msgstr ""
 #: build-blocks/settings-signature.js:543
 #: build-signer/index.js:587
 #: build-signer/index.js:988
-#: build/routes/editor/content.js:4507
+#: build/routes/editor/content.js:4515
 msgid "ViewBox"
 msgstr ""
 
@@ -5383,7 +5383,7 @@ msgstr ""
 #: build-blocks/screen.js:1210
 #: build-blocks/settings-signature.js:577
 #: build-signer/index.js:621
-#: build/routes/editor/content.js:4585
+#: build/routes/editor/content.js:4593
 #, js-format
 msgid "Fill: %s"
 msgstr ""
@@ -5393,7 +5393,7 @@ msgstr ""
 #: build-blocks/screen.js:1229
 #: build-blocks/settings-signature.js:596
 #: build-signer/index.js:640
-#: build/routes/editor/content.js:4604
+#: build/routes/editor/content.js:4612
 #, js-format
 msgid "Path %d data (d)"
 msgstr ""
@@ -5402,7 +5402,7 @@ msgstr ""
 #: build-blocks/screen.js:1254
 #: build-blocks/settings-signature.js:621
 #: build-signer/index.js:665
-#: build/routes/editor/content.js:4629
+#: build/routes/editor/content.js:4637
 msgid "Only path commands and numbers, starting with M."
 msgstr ""
 
@@ -5410,7 +5410,7 @@ msgstr ""
 #: build-blocks/screen.js:1281
 #: build-blocks/settings-signature.js:648
 #: build-signer/index.js:692
-#: build/routes/editor/content.js:4656
+#: build/routes/editor/content.js:4664
 msgid "Paths"
 msgstr ""
 
@@ -5418,7 +5418,7 @@ msgstr ""
 #: build-blocks/screen.js:1282
 #: build-blocks/settings-signature.js:649
 #: build-signer/index.js:693
-#: build/routes/editor/content.js:4657
+#: build/routes/editor/content.js:4665
 msgid "Add path"
 msgstr ""
 
@@ -5426,7 +5426,7 @@ msgstr ""
 #: build-blocks/screen.js:1292
 #: build-blocks/settings-signature.js:659
 #: build-signer/index.js:703
-#: build/routes/editor/content.js:4667
+#: build/routes/editor/content.js:4675
 msgid "Add path data"
 msgstr ""
 
@@ -5434,7 +5434,7 @@ msgstr ""
 #: build-blocks/screen.js:1300
 #: build-blocks/settings-signature.js:667
 #: build-signer/index.js:711
-#: build/routes/editor/content.js:4675
+#: build/routes/editor/content.js:4683
 msgid "Path options"
 msgstr ""
 
@@ -5442,7 +5442,7 @@ msgstr ""
 #: build-blocks/screen.js:1305
 #: build-blocks/settings-signature.js:672
 #: build-signer/index.js:716
-#: build/routes/editor/content.js:4680
+#: build/routes/editor/content.js:4688
 msgid "Move to bottom (behind)"
 msgstr ""
 
@@ -5450,7 +5450,7 @@ msgstr ""
 #: build-blocks/screen.js:1309
 #: build-blocks/settings-signature.js:676
 #: build-signer/index.js:720
-#: build/routes/editor/content.js:4684
+#: build/routes/editor/content.js:4692
 msgid "Move to top (in front)"
 msgstr ""
 
@@ -5459,8 +5459,8 @@ msgstr ""
 #: build-blocks/settings-signature.js:685
 #: build-signer/index.js:729
 #: build/routes/editor/content.js:4240
-#: build/routes/editor/content.js:4693
-#: build/routes/editor/content.js:6688
+#: build/routes/editor/content.js:4701
+#: build/routes/editor/content.js:6696
 msgid "Delete"
 msgstr ""
 
@@ -5468,7 +5468,7 @@ msgstr ""
 #: build-blocks/screen.js:1357
 #: build-blocks/settings-signature.js:724
 #: build-signer/index.js:768
-#: build/routes/editor/content.js:5991
+#: build/routes/editor/content.js:5999
 msgid "The size to show it at, e.g. an icon of 24 × 24 shown at 512 × 512. Empty, it is the viewBox’s; the certificate fits it in its place with this proportion."
 msgstr ""
 
@@ -5476,7 +5476,7 @@ msgstr ""
 #: build-blocks/screen.js:1407
 #: build-blocks/settings-signature.js:774
 #: build-signer/index.js:818
-#: build/routes/editor/content.js:6041
+#: build/routes/editor/content.js:6049
 msgid "Paste another SVG"
 msgstr ""
 
@@ -5484,7 +5484,7 @@ msgstr ""
 #: build-blocks/screen.js:1420
 #: build-blocks/settings-signature.js:787
 #: build-signer/index.js:831
-#: build/routes/editor/content.js:6054
+#: build/routes/editor/content.js:6062
 msgid "SVG code"
 msgstr ""
 
@@ -5492,7 +5492,7 @@ msgstr ""
 #: build-blocks/screen.js:1421
 #: build-blocks/settings-signature.js:788
 #: build-signer/index.js:832
-#: build/routes/editor/content.js:6055
+#: build/routes/editor/content.js:6063
 msgid "Paste the code of an SVG here, or drop an .svg file on this window."
 msgstr ""
 
@@ -5500,7 +5500,7 @@ msgstr ""
 #: build-blocks/screen.js:1445
 #: build-blocks/settings-signature.js:812
 #: build-signer/index.js:856
-#: build/routes/editor/content.js:6079
+#: build/routes/editor/content.js:6087
 msgid "Drop an .svg file to read its paths"
 msgstr ""
 
@@ -5508,7 +5508,7 @@ msgstr ""
 #: build-blocks/event-pictures.js:893
 #: build-blocks/screen.js:1466
 #: build-signer/index.js:877
-#: build/routes/editor/content.js:6100
+#: build/routes/editor/content.js:6108
 #, js-format
 msgid "Edit SVG: %s"
 msgstr ""
@@ -5518,7 +5518,7 @@ msgstr ""
 #: build-blocks/settings-signature.js:1202
 #: build-signer/index.js:879
 #: build/routes/editor/content.js:4183
-#: build/routes/editor/content.js:6102
+#: build/routes/editor/content.js:6110
 msgid "Edit SVG"
 msgstr ""
 
@@ -5530,7 +5530,7 @@ msgstr ""
 #: build-blocks/settings-signature.js:1221
 #: build-signer/index.js:901
 #: build/routes/editor/content.js:4082
-#: build/routes/editor/content.js:6124
+#: build/routes/editor/content.js:6132
 msgid "Apply"
 msgstr ""
 
@@ -5550,8 +5550,8 @@ msgstr ""
 #: build-blocks/screen.js:1631
 #: build-blocks/settings-signature.js:958
 #: build/routes/editor/content.js:4274
-#: build/routes/editor/content.js:7873
-#: build/routes/editor/content.js:7947
+#: build/routes/editor/content.js:7881
+#: build/routes/editor/content.js:7955
 msgid "Close"
 msgstr ""
 
@@ -5624,19 +5624,19 @@ msgstr ""
 
 #: build-blocks/events-generator.js:127
 #: build-blocks/screen.js:2624
-#: build/routes/editor/content.js:7857
+#: build/routes/editor/content.js:7865
 msgid "Go to Events"
 msgstr ""
 
 #: build-blocks/events-generator.js:128
 #: build-blocks/screen.js:2625
-#: build/routes/editor/content.js:7856
+#: build/routes/editor/content.js:7864
 msgid "Go to Certificates"
 msgstr ""
 
 #: build-blocks/events-generator.js:129
 #: build-blocks/screen.js:2626
-#: build/routes/editor/content.js:7859
+#: build/routes/editor/content.js:7867
 msgid "Go to Settings"
 msgstr ""
 
@@ -5936,15 +5936,15 @@ msgstr ""
 
 #: build/routes/editor/content.js:3404
 #: build/routes/editor/content.js:3420
-#: build/routes/editor/content.js:5899
-#: build/routes/editor/content.js:8164
+#: build/routes/editor/content.js:5907
+#: build/routes/editor/content.js:8172
 msgid "Landscape"
 msgstr ""
 
 #: build/routes/editor/content.js:3404
 #: build/routes/editor/content.js:3421
-#: build/routes/editor/content.js:5900
-#: build/routes/editor/content.js:8164
+#: build/routes/editor/content.js:5908
+#: build/routes/editor/content.js:8172
 msgid "Portrait"
 msgstr ""
 
@@ -5953,12 +5953,12 @@ msgid "Paper"
 msgstr ""
 
 #: build/routes/editor/content.js:3419
-#: build/routes/editor/content.js:5925
+#: build/routes/editor/content.js:5933
 msgid "Orientation"
 msgstr ""
 
 #: build/routes/editor/content.js:3425
-#: build/routes/editor/content.js:5813
+#: build/routes/editor/content.js:5821
 msgid "Safe margin"
 msgstr ""
 
@@ -6139,56 +6139,56 @@ msgid "Edit text"
 msgstr ""
 
 #: build/routes/editor/content.js:4197
-#: build/routes/editor/content.js:6630
+#: build/routes/editor/content.js:6638
 msgid "Bring forward"
 msgstr ""
 
 #: build/routes/editor/content.js:4198
-#: build/routes/editor/content.js:6631
+#: build/routes/editor/content.js:6639
 msgid "Send backward"
 msgstr ""
 
 #: build/routes/editor/content.js:4200
-#: build/routes/editor/content.js:6407
+#: build/routes/editor/content.js:6415
 msgid "Ungroup"
 msgstr ""
 
 #: build/routes/editor/content.js:4201
-#: build/routes/editor/content.js:6408
-#: build/routes/editor/content.js:6671
+#: build/routes/editor/content.js:6416
+#: build/routes/editor/content.js:6679
 msgid "Unlock"
 msgstr ""
 
 #: build/routes/editor/content.js:4201
-#: build/routes/editor/content.js:6408
-#: build/routes/editor/content.js:6671
+#: build/routes/editor/content.js:6416
+#: build/routes/editor/content.js:6679
 msgid "Lock"
 msgstr ""
 
 #: build/routes/editor/content.js:4202
-#: build/routes/editor/content.js:6634
-#: build/routes/editor/content.js:7908
+#: build/routes/editor/content.js:6642
+#: build/routes/editor/content.js:7916
 msgid "Options"
 msgstr ""
 
 #: build/routes/editor/content.js:4211
-#: build/routes/editor/content.js:6643
+#: build/routes/editor/content.js:6651
 msgid "Cut"
 msgstr ""
 
 #: build/routes/editor/content.js:4219
-#: build/routes/editor/content.js:6657
+#: build/routes/editor/content.js:6665
 msgid "Bring to front"
 msgstr ""
 
 #: build/routes/editor/content.js:4223
-#: build/routes/editor/content.js:6661
+#: build/routes/editor/content.js:6669
 msgid "Send to back"
 msgstr ""
 
 #: build/routes/editor/content.js:4227
-#: build/routes/editor/content.js:6409
-#: build/routes/editor/content.js:6675
+#: build/routes/editor/content.js:6417
+#: build/routes/editor/content.js:6683
 msgid "Hide"
 msgstr ""
 
@@ -6200,907 +6200,907 @@ msgstr ""
 msgid "No results found."
 msgstr ""
 
-#: build/routes/editor/content.js:4417
+#: build/routes/editor/content.js:4425
 msgid "This file is not a certificate design."
 msgstr ""
 
-#: build/routes/editor/content.js:4422
+#: build/routes/editor/content.js:4430
 msgid "Import design"
 msgstr ""
 
-#: build/routes/editor/content.js:4423
+#: build/routes/editor/content.js:4431
 msgid "Choose a design file (.html), like one exported from this editor. It replaces the whole current design: elements, colors and page. Nothing is saved until you click Save."
 msgstr ""
 
-#: build/routes/editor/content.js:4425
+#: build/routes/editor/content.js:4433
 msgid "Drop the design file here"
 msgstr ""
 
-#: build/routes/editor/content.js:4429
+#: build/routes/editor/content.js:4437
 msgid "Choose file"
 msgstr ""
 
-#: build/routes/editor/content.js:4430
+#: build/routes/editor/content.js:4438
 msgid "or drop it here"
 msgstr ""
 
 #. translators: 1: number of elements, 2: page width, 3: page height (points).
-#: build/routes/editor/content.js:4435
+#: build/routes/editor/content.js:4443
 #, js-format
 msgid "%1$s element, page %2$s × %3$s pt. The current design will be replaced."
 msgid_plural "%1$s elements, page %2$s × %3$s pt. The current design will be replaced."
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/routes/editor/content.js:4447
+#: build/routes/editor/content.js:4455
 msgid "Replace design"
 msgstr ""
 
-#: build/routes/editor/content.js:4739
+#: build/routes/editor/content.js:4747
 msgid "Text by language"
 msgstr ""
 
-#: build/routes/editor/content.js:4740
+#: build/routes/editor/content.js:4748
 msgid "A language with no text of its own shows the default text."
 msgstr ""
 
-#: build/routes/editor/content.js:4743
+#: build/routes/editor/content.js:4751
 msgid "Default text"
 msgstr ""
 
 #. translators: %s: language name.
-#: build/routes/editor/content.js:4755
+#: build/routes/editor/content.js:4763
 #, js-format
 msgid "Text in %s"
 msgstr ""
 
-#: build/routes/editor/content.js:4766
+#: build/routes/editor/content.js:4774
 msgid "Use the default text"
 msgstr ""
 
-#: build/routes/editor/content.js:4777
-#: build/routes/editor/content.js:5532
+#: build/routes/editor/content.js:4785
+#: build/routes/editor/content.js:5540
 msgid "Row"
 msgstr ""
 
-#: build/routes/editor/content.js:4778
-#: build/routes/editor/content.js:5531
+#: build/routes/editor/content.js:4786
+#: build/routes/editor/content.js:5539
 msgid "Stack"
 msgstr ""
 
-#: build/routes/editor/content.js:4779
+#: build/routes/editor/content.js:4787
 msgid "Grid"
 msgstr ""
 
-#: build/routes/editor/content.js:4788
+#: build/routes/editor/content.js:4796
 msgid "Justify items top"
 msgstr ""
 
-#: build/routes/editor/content.js:4789
-#: build/routes/editor/content.js:4794
+#: build/routes/editor/content.js:4797
+#: build/routes/editor/content.js:4802
 msgid "Justify items center"
 msgstr ""
 
-#: build/routes/editor/content.js:4790
+#: build/routes/editor/content.js:4798
 msgid "Justify items bottom"
 msgstr ""
 
-#: build/routes/editor/content.js:4791
-#: build/routes/editor/content.js:4796
+#: build/routes/editor/content.js:4799
+#: build/routes/editor/content.js:4804
 msgid "Space between items"
 msgstr ""
 
-#: build/routes/editor/content.js:4793
+#: build/routes/editor/content.js:4801
 msgid "Justify items left"
 msgstr ""
 
-#: build/routes/editor/content.js:4795
+#: build/routes/editor/content.js:4803
 msgid "Justify items right"
 msgstr ""
 
-#: build/routes/editor/content.js:4799
+#: build/routes/editor/content.js:4807
 msgid "Align items left"
 msgstr ""
 
-#: build/routes/editor/content.js:4800
-#: build/routes/editor/content.js:4805
+#: build/routes/editor/content.js:4808
+#: build/routes/editor/content.js:4813
 msgid "Align items center"
 msgstr ""
 
-#: build/routes/editor/content.js:4801
+#: build/routes/editor/content.js:4809
 msgid "Align items right"
 msgstr ""
 
-#: build/routes/editor/content.js:4802
-#: build/routes/editor/content.js:4807
+#: build/routes/editor/content.js:4810
+#: build/routes/editor/content.js:4815
 msgid "Stretch items"
 msgstr ""
 
-#: build/routes/editor/content.js:4804
+#: build/routes/editor/content.js:4812
 msgid "Align items top"
 msgstr ""
 
-#: build/routes/editor/content.js:4806
+#: build/routes/editor/content.js:4814
 msgid "Align items bottom"
 msgstr ""
 
-#: build/routes/editor/content.js:4810
-#: build/routes/editor/content.js:5530
-#: build/routes/editor/content.js:5549
+#: build/routes/editor/content.js:4818
+#: build/routes/editor/content.js:5538
+#: build/routes/editor/content.js:5557
 msgid "Layout"
 msgstr ""
 
-#: build/routes/editor/content.js:4811
+#: build/routes/editor/content.js:4819
 msgid "Type"
 msgstr ""
 
-#: build/routes/editor/content.js:4812
-#: build/routes/editor/content.js:5540
+#: build/routes/editor/content.js:4820
+#: build/routes/editor/content.js:5548
 msgid "Gap"
 msgstr ""
 
-#: build/routes/editor/content.js:4813
+#: build/routes/editor/content.js:4821
 msgid "Padding"
 msgstr ""
 
-#: build/routes/editor/content.js:4814
+#: build/routes/editor/content.js:4822
 msgid "Columns"
 msgstr ""
 
-#: build/routes/editor/content.js:4815
+#: build/routes/editor/content.js:4823
 msgid "Justification"
 msgstr ""
 
-#: build/routes/editor/content.js:4816
-#: build/routes/editor/content.js:5516
-#: build/routes/editor/content.js:5534
+#: build/routes/editor/content.js:4824
+#: build/routes/editor/content.js:5524
+#: build/routes/editor/content.js:5542
 msgid "Alignment"
 msgstr ""
 
-#: build/routes/editor/content.js:4817
+#: build/routes/editor/content.js:4825
 msgid "Clip content"
 msgstr ""
 
-#: build/routes/editor/content.js:4817
+#: build/routes/editor/content.js:4825
 msgid "Cut what goes out of the group’s box."
 msgstr ""
 
-#: build/routes/editor/content.js:4846
+#: build/routes/editor/content.js:4854
 msgid "Custom size"
 msgstr ""
 
-#: build/routes/editor/content.js:4990
+#: build/routes/editor/content.js:4998
 msgid "X"
 msgstr ""
 
-#: build/routes/editor/content.js:4991
+#: build/routes/editor/content.js:4999
 msgid "Y"
 msgstr ""
 
 #. translators: 1: a font, 2: the font the PDF uses instead.
-#: build/routes/editor/content.js:5321
+#: build/routes/editor/content.js:5329
 #, js-format
 msgid "%1$s (the PDF uses %2$s)"
 msgstr ""
 
 #. translators: 1: a font, 2: the font used instead.
-#: build/routes/editor/content.js:5329
+#: build/routes/editor/content.js:5337
 #, js-format
 msgid "%1$s (not installed: %2$s is used)"
 msgstr ""
 
-#: build/routes/editor/content.js:5367
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:5375
+#: build/routes/editor/content.js:7228
 msgid "Shape"
 msgstr ""
 
-#: build/routes/editor/content.js:5375
+#: build/routes/editor/content.js:5383
 msgid "The date the certificate is issued, in the site's date format or in the one you write."
 msgstr ""
 
-#: build/routes/editor/content.js:5375
+#: build/routes/editor/content.js:5383
 msgid "Required on every certificate: it can be moved and styled, not deleted."
 msgstr ""
 
-#: build/routes/editor/content.js:5375
+#: build/routes/editor/content.js:5383
 msgid "The QR code, the code and the hint anyone can use to check the certificate."
 msgstr ""
 
-#: build/routes/editor/content.js:5375
+#: build/routes/editor/content.js:5383
 msgid "Where the signer's signature is drawn (from Settings or the event), upright and as large as it fits. It has no drawing of its own."
 msgstr ""
 
-#: build/routes/editor/content.js:5375
+#: build/routes/editor/content.js:5383
 msgid "Text with fields that each certificate fills in."
 msgstr ""
 
-#: build/routes/editor/content.js:5388
-#: build/routes/editor/content.js:5392
+#: build/routes/editor/content.js:5396
+#: build/routes/editor/content.js:5400
 msgid "Alternative text"
 msgstr ""
 
-#: build/routes/editor/content.js:5397
-#: build/routes/editor/content.js:5402
+#: build/routes/editor/content.js:5405
+#: build/routes/editor/content.js:5410
 msgid "Aspect ratio"
 msgstr ""
 
-#: build/routes/editor/content.js:5405
+#: build/routes/editor/content.js:5413
 msgid "Original"
 msgstr ""
 
-#: build/routes/editor/content.js:5406
+#: build/routes/editor/content.js:5414
 msgid "Square - 1:1"
 msgstr ""
 
-#: build/routes/editor/content.js:5407
+#: build/routes/editor/content.js:5415
 msgid "Standard - 4:3"
 msgstr ""
 
-#: build/routes/editor/content.js:5408
+#: build/routes/editor/content.js:5416
 msgid "Portrait - 3:4"
 msgstr ""
 
-#: build/routes/editor/content.js:5409
+#: build/routes/editor/content.js:5417
 msgid "Classic - 3:2"
 msgstr ""
 
-#: build/routes/editor/content.js:5410
+#: build/routes/editor/content.js:5418
 msgid "Classic Portrait - 2:3"
 msgstr ""
 
-#: build/routes/editor/content.js:5411
+#: build/routes/editor/content.js:5419
 msgid "Wide - 16:9"
 msgstr ""
 
-#: build/routes/editor/content.js:5412
+#: build/routes/editor/content.js:5420
 msgid "Tall - 9:16"
 msgstr ""
 
-#: build/routes/editor/content.js:5430
-#: build/routes/editor/content.js:5436
+#: build/routes/editor/content.js:5438
+#: build/routes/editor/content.js:5444
 msgid "Scale"
 msgstr ""
 
-#: build/routes/editor/content.js:5440
+#: build/routes/editor/content.js:5448
 msgid "Cover"
 msgstr ""
 
-#: build/routes/editor/content.js:5441
+#: build/routes/editor/content.js:5449
 msgid "Contain"
 msgstr ""
 
 #. translators: %s: field name, e.g. Date of issue.
-#: build/routes/editor/content.js:5462
+#: build/routes/editor/content.js:5470
 #, js-format
 msgid "Format: %s"
 msgstr ""
 
-#: build/routes/editor/content.js:5478
+#: build/routes/editor/content.js:5486
 msgid "Date format"
 msgstr ""
 
 #. translators: %s: the date as it is shown, e.g. October 31, 2026. <a>: link to the WordPress documentation of date formats.
-#: build/routes/editor/content.js:5483
+#: build/routes/editor/content.js:5491
 #, js-format
 msgid "Shown as %s. Empty: the format of Settings → General. Write the letters as WordPress does, with a backslash before a letter that is a word (<a>documentation</a>)."
 msgstr ""
 
-#: build/routes/editor/content.js:5497
+#: build/routes/editor/content.js:5505
 msgid "Typography"
 msgstr ""
 
-#: build/routes/editor/content.js:5501
+#: build/routes/editor/content.js:5509
 msgid "Font"
 msgstr ""
 
-#: build/routes/editor/content.js:5503
-#: build/routes/editor/content.js:5508
+#: build/routes/editor/content.js:5511
+#: build/routes/editor/content.js:5516
 msgid "Appearance"
 msgstr ""
 
-#: build/routes/editor/content.js:5510
+#: build/routes/editor/content.js:5518
 msgid "Regular"
 msgstr ""
 
-#: build/routes/editor/content.js:5510
+#: build/routes/editor/content.js:5518
 msgid "Medium"
 msgstr ""
 
-#: build/routes/editor/content.js:5510
+#: build/routes/editor/content.js:5518
 msgid "Semi Bold"
 msgstr ""
 
-#: build/routes/editor/content.js:5514
+#: build/routes/editor/content.js:5522
 msgid "Line height"
 msgstr ""
 
-#: build/routes/editor/content.js:5515
+#: build/routes/editor/content.js:5523
 msgid "Letter spacing"
 msgstr ""
 
-#: build/routes/editor/content.js:5517
-#: build/routes/editor/content.js:5535
-#: build/routes/editor/content.js:5651
-#: build/routes/editor/content.js:5654
-#: build/routes/editor/content.js:5857
+#: build/routes/editor/content.js:5525
+#: build/routes/editor/content.js:5543
+#: build/routes/editor/content.js:5659
+#: build/routes/editor/content.js:5662
+#: build/routes/editor/content.js:5865
 msgid "Left"
 msgstr ""
 
-#: build/routes/editor/content.js:5518
-#: build/routes/editor/content.js:5536
-#: build/routes/editor/content.js:5858
+#: build/routes/editor/content.js:5526
+#: build/routes/editor/content.js:5544
+#: build/routes/editor/content.js:5866
 msgid "Center"
 msgstr ""
 
-#: build/routes/editor/content.js:5519
-#: build/routes/editor/content.js:5537
-#: build/routes/editor/content.js:5653
-#: build/routes/editor/content.js:5654
-#: build/routes/editor/content.js:5859
+#: build/routes/editor/content.js:5527
+#: build/routes/editor/content.js:5545
+#: build/routes/editor/content.js:5661
+#: build/routes/editor/content.js:5662
+#: build/routes/editor/content.js:5867
 msgid "Right"
 msgstr ""
 
-#: build/routes/editor/content.js:5521
+#: build/routes/editor/content.js:5529
 msgid "Letter case"
 msgstr ""
 
-#: build/routes/editor/content.js:5523
+#: build/routes/editor/content.js:5531
 msgid "Uppercase"
 msgstr ""
 
-#: build/routes/editor/content.js:5525
+#: build/routes/editor/content.js:5533
 msgid "Shrink to fit"
 msgstr ""
 
-#: build/routes/editor/content.js:5525
+#: build/routes/editor/content.js:5533
 msgid "Shrink to fit (one line)"
 msgstr ""
 
-#: build/routes/editor/content.js:5539
+#: build/routes/editor/content.js:5547
 msgid "QR code size"
 msgstr ""
 
-#: build/routes/editor/content.js:5541
+#: build/routes/editor/content.js:5549
 msgid "Code size"
 msgstr ""
 
-#: build/routes/editor/content.js:5542
+#: build/routes/editor/content.js:5550
 msgid "Hint size"
 msgstr ""
 
-#: build/routes/editor/content.js:5544
+#: build/routes/editor/content.js:5552
 msgid "Code color"
 msgstr ""
 
-#: build/routes/editor/content.js:5545
+#: build/routes/editor/content.js:5553
 msgid "Hint color"
 msgstr ""
 
-#: build/routes/editor/content.js:5550
-#: build/routes/editor/content.js:5852
+#: build/routes/editor/content.js:5558
+#: build/routes/editor/content.js:5860
 msgid "Fit"
 msgstr ""
 
-#: build/routes/editor/content.js:5551
-#: build/routes/editor/content.js:5556
-#: build/routes/editor/content.js:5558
-#: build/routes/editor/content.js:5860
-#: build/routes/editor/content.js:5867
+#: build/routes/editor/content.js:5559
+#: build/routes/editor/content.js:5564
+#: build/routes/editor/content.js:5566
+#: build/routes/editor/content.js:5868
+#: build/routes/editor/content.js:5875
 msgid "Fill"
 msgstr ""
 
-#: build/routes/editor/content.js:5553
+#: build/routes/editor/content.js:5561
 msgid "Color"
 msgstr ""
 
-#: build/routes/editor/content.js:5557
+#: build/routes/editor/content.js:5565
 msgid "Signature color"
 msgstr ""
 
-#: build/routes/editor/content.js:5562
+#: build/routes/editor/content.js:5570
 msgid "Stroke"
 msgstr ""
 
-#: build/routes/editor/content.js:5571
+#: build/routes/editor/content.js:5579
 msgid "Border"
 msgstr ""
 
-#: build/routes/editor/content.js:5579
+#: build/routes/editor/content.js:5587
 msgid "Style"
 msgstr ""
 
-#: build/routes/editor/content.js:5580
+#: build/routes/editor/content.js:5588
 msgid "Solid"
 msgstr ""
 
-#: build/routes/editor/content.js:5581
+#: build/routes/editor/content.js:5589
 msgid "Dashed"
 msgstr ""
 
-#: build/routes/editor/content.js:5582
+#: build/routes/editor/content.js:5590
 msgid "Dotted"
 msgstr ""
 
-#: build/routes/editor/content.js:5584
-#: build/routes/editor/content.js:5586
+#: build/routes/editor/content.js:5592
+#: build/routes/editor/content.js:5594
 msgid "Radius"
 msgstr ""
 
-#: build/routes/editor/content.js:5587
+#: build/routes/editor/content.js:5595
 msgid "Unlink radii"
 msgstr ""
 
-#: build/routes/editor/content.js:5587
+#: build/routes/editor/content.js:5595
 msgid "Link radii"
 msgstr ""
 
-#: build/routes/editor/content.js:5596
 #: build/routes/editor/content.js:5604
+#: build/routes/editor/content.js:5612
 msgid "All corners"
 msgstr ""
 
-#: build/routes/editor/content.js:5613
+#: build/routes/editor/content.js:5621
 msgid "Top left"
 msgstr ""
 
-#: build/routes/editor/content.js:5613
+#: build/routes/editor/content.js:5621
 msgid "Top right"
 msgstr ""
 
-#: build/routes/editor/content.js:5613
+#: build/routes/editor/content.js:5621
 msgid "Bottom right"
 msgstr ""
 
-#: build/routes/editor/content.js:5613
+#: build/routes/editor/content.js:5621
 msgid "Bottom left"
 msgstr ""
 
-#: build/routes/editor/content.js:5623
-#: build/routes/editor/content.js:5628
+#: build/routes/editor/content.js:5631
+#: build/routes/editor/content.js:5636
 msgid "Corner shape"
 msgstr ""
 
-#: build/routes/editor/content.js:5631
+#: build/routes/editor/content.js:5639
 msgid "Round"
 msgstr ""
 
-#: build/routes/editor/content.js:5632
+#: build/routes/editor/content.js:5640
 msgid "Scoop"
 msgstr ""
 
-#: build/routes/editor/content.js:5633
+#: build/routes/editor/content.js:5641
 msgid "Bevel"
 msgstr ""
 
-#: build/routes/editor/content.js:5634
+#: build/routes/editor/content.js:5642
 msgid "Notch"
 msgstr ""
 
-#: build/routes/editor/content.js:5635
+#: build/routes/editor/content.js:5643
 msgid "Squircle"
 msgstr ""
 
-#: build/routes/editor/content.js:5641
+#: build/routes/editor/content.js:5649
 msgid "Dimensions"
 msgstr ""
 
-#: build/routes/editor/content.js:5642
-#: build/routes/editor/content.js:5643
+#: build/routes/editor/content.js:5650
+#: build/routes/editor/content.js:5651
 msgid "Position and size"
 msgstr ""
 
-#: build/routes/editor/content.js:5644
+#: build/routes/editor/content.js:5652
 msgid "Rotation"
 msgstr ""
 
-#: build/routes/editor/content.js:5645
+#: build/routes/editor/content.js:5653
 msgid "Opacity"
 msgstr ""
 
-#: build/routes/editor/content.js:5652
-#: build/routes/editor/content.js:5658
+#: build/routes/editor/content.js:5660
+#: build/routes/editor/content.js:5666
 msgid "Offset"
 msgstr ""
 
-#: build/routes/editor/content.js:5657
-#: build/routes/editor/content.js:5660
-#: build/routes/editor/content.js:5864
+#: build/routes/editor/content.js:5665
+#: build/routes/editor/content.js:5668
+#: build/routes/editor/content.js:5872
 msgid "Top"
 msgstr ""
 
-#: build/routes/editor/content.js:5659
-#: build/routes/editor/content.js:5660
-#: build/routes/editor/content.js:5866
+#: build/routes/editor/content.js:5667
+#: build/routes/editor/content.js:5668
+#: build/routes/editor/content.js:5874
 msgid "Bottom"
 msgstr ""
 
-#: build/routes/editor/content.js:5689
+#: build/routes/editor/content.js:5697
 msgid "Use a value and unit"
 msgstr ""
 
-#: build/routes/editor/content.js:5689
+#: build/routes/editor/content.js:5697
 msgid "Set custom value (calc)"
 msgstr ""
 
-#: build/routes/editor/content.js:5715
+#: build/routes/editor/content.js:5723
 msgid "Use pt, mm, % or calc(100% - 20pt)."
 msgstr ""
 
-#: build/routes/editor/content.js:5753
+#: build/routes/editor/content.js:5761
 msgid "group"
 msgstr ""
 
-#: build/routes/editor/content.js:5753
+#: build/routes/editor/content.js:5761
 msgid "margin"
 msgstr ""
 
-#: build/routes/editor/content.js:5753
+#: build/routes/editor/content.js:5761
 msgid "page"
 msgstr ""
 
-#: build/routes/editor/content.js:5755
+#: build/routes/editor/content.js:5763
 msgid "left"
 msgstr ""
 
-#: build/routes/editor/content.js:5756
+#: build/routes/editor/content.js:5764
 msgid "center"
 msgstr ""
 
-#: build/routes/editor/content.js:5757
+#: build/routes/editor/content.js:5765
 msgid "right"
 msgstr ""
 
-#: build/routes/editor/content.js:5758
+#: build/routes/editor/content.js:5766
 msgid "top"
 msgstr ""
 
-#: build/routes/editor/content.js:5759
+#: build/routes/editor/content.js:5767
 msgid "middle"
 msgstr ""
 
-#: build/routes/editor/content.js:5760
+#: build/routes/editor/content.js:5768
 msgid "bottom"
 msgstr ""
 
-#: build/routes/editor/content.js:5811
+#: build/routes/editor/content.js:5819
 msgid "Relative to"
 msgstr ""
 
-#: build/routes/editor/content.js:5812
+#: build/routes/editor/content.js:5820
 msgid "Page"
 msgstr ""
 
-#: build/routes/editor/content.js:5813
+#: build/routes/editor/content.js:5821
 msgid "Margin"
 msgstr ""
 
-#: build/routes/editor/content.js:5815
-#: build/routes/editor/content.js:5816
-#: build/routes/editor/content.js:6649
-#: build/routes/editor/content.js:8084
-#: build/routes/editor/content.js:8085
+#: build/routes/editor/content.js:5823
+#: build/routes/editor/content.js:5824
+#: build/routes/editor/content.js:6657
+#: build/routes/editor/content.js:8092
+#: build/routes/editor/content.js:8093
 msgid "Align"
 msgstr ""
 
-#: build/routes/editor/content.js:5826
+#: build/routes/editor/content.js:5834
 msgid "Fill: nothing to align"
 msgstr ""
 
 #. translators: 1: left, center, right, top, middle or bottom; 2: page, margin or group.
-#: build/routes/editor/content.js:5828
+#: build/routes/editor/content.js:5836
 #, js-format
 msgid "Align %1$s to the %2$s"
 msgstr ""
 
-#: build/routes/editor/content.js:5845
+#: build/routes/editor/content.js:5853
 msgctxt "size: fill the page or margin"
 msgid "Fill"
 msgstr ""
 
-#: build/routes/editor/content.js:5851
+#: build/routes/editor/content.js:5859
 msgid "Both"
 msgstr ""
 
-#: build/routes/editor/content.js:5852
+#: build/routes/editor/content.js:5860
 msgid "As large as fits, keeping the aspect ratio"
 msgstr ""
 
-#: build/routes/editor/content.js:5856
+#: build/routes/editor/content.js:5864
 msgid "Horizontal"
 msgstr ""
 
-#: build/routes/editor/content.js:5863
+#: build/routes/editor/content.js:5871
 msgid "Vertical"
 msgstr ""
 
-#: build/routes/editor/content.js:5865
+#: build/routes/editor/content.js:5873
 msgid "Middle"
 msgstr ""
 
-#: build/routes/editor/content.js:5879
+#: build/routes/editor/content.js:5887
 msgid "Aspect ratio locked"
 msgstr ""
 
-#: build/routes/editor/content.js:5879
+#: build/routes/editor/content.js:5887
 msgid "Lock aspect ratio"
 msgstr ""
 
-#: build/routes/editor/content.js:5890
+#: build/routes/editor/content.js:5898
 msgid "Page (print)"
 msgstr ""
 
-#: build/routes/editor/content.js:5891
-#: build/routes/editor/content.js:8163
+#: build/routes/editor/content.js:5899
+#: build/routes/editor/content.js:8171
 msgid "Desktop"
 msgstr ""
 
-#: build/routes/editor/content.js:5892
-#: build/routes/editor/content.js:8163
+#: build/routes/editor/content.js:5900
+#: build/routes/editor/content.js:8171
 msgid "Tablet"
 msgstr ""
 
-#: build/routes/editor/content.js:5893
-#: build/routes/editor/content.js:8163
+#: build/routes/editor/content.js:5901
+#: build/routes/editor/content.js:8171
 msgid "Mobile"
 msgstr ""
 
-#: build/routes/editor/content.js:5940
+#: build/routes/editor/content.js:5948
 msgid "The page is the print format set in Size; it does not turn."
 msgstr ""
 
-#: build/routes/editor/content.js:5940
+#: build/routes/editor/content.js:5948
 msgid "Moving, resizing or hiding here changes this screen only. Text and style are shared."
 msgstr ""
 
-#: build/routes/editor/content.js:6409
-#: build/routes/editor/content.js:6675
+#: build/routes/editor/content.js:6417
+#: build/routes/editor/content.js:6683
 msgid "Show"
 msgstr ""
 
-#: build/routes/editor/content.js:6599
+#: build/routes/editor/content.js:6607
 msgid "Align left"
 msgstr ""
 
-#: build/routes/editor/content.js:6600
+#: build/routes/editor/content.js:6608
 msgid "Align center"
 msgstr ""
 
-#: build/routes/editor/content.js:6601
+#: build/routes/editor/content.js:6609
 msgid "Align right"
 msgstr ""
 
-#: build/routes/editor/content.js:6602
+#: build/routes/editor/content.js:6610
 msgid "Align top"
 msgstr ""
 
-#: build/routes/editor/content.js:6603
+#: build/routes/editor/content.js:6611
 msgid "Align middle"
 msgstr ""
 
-#: build/routes/editor/content.js:6604
+#: build/routes/editor/content.js:6612
 msgid "Align bottom"
 msgstr ""
 
-#: build/routes/editor/content.js:6612
+#: build/routes/editor/content.js:6620
 msgid "Multiple elements selected"
 msgstr ""
 
-#: build/routes/editor/content.js:6613
+#: build/routes/editor/content.js:6621
 msgid "Selection tools"
 msgstr ""
 
-#: build/routes/editor/content.js:6683
+#: build/routes/editor/content.js:6691
 msgid "Required: they can be moved, not deleted."
 msgstr ""
 
-#: build/routes/editor/content.js:6834
+#: build/routes/editor/content.js:6842
 msgid "Drawing"
 msgstr ""
 
-#: build/routes/editor/content.js:6854
+#: build/routes/editor/content.js:6862
 msgid "Picture"
 msgstr ""
 
-#: build/routes/editor/content.js:7185
+#: build/routes/editor/content.js:7193
 msgid "Choose a layout for the group"
 msgstr ""
 
-#: build/routes/editor/content.js:7186
+#: build/routes/editor/content.js:7194
 msgid "Group: choose a layout"
 msgstr ""
 
-#: build/routes/editor/content.js:7220
+#: build/routes/editor/content.js:7228
 msgid "QR code"
 msgstr ""
 
-#: build/routes/editor/content.js:7247
+#: build/routes/editor/content.js:7255
 msgid "Fit horizontal"
 msgstr ""
 
-#: build/routes/editor/content.js:7248
+#: build/routes/editor/content.js:7256
 msgid "Fit vertical"
 msgstr ""
 
-#: build/routes/editor/content.js:7249
+#: build/routes/editor/content.js:7257
 msgid "Fit view"
 msgstr ""
 
-#: build/routes/editor/content.js:7253
+#: build/routes/editor/content.js:7261
 msgid "Zoom out"
 msgstr ""
 
-#: build/routes/editor/content.js:7258
+#: build/routes/editor/content.js:7266
 msgid "Zoom"
 msgstr ""
 
-#: build/routes/editor/content.js:7296
+#: build/routes/editor/content.js:7304
 msgid "Zoom in"
 msgstr ""
 
-#: build/routes/editor/content.js:7521
+#: build/routes/editor/content.js:7529
 msgid "Kept: it has to be on every certificate."
 msgid_plural "Kept: they have to be on every certificate."
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/routes/editor/content.js:7581
+#: build/routes/editor/content.js:7589
 msgid "There is no room for more elements."
 msgstr ""
 
-#: build/routes/editor/content.js:7671
+#: build/routes/editor/content.js:7679
 msgid "Design imported. Save to keep it."
 msgstr ""
 
-#: build/routes/editor/content.js:7803
+#: build/routes/editor/content.js:7811
 msgid "Loading…"
 msgstr ""
 
-#: build/routes/editor/content.js:7804
+#: build/routes/editor/content.js:7812
 msgid "Saved"
 msgstr ""
 
-#: build/routes/editor/content.js:7805
+#: build/routes/editor/content.js:7813
 msgid "Unsaved changes"
 msgstr ""
 
-#: build/routes/editor/content.js:7806
-#: build/routes/editor/content.js:7905
+#: build/routes/editor/content.js:7814
+#: build/routes/editor/content.js:7913
 msgid "Saving…"
 msgstr ""
 
-#: build/routes/editor/content.js:7807
+#: build/routes/editor/content.js:7815
 msgid "Couldn’t save"
 msgstr ""
 
-#: build/routes/editor/content.js:7819
+#: build/routes/editor/content.js:7827
 msgid "Couldn’t open the preview."
 msgstr ""
 
-#: build/routes/editor/content.js:7832
-#: build/routes/editor/content.js:7876
+#: build/routes/editor/content.js:7840
+#: build/routes/editor/content.js:7884
 msgid "Undo"
 msgstr ""
 
-#: build/routes/editor/content.js:7833
-#: build/routes/editor/content.js:7877
+#: build/routes/editor/content.js:7841
+#: build/routes/editor/content.js:7885
 msgid "Redo"
 msgstr ""
 
-#: build/routes/editor/content.js:7834
+#: build/routes/editor/content.js:7842
 msgid "Add an element"
 msgstr ""
 
-#: build/routes/editor/content.js:7835
+#: build/routes/editor/content.js:7843
 msgid "Hide layers"
 msgstr ""
 
-#: build/routes/editor/content.js:7835
+#: build/routes/editor/content.js:7843
 msgid "Show layers"
 msgstr ""
 
-#: build/routes/editor/content.js:7836
+#: build/routes/editor/content.js:7844
 msgid "Hide settings"
 msgstr ""
 
-#: build/routes/editor/content.js:7836
+#: build/routes/editor/content.js:7844
 msgid "Show settings"
 msgstr ""
 
-#: build/routes/editor/content.js:7837
+#: build/routes/editor/content.js:7845
 msgid "Show the certificate"
 msgstr ""
 
-#: build/routes/editor/content.js:7837
+#: build/routes/editor/content.js:7845
 msgid "Show the declaration"
 msgstr ""
 
-#: build/routes/editor/content.js:7838
-#: build/routes/editor/content.js:7890
+#: build/routes/editor/content.js:7846
+#: build/routes/editor/content.js:7898
 msgid "Preview in new tab"
 msgstr ""
 
-#: build/routes/editor/content.js:7839
-#: build/routes/editor/content.js:7891
+#: build/routes/editor/content.js:7847
+#: build/routes/editor/content.js:7899
 msgid "Preview in dark mode"
 msgstr ""
 
-#: build/routes/editor/content.js:7839
-#: build/routes/editor/content.js:7891
+#: build/routes/editor/content.js:7847
+#: build/routes/editor/content.js:7899
 msgid "Preview in light mode"
 msgstr ""
 
-#: build/routes/editor/content.js:7841
+#: build/routes/editor/content.js:7849
 msgid "Duplicate the selection"
 msgstr ""
 
-#: build/routes/editor/content.js:7842
+#: build/routes/editor/content.js:7850
 msgid "Delete the selection"
 msgstr ""
 
-#: build/routes/editor/content.js:7847
-#: build/routes/editor/content.js:7916
+#: build/routes/editor/content.js:7855
+#: build/routes/editor/content.js:7924
 msgid "Import…"
 msgstr ""
 
-#: build/routes/editor/content.js:7848
+#: build/routes/editor/content.js:7856
 msgid "Clear the design"
 msgstr ""
 
-#: build/routes/editor/content.js:7855
+#: build/routes/editor/content.js:7863
 msgid "Go to Templates"
 msgstr ""
 
-#: build/routes/editor/content.js:7858
+#: build/routes/editor/content.js:7866
 msgid "Go to Quick generator"
 msgstr ""
 
-#: build/routes/editor/content.js:7863
+#: build/routes/editor/content.js:7871
 msgid "Back to Certificates"
 msgstr ""
 
-#: build/routes/editor/content.js:7873
+#: build/routes/editor/content.js:7881
 msgid "Add element"
 msgstr ""
 
-#: build/routes/editor/content.js:7878
-#: build/routes/editor/content.js:7946
+#: build/routes/editor/content.js:7886
+#: build/routes/editor/content.js:7954
 msgid "Layers"
 msgstr ""
 
-#: build/routes/editor/content.js:7884
+#: build/routes/editor/content.js:7892
 msgid "Certificate design"
 msgstr ""
 
-#: build/routes/editor/content.js:7903
+#: build/routes/editor/content.js:7911
 msgid "Couldn’t save. Try again."
 msgstr ""
 
-#: build/routes/editor/content.js:7908
+#: build/routes/editor/content.js:7916
 msgid "Design"
 msgstr ""
 
-#: build/routes/editor/content.js:8069
+#: build/routes/editor/content.js:8077
 msgid "Element"
 msgstr ""
 
-#: build/routes/editor/content.js:8072
+#: build/routes/editor/content.js:8080
 msgid "Close settings"
 msgstr ""
 
 #. translators: %d: how many elements are selected.
-#: build/routes/editor/content.js:8080
+#: build/routes/editor/content.js:8088
 #, js-format
 msgid "%d element selected"
 msgid_plural "%d elements selected"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/routes/editor/content.js:8145
+#: build/routes/editor/content.js:8153
 msgid "Selection"
 msgstr ""
 
 #. translators: %d: how many elements are selected.
-#: build/routes/editor/content.js:8155
+#: build/routes/editor/content.js:8163
 #, js-format
 msgid "%d element"
 msgid_plural "%d elements"
@@ -7108,16 +7108,16 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: screen (Desktop, Tablet, Mobile), 2: orientation, 3: width, 4: height.
-#: build/routes/editor/content.js:8162
+#: build/routes/editor/content.js:8170
 #, js-format
 msgid "%1$s · %2$s · %3$s × %4$s"
 msgstr ""
 
-#: build/routes/editor/content.js:8187
+#: build/routes/editor/content.js:8195
 msgid "This replaces everything in this template (the page, the elements and the colors) with the Basic design, the one a new site starts from."
 msgstr ""
 
-#: build/routes/editor/content.js:8188
+#: build/routes/editor/content.js:8196
 msgid "Nothing is saved until you click Save, and Undo brings your design back."
 msgstr ""
 
