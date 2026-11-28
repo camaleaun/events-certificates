@@ -201,6 +201,17 @@ pre {
 	color: var(--accent);
 }
 
+/* The WordPress admin's tertiary button: no border, no fill, the accent color. */
+.button.tertiary {
+	border-color: transparent;
+	background: transparent;
+	color: var(--accent);
+}
+
+.button.tertiary:hover {
+	text-decoration: underline;
+}
+
 .hero {
 	padding: 3rem 0 2rem;
 }

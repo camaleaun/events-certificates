@@ -29,7 +29,7 @@ const first = page.highlight.find( ( item ) => item.feature.screenshot )?.id;
 			<p>{ hero.lead }</p>
 			<div class="actions">
 				<a class="button" href={ site.playground }>{ hero.primary }</a>
-				<a class="button secondary" href={ href( `docs/${ page.scenario.docs }/` ) }>{ strings.readDocs }</a>
+				<a class="button tertiary" href={ href( `docs/${ page.scenario.docs }/` ) }>{ strings.readDocs }</a>
 			</div>
 			<p class="note">{ hero.note }</p>
 			<ScenarioSwitch current={ id } />
