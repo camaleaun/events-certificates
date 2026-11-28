@@ -1277,7 +1277,7 @@ function phrases( $role = 'attendee' ) {
 		// The same word for every role (the Basic template's title): what the person did is in the sentence below it.
 		'title_plain'       => __( 'Certificate', 'events-certificates' ),
 		'intro_text'        => __( 'This is to certify that', 'events-certificates' ),
-		'issued_label'      => __( 'Date of issue', 'events-certificates' ),
+		'issued_label'      => __( 'Date of emission', 'events-certificates' ),
 		// The band's text is the site's to give (a Base design filter, or the template): nothing by default.
 		'band_text'         => '',
 		'took_part_text'    => __( 'took part in', 'events-certificates' ),

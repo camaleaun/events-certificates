@@ -70,7 +70,7 @@ export function fields(): Record< string, FieldInfo > {
 		title_text: { label: __( 'Certificate of participation', 'events-certificates' ), group: 'text' },
 		title_plain: { label: __( 'Certificate', 'events-certificates' ), group: 'text' },
 		intro_text: { label: __( 'This is to certify that', 'events-certificates' ), group: 'text' },
-		issued_label: { label: __( 'Date of issue', 'events-certificates' ), group: 'text' },
+		issued_label: { label: __( 'Date of emission', 'events-certificates' ), group: 'text' },
 		place_date_label: { label: __( 'Place and date', 'events-certificates' ), group: 'text' },
 		verify_hint: { label: __( 'Use the code above to verify at:', 'events-certificates' ), group: 'text' },
 	};
