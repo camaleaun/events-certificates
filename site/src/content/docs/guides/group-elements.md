@@ -7,6 +7,8 @@ A **group** is a box that holds other elements and decides where they go, like W
 
 ## Make one
 
+![The template editor with several elements selected: the bar to group them, the layers and the options.](../../../assets/screenshots/editor-selection.webp)
+
 Select two or more elements (click, then **Shift**+click for a range or **Cmd**/**Ctrl**+click to add one; or drag a rectangle on the empty page) and choose a layout in the bar that appears over them, or press **Cmd+G**. **Shift+Cmd+G** ungroups. The group is as big as the elements are together and they stay where they were.
 
 The layouts, in WordPress's order:

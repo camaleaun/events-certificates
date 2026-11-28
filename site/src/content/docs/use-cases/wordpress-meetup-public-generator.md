@@ -9,6 +9,8 @@ A WordPress meetup has forty people in the room and no one wants to make forty P
 
 ## The steps
 
+
+![The public page where attendees type their name and download their certificate.](../../../assets/screenshots/public-generator.webp)
 1. In **Standalone** the page **Certificates of participation** (`/certificate-generator/`) is made for you the first time an administrator opens the admin.
 2. Fill in the event on the page, as in the Quick generator.
 3. Share the address. Each attendee types their name and downloads their PDF; it is drawn **in their browser** with nothing sent to the site.

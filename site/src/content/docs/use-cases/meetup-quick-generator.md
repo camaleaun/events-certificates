@@ -9,6 +9,8 @@ A community meetup that is not about WordPress ("JavaScript Night") wants its ow
 
 ## The steps
 
+
+![The Quick generator in the admin: paste names, pick a template, download.](../../../assets/screenshots/quick-admin.webp)
 1. In the template editor, start from **Basic** and make it yours: dark colors, a logo, a row of elements ([Group elements](../../guides/group-elements/)), a QR code and a signature ([Templates and the editor](../../guides/templates/)).
 2. Open **Certificates › Generator** and choose **Switch to Quick**.
 3. In **Templates**, mark your template **Use in the Quick generator**; then fill in the event and paste the names (or the Meetup CSV).

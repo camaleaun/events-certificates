@@ -11,7 +11,8 @@
     "brand": "node scripts/brand.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "lighthouse": "node scripts/lighthouse.mjs",
-    "translations": "node scripts/translations.mjs"
+    "translations": "node scripts/translations.mjs",
+    "demo-sites": "bash scripts/demo-sites.sh"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.6",

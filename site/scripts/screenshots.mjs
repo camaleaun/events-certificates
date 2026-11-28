@@ -1,44 +1,64 @@
-// Takes the screenshots of site/src/data/screenshots.ts on a throwaway Studio site (never the dev site: its names are real)
-// seeded by ../bin/screenshots-seed.php. Needs Studio's CLI and Chrome. Usage, from site/:
-//   npm run screenshots -- http://localhost:8930 <event-id> <design-id>
-// The site is made once with `studio site create --path ~/Studio/evcert-shots`, the plugin zip installed and the seed run.
-import { chromium } from 'playwright-core';
+// Takes the screenshots of src/data/screenshots.ts on the demo sites (npm run demo-sites): never the development site.
+//
+//   npm run screenshots                     every picture that is stale or missing (what `npm run check` asks for)
+//   npm run screenshots -- --all            every picture
+//   npm run screenshots -- generator editor those ids
+//   npm run screenshots -- --scenario=standalone
+//
+// "Stale" is a picture whose `sources` changed after the commit recorded in screenshots-captured.json when it was taken.
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import sharp from 'sharp';
-import { mkdirSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { screenshots, viewport } from '../src/data/screenshots.ts';
+import { addressOf, demoSite, openBrowser, siteRoot } from './lib/demo.mjs';
+import { scenes } from './lib/scenes.mjs';
+import { staleIds } from './lib/stale.mjs';
 
-const [ base, event = '0', design = '0' ] = process.argv.slice( 2 );
-if ( ! base ) {
-	console.error( 'Give the address of the throwaway site: npm run screenshots -- http://localhost:8930 <event-id> <design-id>' );
-	process.exit( 1 );
+const args = process.argv.slice( 2 );
+const ids = args.filter( ( arg ) => ! arg.startsWith( '--' ) );
+const scenario = args.find( ( arg ) => arg.startsWith( '--scenario=' ) )?.slice( 11 );
+const picked = screenshots.filter( ( shot ) => ( ! scenario || shot.scenario === scenario ) && ( ids.length ? ids.includes( shot.id ) : args.includes( '--all' ) || staleIds().includes( shot.id ) ) );
+if ( ! picked.length ) {
+	console.log( 'Nothing to take: every screenshot is up to date.' );
+	process.exit( 0 );
 }
-const here = dirname( fileURLToPath( import.meta.url ) );
-const out = resolve( here, '../src/assets/screenshots' );
+
+const out = resolve( siteRoot, 'src/assets/screenshots' );
 mkdirSync( out, { recursive: true } );
+const captured = JSON.parse( readFileSync( resolve( siteRoot, 'screenshots-captured.json' ), 'utf8' ).trim() || '{}' );
+const head = execFileSync( 'git', [ 'rev-parse', 'HEAD' ], { encoding: 'utf8' } ).trim();
+const sites = {};
+const session = {};
 
-const browser = await chromium.launch( { channel: 'chrome' } );
-const context = await browser.newContext( { viewport: { width: viewport.width, height: viewport.height }, deviceScaleFactor: viewport.scale, locale: 'en-US' } );
-// The admin bar's user name and avatar are hidden: a screenshot shows the product, not who took it.
-await context.addInitScript( () => {
-	addEventListener( 'DOMContentLoaded', () => {
-		const style = document.createElement( 'style' );
-		style.textContent = '#wp-admin-bar-my-account{display:none!important}';
-		document.head.append( style );
-	} );
-} );
-const page = await context.newPage();
-await page.goto( `${ base }/studio-auto-login?redirect_to=${ encodeURIComponent( `${ base }/wp-admin/` ) }` );
-
-for ( const shot of screenshots ) {
-	const url = base + shot.path.replace( '{event}', event ).replace( '{design}', design );
-	await page.goto( url, { waitUntil: 'networkidle' } );
+for ( const shot of picked ) {
+	sites[ shot.scenario ] ??= demoSite( shot.scenario );
+	const site = sites[ shot.scenario ];
+	if ( ! site ) {
+		console.error( `${ shot.id }: the demo site of "${ shot.scenario }" is not made (npm run demo-sites -- ${ shot.scenario }).` );
+		process.exitCode = 1;
+		continue;
+	}
+	session[ shot.scenario ] ??= await openBrowser( site, viewport );
+	const { page } = session[ shot.scenario ];
+	await page.goto( addressOf( site, shot.path ), { waitUntil: 'networkidle' } );
+	// A public page shows no admin bar.
+	await page.addStyleTag( { content: '#wpadminbar{display:none!important}html{margin-top:0!important}' } ).catch( () => {} );
 	await page.waitForTimeout( 1500 );
+	if ( shot.scene ) {
+		await scenes[ shot.scene ]( page );
+	}
 	const png = await page.screenshot();
 	await sharp( png ).webp( { quality: 92 } ).toFile( resolve( out, `${ shot.id }.webp` ) );
-	// The directory's own, numbered as the readme's `== Screenshots ==` lists them: PNG, 1440 wide.
-	await sharp( png ).resize( viewport.width ).png().toFile( resolve( here, `../../.wordpress-org/screenshot-${ screenshots.indexOf( shot ) + 1 }.png` ) );
-	console.log( `${ shot.id }: ${ url }` );
+	const wporg = screenshots.filter( ( item ) => item.wporg );
+	if ( shot.wporg ) {
+		// The directory's own, numbered as the readme's `== Screenshots ==` lists them: PNG, 1440 wide.
+		await sharp( png ).resize( viewport.width ).png().toFile( resolve( siteRoot, `../.wordpress-org/screenshot-${ wporg.indexOf( shot ) + 1 }.png` ) );
+	}
+	captured[ `${ shot.id }@en` ] = { commit: head, at: new Date().toISOString().slice( 0, 10 ) };
+	console.log( `${ shot.id }: ${ addressOf( site, shot.path ) }` );
 }
-await browser.close();
+for ( const { browser } of Object.values( session ) ) {
+	await browser.close();
+}
+writeFileSync( resolve( siteRoot, 'screenshots-captured.json' ), JSON.stringify( captured, null, '\t' ) + '\n' );
