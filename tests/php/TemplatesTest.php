@@ -458,17 +458,17 @@ class TemplatesTest extends Test_Case {
 							'field' => 'name',
 							'b'     => true,
 						),
-						array( 'text' => ' [not a field] and [other]' ),
+						array( 'text' => ' [not a field] and [[other]]' ),
 					),
 				),
 			),
 		);
 		$content = Designs\content( $design );
 
-		$this->assertStringContainsString( '"text":"Dear **[name]** \\\\[not a field] and \\\\[other]"', $content );
+		$this->assertStringContainsString( '"text":"Dear **[[name]]** [not a field] and \\\\[[other]]"', $content );
 		$back = Designs\decode( $content );
 		$this->assertSame( $design['elements'][0]['runs'], $back['elements'][0]['runs'] );
-		$read = Designs\decode( str_replace( '\\\\[other]', '[other]', $content ) );
-		$this->assertSame( ' [not a field] and [other]', $read['elements'][0]['runs'][2]['text'], 'A word in brackets that is not a field is text.' );
+		$read = Designs\decode( str_replace( '\\\\[[other]]', '[[other]]', $content ) );
+		$this->assertSame( ' [not a field] and [[other]]', $read['elements'][0]['runs'][2]['text'], 'A word in double brackets that is not a field is text.' );
 	}
 }

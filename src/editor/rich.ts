@@ -1,5 +1,5 @@
 /**
- * What the text editor does with the clipboard (docs/decisions/0054): a copy says the selected runs as text (`Dear [name], held in **[location]**`) and a paste reads
+ * What the text editor does with the clipboard (docs/decisions/0054): a copy says the selected runs as text (`Dear [[name]], held in **[[location]]**`) and a paste reads
  * text as runs, with the grammar of camaleaun/draw, so a field comes back as a chip and a mark as a mark. The parts that need no DOM are here, to be tested.
  */
 import { parseRuns, runsToText } from '@camaleaun/draw';
@@ -32,7 +32,7 @@ export function fieldsInRuns( runs: Run[], keys: string[] ): Run[] {
 		}
 		const marks = { ...( run.b ? { b: true } : {} ), ...( run.i ? { i: true } : {} ) };
 		let rest = run.text;
-		for ( let m = /\[([A-Za-z0-9_-]{1,40})(?::([A-Za-z0-9_-]{1,40}))?\]/.exec( rest ); m; m = /\[([A-Za-z0-9_-]{1,40})(?::([A-Za-z0-9_-]{1,40}))?\]/.exec( rest ) ) {
+		for ( let m = /\[\[([A-Za-z0-9_-]{1,40})(?::([A-Za-z0-9_-]{1,40}))?\]\]/.exec( rest ); m; m = /\[\[([A-Za-z0-9_-]{1,40})(?::([A-Za-z0-9_-]{1,40}))?\]\]/.exec( rest ) ) {
 			if ( keys.includes( m[ 1 ] ) ) {
 				if ( m.index ) {
 					push( { text: rest.slice( 0, m.index ), ...marks } );

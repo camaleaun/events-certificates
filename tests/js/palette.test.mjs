@@ -226,7 +226,7 @@ test( 'what a text says is escaped as text and as an attribute value: <, >, &, "
 
 
 test( 'a text an earlier version kept as a string is runs once it is loaded', () => {
-	const design = m.migrate( { page: { w: 100, h: 50 }, colors: {}, palette: [], elements: [ { type: 'text', id: 't', x: 0, y: 0, w: 10, h: 5, text: '{name} and **bold** [location] [nope]' } ] } );
+	const design = m.migrate( { page: { w: 100, h: 50 }, colors: {}, palette: [], elements: [ { type: 'text', id: 't', x: 0, y: 0, w: 10, h: 5, text: '{name} and **bold** [[location]] [nope]' } ] } );
 	const el = design.elements[ 0 ];
 	assert.equal( el.text, undefined );
 	assert.deepEqual( JSON.parse( JSON.stringify( el.runs ) ), [ { field: 'name' }, { text: ' and ' }, { text: 'bold', b: true }, { text: ' ' }, { field: 'location' }, { text: ' [nope]' } ] );
