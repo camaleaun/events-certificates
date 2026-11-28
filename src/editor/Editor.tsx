@@ -935,11 +935,14 @@ export default function Editor() {
 							panRef.current = null;
 						}
 					} }
-					onPointerDown={ () => {
+					onPointerDown={ ( event ) => {
 						if ( editing ) {
 							stopEditing();
 						}
-						setSelected( null );
+						// With Shift (or Cmd/Ctrl) the box that may follow adds to what is selected.
+						if ( ! ( event.shiftKey || event.metaKey || event.ctrlKey ) ) {
+							setSelected( null );
+						}
 					} }
 				>
 						<BlockCanvas

@@ -10,7 +10,7 @@ import { resizeBox, snap, type Guide } from '@camaleaun/draw';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { toElements, type Selection } from './blocks';
-import { clickTarget, rangeIds, toggleIds } from './selection';
+import { clickTarget, commonParent, inListOrder, marqueeIds, rangeIds, toggleIds } from './selection';
 import { box, lockedRatio, moved, pageColor, placed, type Design, type Element, type GroupEl, type Mode } from './model';
 import { Shape } from './Shape';
 import { VARIATIONS } from './GroupPanel';
@@ -61,6 +61,8 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	const dragRef = useRef< Drag | null >( null );
 	const [ preview, setPreview ] = useState< Element | null >( null );
 	// The others that move along while several are dragged, where they would be.
+	// A box drawn on the page to select what it touches: from where it began, to where it is, whether it adds to the selection, and the locked element it began on (a click on it selects it).
+	const [ marquee, setMarquee ] = useState< { from: { x: number; y: number }; to: { x: number; y: number }; add: boolean; on: string | null } | null >( null );
 	const [ peerPreview, setPeerPreview ] = useState< Record< string, Element > | null >( null );
 	const [ guides, setGuides ] = useState< Guide[] >( [] );
 
@@ -95,7 +97,17 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	};
 	const select = ( id: string ) => onSelect( [ id ], id );
 
+	const beginMarquee = ( event: React.PointerEvent, on: string | null ) => {
+		( event.target as Element & globalThis.Element ).setPointerCapture?.( event.pointerId );
+		const at = toPage( event );
+		setMarquee( { from: at, to: at, add: event.shiftKey || event.metaKey || event.ctrlKey, on } );
+	};
+
 	const onMove = ( event: React.PointerEvent ) => {
+		if ( marquee ) {
+			setMarquee( { ...marquee, to: toPage( event ) } );
+			return;
+		}
 		const drag = dragRef.current;
 		if ( ! drag ) {
 			return;
@@ -148,6 +160,26 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	};
 
 	const onUp = () => {
+		if ( marquee ) {
+			const rect = { x: Math.min( marquee.from.x, marquee.to.x ), y: Math.min( marquee.from.y, marquee.to.y ), w: Math.abs( marquee.to.x - marquee.from.x ), h: Math.abs( marquee.to.y - marquee.from.y ) };
+			setMarquee( null );
+			if ( rect.w + rect.h < 3 / zoom ) {
+				// A click, not a box: on a locked element it selects that.
+				if ( marquee.on ) {
+					select( marquee.on );
+				}
+				return;
+			}
+			// Inside the group of what is selected, the box takes what is in that group; elsewhere, what is on the page itself.
+			const context = selection.ids.length ? commonParent( shownTree, selection.ids ) : null;
+			const group = context ? ( findEl( shownTree, context ) as Placed | undefined ) : undefined;
+			const startedIn = !! group && ( () => { const b = pageBox( group ); return marquee.from.x >= b.x && marquee.from.x <= b.x + b.w && marquee.from.y >= b.y && marquee.from.y <= b.y + b.h; } )();
+			const found = marqueeIds( shownTree, rect, startedIn ? ( context as string ) : null );
+			const same = ! marquee.add || ! selection.ids.length || commonParent( shownTree, selection.ids ) === ( startedIn ? context : null );
+			const ids = marquee.add && same ? inListOrder( shownTree, [ ...selection.ids, ...found ] ) : found;
+			onSelect( ids, ids[ 0 ] ?? null );
+			return;
+		}
 		const drag = dragRef.current;
 		dragRef.current = null;
 		// What an element changes when it is where `at` says: absolute elements take the numbers, anchored ones update their anchors (docs/decisions/0004). What is in a group is placed from
@@ -252,6 +284,11 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 					if ( ( event.shiftKey || event.metaKey || event.ctrlKey ) && extend( event, target.id ) ) {
 						return;
 					}
+					// What is locked cannot be dragged, so a drag that starts on it draws a box (a click on it selects it).
+					if ( target.locked && tab !== 'content' && ! ( many.length > 1 && many.includes( target.id ) ) ) {
+						beginMarquee( event, target.id );
+						return;
+					}
 					// One of several that are selected stays so (to be dragged with the others; let go without moving, it is the one selected).
 					if ( ! ( many.length > 1 && many.includes( target.id ) && tab !== 'content' ) ) {
 						select( target.id );
@@ -273,7 +310,7 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	};
 
 	return (
-		<svg ref={ svgRef } className="evcert-canvas" width={ ( w + bleed * 2 ) * zoom } height={ ( h + bleed * 2 ) * zoom } viewBox={ `${ -bleed } ${ -bleed } ${ w + bleed * 2 } ${ h + bleed * 2 }` } onPointerMove={ onMove } onPointerUp={ onUp }>
+		<svg ref={ svgRef } className="evcert-canvas" width={ ( w + bleed * 2 ) * zoom } height={ ( h + bleed * 2 ) * zoom } viewBox={ `${ -bleed } ${ -bleed } ${ w + bleed * 2 } ${ h + bleed * 2 }` } onPointerMove={ onMove } onPointerUp={ onUp } onPointerDown={ ( event ) => tab === 'art' && beginMarquee( event, null ) }>
 			<defs>
 				<pattern id="evcert-checker" width="12" height="12" patternUnits="userSpaceOnUse">
 					<rect width="12" height="12" fill="#ffffff" />
@@ -306,6 +343,9 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 					g.kind === 'gap' ? null : g.axis === 'x' ? <line key={ i } x1={ g.at } x2={ g.at } y1={ -bleed } y2={ h + bleed } className="evcert-snap" /> : <line key={ i } y1={ g.at } y2={ g.at } x1={ -bleed } x2={ w + bleed } className="evcert-snap" />
 				) }
 			</g>
+			{ marquee && ( marquee.from.x !== marquee.to.x || marquee.from.y !== marquee.to.y ) && (
+				<rect className="evcert-marquee" x={ Math.min( marquee.from.x, marquee.to.x ) } y={ Math.min( marquee.from.y, marquee.to.y ) } width={ Math.abs( marquee.to.x - marquee.from.x ) } height={ Math.abs( marquee.to.y - marquee.from.y ) } />
+			) }
 			{ many.length > 1 && tab === 'art' && ! editingId && (
 				<g className="evcert-selection is-many">
 					{ /* Each selected element is a fill with some opacity (as the post editor's selected blocks); they are not drawn while one is dragged, so the guides can be seen. */ }
