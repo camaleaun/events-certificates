@@ -2,8 +2,7 @@
  * Copying and pasting elements (docs/decisions/0056): what a copy puts on the clipboard (the elements as they are on the page, so a paste keeps their place wherever it goes) and
  * where a paste puts them. The DOM side (the events, the formats) is in Editor.tsx.
  */
-import { color, runsOf, moved, type Design, type Element } from './model';
-import { textFromRuns } from './rich';
+import { color, moved, type Design, type Element } from './model';
 import { inListOrder } from './selection';
 import { cloneEl, findEl, flatten, isGroup, MAX_ELEMENTS, moveEl, parentOf } from './tree';
 
@@ -33,13 +32,10 @@ export function copyPayload( tree: Element[], page: Page, ids: string[], source:
 	return { version: 1, elements: JSON.parse( JSON.stringify( elements ) ), source: { colors: source.colors, palette: source.palette } };
 }
 
-/** The words of the texts of a copy, a line each (`[[fields]]` and marks as they are written: ADR 0054). */
-export function plainTextOf( els: Element[] ): string {
-	return flatten( els )
-		.filter( ( el ) => el.type === 'text' )
-		.map( ( el ) => textFromRuns( runsOf( el as never ) ) )
-		.filter( Boolean )
-		.join( '\n' );
+/** The block markup of a copy, from the html or, when that has none, from the plain text (a copy pasted in a text editor and copied back); empty when there is none of ours. */
+export function blockMarkupOf( html: string, text: string ): string {
+	const ours = ( markup: string ) => markup.includes( '<!-- wp:events-certificates/' );
+	return ours( html ) ? html : ours( text ) ? text : '';
 }
 
 /** A color of the theme that the other template does not have (`$primary`) becomes its value, so a paste looks the same there. */

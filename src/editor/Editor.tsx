@@ -50,7 +50,7 @@ import SvgEditor from './SvgEditor';
 import type { Picked } from './media';
 import { parse, serialize } from '@wordpress/blocks';
 import { BlockLayers, BlocksProvider, registerBlocks, toBlocks, toElements, type Selection } from './blocks';
-import { adoptColors, CLIPBOARD_TYPE, copyIsOfElements, copyPayload, pasteEls, plainTextOf, type ClipboardPayload } from './clipboard';
+import { adoptColors, blockMarkupOf, CLIPBOARD_TYPE, copyIsOfElements, copyPayload, pasteEls, type ClipboardPayload } from './clipboard';
 import { runsFromText } from './rich';
 import { FIELD_KEYS } from './fieldKeys';
 import { BLOCK_NAMES } from './dialect';
@@ -452,15 +452,19 @@ export default function Editor() {
 	const remove = ( id: string ) => removeMany( [ id ] );
 	/** The last paste: the same copy pasted again is moved a little more each time, so the copies do not hide each other. */
 	const pasted = useRef< { key: string; n: number } >( { key: '', n: 0 } );
-	/** Copy or cut: what is selected goes on the clipboard as elements (to paste here or in another template), as the blocks of the layers (text/html) and as the words of its texts. */
+	/**
+	 * Copy or cut: what is selected goes on the clipboard as elements (to paste here or in another template) and as the block markup of the layers, in the html and in the plain text, as
+	 * the post editor does (a text editor gets the blocks). The words of a text are copied by selecting them in the text, in its editing mode.
+	 */
 	const toClipboard = ( data: DataTransfer, cut: boolean ): boolean => {
 		const payload = copyPayload( design.elements, design.page, selection.ids, design );
 		if ( ! payload.elements.length ) {
 			return false;
 		}
 		data.setData( CLIPBOARD_TYPE, JSON.stringify( { ...payload, cut } as ClipboardPayload ) );
-		data.setData( 'text/html', serialize( toBlocks( payload.elements ) as never ) );
-		data.setData( 'text/plain', plainTextOf( payload.elements ) );
+		const markup = serialize( toBlocks( payload.elements ) as never );
+		data.setData( 'text/html', markup );
+		data.setData( 'text/plain', markup );
 		pasted.current = { key: '', n: 0 };
 		if ( cut ) {
 			removeMany( selection.ids );
@@ -480,10 +484,10 @@ export default function Editor() {
 				// Not ours: read what else it holds.
 			}
 		}
-		const html = data.getData( 'text/html' );
-		if ( html.includes( '<!-- wp:events-certificates/' ) ) {
+		const markup = blockMarkupOf( data.getData( 'text/html' ), data.getData( 'text/plain' ) );
+		if ( markup ) {
 			const known = Object.values( BLOCK_NAMES );
-			const blocks = ( parse( html ) as { name: string }[] ).filter( ( b ) => known.includes( b.name ) );
+			const blocks = ( parse( markup ) as { name: string }[] ).filter( ( b ) => known.includes( b.name ) );
 			if ( blocks.length ) {
 				return { els: toElements( blocks as never ), key: '', cut: false };
 			}

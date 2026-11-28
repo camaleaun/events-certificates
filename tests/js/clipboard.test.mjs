@@ -46,18 +46,13 @@ test( 'a copy has the elements as they are on the page, and none that is in anot
 	assert.equal( both.elements[ 0 ].children.length, 2 );
 } );
 
-test( 'the plain text of a copy is the words of its texts, one a line', () => {
-	const els = [ { id: 't1', type: 'text', runs: [ { text: 'Dear ' }, { field: 'name' } ] }, rect( 'r', 0, 0, 1, 1 ), { id: 't2', type: 'text', runs: [ { text: 'Thanks', b: true } ] } ];
-	assert.equal( c.plainTextOf( els ), 'Dear [[name]]\n**Thanks**' );
-} );
-
-test( 'a copy or a cut is the selected elements\' unless the user selected text of their own, or is in a field', () => {
-	const base = { selected: 1, editable: false, hasTextSelection: false, defaultPrevented: false };
-	assert.equal( c.copyIsOfElements( base ), true, 'an element is selected and nothing else' );
-	assert.equal( c.copyIsOfElements( { ...base, hasTextSelection: true } ), false, 'text selected anywhere on the page (the sidebar, a notice) is copied as text' );
-	assert.equal( c.copyIsOfElements( { ...base, editable: true } ), false, 'in a field the field copies' );
-	assert.equal( c.copyIsOfElements( { ...base, selected: 0 } ), false, 'nothing selected: nothing of ours to copy' );
-	assert.equal( c.copyIsOfElements( { ...base, defaultPrevented: true } ), false, 'what another handler took' );
+test( 'the markup of blocks of a copy is found in the html, or in the plain text (what a text editor gave back)', () => {
+	const markup = '<!-- wp:events-certificates/certificate-text {"x":1} /-->';
+	assert.equal( c.blockMarkupOf( markup, '' ), markup, 'in the html' );
+	assert.equal( c.blockMarkupOf( '', markup ), markup, 'in the plain text: the copy was pasted in a text editor and copied back' );
+	assert.equal( c.blockMarkupOf( '<p>x</p>', markup ), markup, 'the html says none, the plain text does' );
+	assert.equal( c.blockMarkupOf( '<p>Dear Ana</p>', 'Dear Ana' ), '', 'words are not blocks' );
+	assert.equal( c.blockMarkupOf( '', '<!-- wp:paragraph --><p>x</p><!-- /wp:paragraph -->' ), '', 'blocks of another plugin are not ours' );
 } );
 
 test( 'a paste has new ids, goes in the selected group when it holds them, and keeps its place on the page', () => {

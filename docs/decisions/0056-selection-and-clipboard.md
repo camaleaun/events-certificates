@@ -27,7 +27,8 @@ bar over the selection had nothing but the four ways to group.
   the four ways to group; and an Options menu with icons (Copy, Cut, Duplicate; Bring to front, Send to back; Group, Lock, Hide; Delete). The menu of a layer has Group, Ungroup, Lock and Hide
   with the editor's rules (the core's would make a group with no place, and write attributes the design does not have: the blocks turn those off).
 - **Copy, cut and paste** (`clipboard.ts`): a copy writes the elements as they are on the page (`application/x-events-certificates+json`, with the colors they use), the same blocks the layers
-  copy (`text/html`) and the words of the texts (`text/plain`). A paste reads those, or plain text (a new Text); new ids; into the selected group when only that is selected, else right
+  copy, as markup, in `text/html` and in `text/plain` (a text editor gets the blocks, as with the post editor; amended 2026-11-28: it was the words of the texts). The words of a
+  text are copied by selecting them in the text's editing mode (ADR 0054), and text the user selects anywhere else is copied as that text, not as the selected elements. A paste reads those, or plain text (a new Text); new ids; into the selected group when only that is selected, else right
   after the one at the front of the selection, in its own list, else at the end of the page; never in place of the selection. The same copy pasted again moves a little more each time; the code
   of authenticity and the verification are not pasted twice; colors of the theme the other template lacks become their values. The text editor keeps its own copy and paste (ADR 0054).
 
