@@ -68,7 +68,7 @@ export const features: Record< string, Feature > = {
 		text: 'Who RSVP’d "attending" arrives as registered, who checked in as attended, and the organizers with their role. Sync again whenever you like; it never demotes anyone.',
 		where: only( 'gatherpress', 'both' ),
 		prominence: { default: 'highlight' },
-		docs: 'integrations/gatherpress',
+		docs: 'scenarios/gatherpress',
 		claimNote: 'Tested with GatherPress 0.37.0.',
 	},
 	'self-issue': {
@@ -76,7 +76,7 @@ export const features: Record< string, Feature > = {
 		text: 'The ticket e-mail links to a "Certificate" step: the attendee confirms, and gets their certificate. Organizers only mark who was present.',
 		where: only( 'wordcamp', 'both' ),
 		prominence: { default: 'highlight' },
-		docs: 'integrations/camptix',
+		docs: 'scenarios/wordcamp',
 		claimNote: 'Needs CampTix, as WordCamp.org runs it.',
 	},
 	'presence-days': {
@@ -84,14 +84,14 @@ export const features: Record< string, Feature > = {
 		text: 'Mark who was present on each day (or at each contributor-day table) from the Attendees list; a certificate says exactly what the person attended.',
 		where: only( 'wordcamp', 'both' ),
 		prominence: { default: 'highlight' },
-		docs: 'integrations/camptix',
+		docs: 'scenarios/wordcamp',
 	},
 	'talk-selection': {
 		title: 'The talks they attended',
 		text: 'The attendee picks the sessions they sat in and the certificate lists them.',
 		where: { standalone: 'no', gatherpress: 'no', wordcamp: { note: 'the schedule comes from the wc-post-types plugin' }, both: { note: 'the schedule comes from the wc-post-types plugin' } },
 		prominence: { default: 'secondary', br: 'highlight' },
-		docs: 'integrations/camptix',
+		docs: 'scenarios/wordcamp',
 	},
 	'declaration-page': {
 		title: 'A declaration page',

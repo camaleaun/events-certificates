@@ -3,6 +3,8 @@ title: "Your first certificate"
 description: "From a new event to a PDF in a few minutes."
 ---
 
+This is the path in **Standalone**. On GatherPress or CampTix the people come from them: see [GatherPress](../../scenarios/gatherpress/) and [WordCamp.org](../../scenarios/wordcamp/).
+
 ## 1. Add an event
 
 ![The Generator: pick an event, preview each certificate, download.](../../../assets/screenshots/generator.webp)

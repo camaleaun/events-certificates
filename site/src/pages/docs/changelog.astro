@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import { changelog, html } from '@libs/readme';
+import { href } from '@libs/site';
+
+const releases = changelog();
+---
+<Base title="Changelog" description="What changed in each version of Events Certificates." markdown={ href( 'docs/changelog.md' ) }>
+	<div class="wrap docs-page">
+		<h1>Changelog</h1>
+		{ releases.map( ( release ) => (
+			<section>
+				<h2>{ release.title }</h2>
+				<Fragment set:html={ html( release.body ) } />
+			</section>
+		) ) }
+		<p class="md-link"><a href={ href( 'docs/changelog.md' ) }>View as Markdown</a></p>
+	</div>
+</Base>

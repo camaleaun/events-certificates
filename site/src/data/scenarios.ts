@@ -75,7 +75,7 @@ export const scenarios: Record< ScenarioId, Scenario > = {
 			limits: [ 'events', 'generator', 'lists', 'email' ],
 		},
 		limits: { events: 'Events are GatherPress’s: this plugin keeps no events of its own here.', generator: 'No Generator screen: you issue from Participants.', lists: 'Exporting and importing lists is off; one template can still be exported.', email: 'It does not e-mail certificates.' },
-		docs: 'integrations/gatherpress',
+		docs: 'scenarios/gatherpress',
 	},
 	wordcamp: {
 		id: 'wordcamp',
@@ -105,7 +105,7 @@ export const scenarios: Record< ScenarioId, Scenario > = {
 			limits: [ 'camptix', 'bulk', 'lists', 'email' ],
 		},
 		limits: { camptix: 'CampTix is not in the WordPress.org plugin directory; the schedule comes from wc-post-types.', bulk: 'Organizers have no bulk issue: attendees issue their own. With self-issue off, nobody can.', lists: 'Exporting and importing lists is off.', email: 'It does not e-mail certificates.' },
-		docs: 'integrations/camptix',
+		docs: 'scenarios/wordcamp',
 	},
 };
 

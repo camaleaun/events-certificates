@@ -10,6 +10,8 @@ export default defineConfig( {
 	site,
 	base,
 	trailingSlash: 'always',
+	// The two integration pages became the case guides.
+	redirects: { '/docs/integrations/camptix': '/docs/scenarios/wordcamp/', '/docs/integrations/gatherpress': '/docs/scenarios/gatherpress/' },
 	integrations: [ sitemap() ],
 	build: { inlineStylesheets: 'always' },
 	markdown: { shikiConfig: { themes: { light: 'github-light-high-contrast', dark: 'github-dark-high-contrast' } } },

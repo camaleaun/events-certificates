@@ -3,6 +3,9 @@ import { sidebar } from '@data/sidebar';
 
 export type Doc = CollectionEntry< 'docs' >;
 
+/** Whether a page is shown in English (a page with `locales` that leaves English out is translators' source only). */
+export const shown = ( doc: Doc ) => ! doc.data.locales || doc.data.locales.includes( 'en' );
+
 /** The docs in the sidebar's order, grouped; throws when the sidebar and the files disagree. */
 export async function groups() {
 	const all = await getCollection( 'docs' );
@@ -19,7 +22,7 @@ export async function groups() {
 		}
 	}
 
-	return sidebar.map( ( group ) => ( { title: group.title, docs: group.pages.map( ( id ) => byId.get( id ) as Doc ) } ) );
+	return sidebar.map( ( group ) => ( { title: group.title, docs: group.pages.map( ( id ) => byId.get( id ) as Doc ).filter( shown ) } ) );
 }
 
 export async function ordered() {

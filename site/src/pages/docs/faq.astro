@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import { faq, html } from '@libs/readme';
+import { href } from '@libs/site';
+
+const items = faq();
+---
+<Base title="Frequently asked questions" description="Answers about fonts, the Meetup list, roles, verification, privacy and more." markdown={ href( 'docs/faq.md' ) }>
+	<div class="wrap docs-page">
+		<h1>Frequently asked questions</h1>
+		{ items.map( ( item ) => (
+			<section>
+				<h2>{ item.title }</h2>
+				<Fragment set:html={ html( item.body ) } />
+			</section>
+		) ) }
+		<p class="md-link"><a href={ href( 'docs/faq.md' ) }>View as Markdown</a></p>
+	</div>
+</Base>

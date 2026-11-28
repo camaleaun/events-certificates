@@ -3,7 +3,9 @@ title: "Export and import"
 description: "Move or keep templates, events, participants, certificates and settings."
 ---
 
-The **Export** and **Import** buttons are next to the title of the Certificates, Events, Templates, Participants and Settings screens. Each opens its screen with that part ticked.
+In **Standalone**, the **Export** and **Import** buttons are next to the title of the Certificates, Events, Templates, Participants and Settings screens. Each opens its screen with that part ticked.
+
+> With **GatherPress** or **CampTix** active, export and import of lists are **off** (events and people belong to them). One template can still be exported and imported from the template editor: [Template files and blocks](../template-files/).
 
 ![Export to a file.](../../../assets/screenshots/export.webp)
 

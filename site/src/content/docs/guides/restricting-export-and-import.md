@@ -16,7 +16,7 @@ Export and Import can take fonts, pictures and vector drawings (SVG paths) from 
 | `pictures` | Taking Media Library pictures in a package and making them (needs `zip`). |
 | `vectors` | The vector drawings (SVG paths) inside a package. |
 
-On a **single site** everything is allowed. On a **network** `zip`, `fonts`, `pictures` and `vectors` are allowed to **super administrators** only; `export` and `import` stay on.
+On a **single site** with no event plugin everything is allowed; with **GatherPress or CampTix** active `export` and `import` are off by default (a single template can still be exported from the editor). On a **network** `zip`, `fonts`, `pictures` and `vectors` are allowed to **super administrators** only; `export` and `import` follow the rule above.
 
 ## How to set them
 
