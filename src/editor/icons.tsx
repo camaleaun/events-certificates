@@ -91,3 +91,16 @@ export function elementIcon( type: Element[ 'type' ] | 'logo' | 'date-of-emissio
 export const cut = icon(
 	<Path key="a" d="M7.5 15.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5zM7.5 4.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5zM9.4 8.4l9.1 9.6M9.4 15.6l9.1-9.6" { ...stroke } />
 );
+
+/**
+ * The six alignments of an element to the edge or the center of its box: a line (the edge) and two bars that lean on it. They are not the justify
+ * icons (those are the anchor) nor the align icons of text.
+ */
+export const alignEdge = {
+	left: icon( <Path key="a" d="M4.75 4v16" { ...stroke } />, <Path key="b" d="M4.75 8.5h11" { ...stroke } />, <Path key="c" d="M4.75 15h7" { ...stroke } /> ),
+	centerH: icon( <Path key="a" d="M12 4v16" { ...stroke } />, <Path key="b" d="M6.5 8.5h11" { ...stroke } />, <Path key="c" d="M8.5 15h7" { ...stroke } /> ),
+	right: icon( <Path key="a" d="M19.25 4v16" { ...stroke } />, <Path key="b" d="M19.25 8.5h-11" { ...stroke } />, <Path key="c" d="M19.25 15h-7" { ...stroke } /> ),
+	top: icon( <Path key="a" d="M4 4.75h16" { ...stroke } />, <Path key="b" d="M8.5 4.75v11" { ...stroke } />, <Path key="c" d="M15 4.75v7" { ...stroke } /> ),
+	middleV: icon( <Path key="a" d="M4 12h16" { ...stroke } />, <Path key="b" d="M8.5 6.5v11" { ...stroke } />, <Path key="c" d="M15 8.5v7" { ...stroke } /> ),
+	bottom: icon( <Path key="a" d="M4 19.25h16" { ...stroke } />, <Path key="b" d="M8.5 19.25v-11" { ...stroke } />, <Path key="c" d="M15 19.25v-7" { ...stroke } /> ),
+};

@@ -827,6 +827,11 @@ $evcert-sidebar-width: 280px;
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
+	&__align {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
 	.is-invalid input {
 		border-color: #cc1818;
 	}

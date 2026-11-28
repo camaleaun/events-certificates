@@ -26,7 +26,7 @@ import { createInterpolateElement, useState } from '@wordpress/element';
 import { BLOCK_NAMES, DATE_OF_EMISSION } from './dialect';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { justifyBottom, justifyCenter, justifyCenterVertical, justifyLeft, justifyRight, justifyStretch, justifyStretchVertical, justifyTop, alignCenter, alignLeft, alignRight, cornerBottomLeft, cornerBottomRight, cornerTopLeft, cornerTopRight, formatUppercase, Icon, link, linkOff, reset, settings } from '@wordpress/icons';
-import { elementIcon } from './icons';
+import { alignEdge, elementIcon } from './icons';
 import { naturalSize, type Picked } from './media';
 import SvgPanel from './SvgPanel';
 import { ElementSize } from './SizeRow';
@@ -623,6 +623,19 @@ function Anchors( { el, stored, page, onChange, withSize = true, inGroup = false
 	const setMode = ( axis: 'h' | 'v', mode: AxisMode ) =>
 		set( { ...layout, [ axis ]: anchorAxis( mode, axis === 'h' ? b.x : b.y, axis === 'h' ? b.w : b.h, layout[ axis ], axis === 'h' ? ref.x : ref.y, axis === 'h' ? ref.w : ref.h ) } );
 	const setRef = ( r: 'page' | 'safe' ) => set( layoutFrom( { ...layout, ref: r }, b, page ) );
+	// Align moves the element to the side or the center of its box and keeps its anchor (an element anchored to the right and aligned to the left is at
+	// "right = the box minus its width"); an axis that fills has nothing to align.
+	const align = ( axis: 'h' | 'v', side: 'start' | 'center' | 'end' ) =>
+		set( { ...layout, [ axis ]: alignAxis( side, axis === 'h' ? b.w : b.h, layout[ axis ], axis === 'h' ? ref.x : ref.y, axis === 'h' ? ref.w : ref.h ) } );
+	const target = inGroup ? __( 'group', 'events-certificates' ) : layout.ref === 'safe' ? __( 'margin', 'events-certificates' ) : __( 'page', 'events-certificates' );
+	const aligns: Array< [ 'h' | 'v', 'start' | 'center' | 'end', JSX.Element, string ] > = [
+		[ 'h', 'start', alignEdge.left, __( 'left', 'events-certificates' ) ],
+		[ 'h', 'center', alignEdge.centerH, __( 'center', 'events-certificates' ) ],
+		[ 'h', 'end', alignEdge.right, __( 'right', 'events-certificates' ) ],
+		[ 'v', 'start', alignEdge.top, __( 'top', 'events-certificates' ) ],
+		[ 'v', 'center', alignEdge.middleV, __( 'middle', 'events-certificates' ) ],
+		[ 'v', 'end', alignEdge.bottom, __( 'bottom', 'events-certificates' ) ],
+	];
 	const ratio = lockedRatio( stored );
 	const side = ratio ? lockedSide( layout ) : null;
 	const field = ( axis: 'h' | 'v', key: 'start' | 'end' | 'size', label: string ) => {
@@ -685,6 +698,27 @@ function Anchors( { el, stored, page, onChange, withSize = true, inGroup = false
 				<ToggleGroupControlOption value="page" label={ __( 'Page', 'events-certificates' ) } disabled={ sameBox } />
 				<ToggleGroupControlOption value="safe" label={ __( 'Margin', 'events-certificates' ) } aria-label={ __( 'Safe margin', 'events-certificates' ) } disabled={ sameBox } showTooltip />
 			</ToggleGroupControl>
+			{ ! flowed && (
+				<div className="evcert-anchors__align" role="group" aria-label={ __( 'Align', 'events-certificates' ) }>
+					<span className="components-base-control__label">{ __( 'Align', 'events-certificates' ) }</span>
+					<HStack spacing={ 1 } justify="flex-start">
+						{ aligns.map( ( [ axis, side, icon, word ] ) => {
+							const fills = layout[ axis ].mode === 'stretch';
+							return (
+								<Button
+									key={ `${ axis }-${ side }` }
+									icon={ icon }
+									size="compact"
+									disabled={ fills }
+									accessibleWhenDisabled
+									label={ fills ? __( 'Fill: nothing to align', 'events-certificates' ) : sprintf( /* translators: 1: left, center, right, top, middle or bottom; 2: page, margin or group. */ __( 'Align %1$s to the %2$s', 'events-certificates' ), word, target ) }
+									onClick={ () => align( axis, side ) }
+								/>
+							);
+						} ) }
+					</HStack>
+				</div>
+			) }
 			<ToggleGroupControl
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
