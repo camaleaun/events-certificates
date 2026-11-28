@@ -4,6 +4,7 @@
  * the options of the camaleaun/draw package's toMarkup() and fromMarkup().
  */
 import type { Options } from '@camaleaun/draw';
+import { FIELD_KEYS } from './fieldKeys';
 
 const SHAPES = [ 'text', 'rect', 'ellipse', 'path', 'line', 'image', 'svg', 'group', 'signature' ];
 
@@ -16,7 +17,7 @@ export const BLOCK_NAMES: Record< string, string > = {
 export const FALLBACK = 'events-certificates/certificate-element';
 
 // The names of the certificate's types that the package does not know: not written, as the type says them.
-export const BLOCK_OPTIONS: Options = { blocks: BLOCK_NAMES, fallback: FALLBACK, paths: 'attribute', names: { signature: 'Signature', 'image:logo': 'Community logo' } };
+export const BLOCK_OPTIONS: Options = { fields: FIELD_KEYS, blocks: BLOCK_NAMES, fallback: FALLBACK, paths: 'attribute', names: { signature: 'Signature', 'image:logo': 'Community logo' } };
 
 type Loose = Record< string, unknown >;
 

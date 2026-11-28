@@ -21,6 +21,8 @@ export const resolve = < T extends Element >( el: T, page: Design[ 'page' ] ): T
 /** An element placed at a box: absolute elements take the numbers, anchored ones update their anchors. */
 export const placed = < T extends Element >( stored: T, b: Box, page: Design[ 'page' ] ): T => placedAt( stored as never, b, page as PageBox ) as T;
 import { __ } from '@wordpress/i18n';
+import { parseRuns } from '@camaleaun/draw';
+import { FIELD_KEYS } from './fieldKeys';
 
 export type Mode = 'light' | 'dark';
 
@@ -344,40 +346,17 @@ export function isRequired( el: Element, elements: Element[] ): boolean {
 	return !! el.slot && REQUIRED_SLOTS.includes( el.slot ) && elements.filter( ( e ) => e.slot === el.slot ).length < 2;
 }
 
-export const PLACEHOLDERS = [ 'name', 'event', 'location', 'issued_date', 'signer_name', 'signer_role', 'code', 'hours', 'role' ];
-
 /**
  * Rich text with fields: a list of runs, plain text or a field (a chip in the
- * editor), each with its own marks. Stored as data, never as text with
- * braces, so a field can't be mistyped and formats travel with it.
+ * editor), each with its own marks. The editor keeps it as data (a field can't be mistyped,
+ * and its format travels with it); a file and the clipboard say it as text (`Dear [name], *welcome*`,
+ * docs/decisions/0054), which camaleaun/draw reads and writes.
  */
 export type Run = { text: string; b?: boolean; i?: boolean } | { field: string; format?: string; b?: boolean; i?: boolean };
 
-export type FieldDef = { key: string; label: string; kind?: 'date' | 'hours' | 'text'; formats?: { key: string; label: string }[] };
-
-/** Fields a text can show. Labels are set by the editor (translated). */
-export const FIELD_KEYS = [ 'name', 'event', 'location', 'issued_date', 'event_date', 'hours', 'role', 'details', 'signer_name', 'signer_role', 'code', 'document' ];
-
-/** Old "{field} and **bold**" text, as runs. */
+/** Written text (`Dear [name], *welcome*`; an earlier version's `{name} and **bold**` too), as runs. */
 export function parseText( text: string ): Run[] {
-	const runs: Run[] = [];
-	const parts = text.split( /(\*\*.+?\*\*)/ );
-	for ( const part of parts ) {
-		const bold = /^\*\*(.+)\*\*$/.exec( part );
-		const body = bold ? bold[ 1 ] : part;
-		for ( const piece of body.split( /(\{[a-z_]+\})/ ) ) {
-			if ( ! piece ) {
-				continue;
-			}
-			const field = /^\{([a-z_]+)\}$/.exec( piece );
-			const run: Run = field ? { field: field[ 1 ] } : { text: piece };
-			if ( bold ) {
-				run.b = true;
-			}
-			runs.push( run );
-		}
-	}
-	return runs;
+	return parseRuns( text, { fields: FIELD_KEYS } ) as Run[];
 }
 
 /** A text element's runs (from runs, or from its old text). */
@@ -784,6 +763,11 @@ export function migrate( input: Design ): Design {
 		elements: design.elements.map( ( el ) => {
 			if ( el.type === 'text' && el.runs ) {
 				return { ...el, runs: phraseRuns( el.runs ) };
+			}
+			if ( el.type === 'text' && typeof el.text === 'string' ) {
+				// The text an earlier version kept as a string (`{name} and **bold**`) is runs from here on.
+				const { text, ...rest } = el;
+				return { ...rest, runs: phraseRuns( parseText( text ) ) } as Element;
 			}
 			if ( el.type !== 'svg' || el.paths ) {
 				return el;

@@ -426,7 +426,8 @@ class TemplatesTest extends Test_Case {
 		$this->assertStringContainsString( '"viewBox":"0 0 24 24"', $content );
 		$this->assertStringContainsString( '"horizontal":{"mode":"stretch"}', $content );
 		$this->assertStringContainsString( '"lineHeight":1.2', $content );
-		$this->assertStringContainsString( '"bold":true', $content );
+		$this->assertStringContainsString( '"text":"*a*"', $content, 'A text is written as text.' );
+		$this->assertStringNotContainsString( '"runs"', $content );
 
 		$back = Designs\decode( $content );
 		$this->assertSame( array( 'rect-1', 'svg-2', 'title', 'signature' ), array_column( $back['elements'], 'id' ) );
@@ -435,5 +436,39 @@ class TemplatesTest extends Test_Case {
 		$this->assertSame( 1.2, $back['elements'][2]['lh'] );
 		$this->assertTrue( $back['elements'][2]['runs'][0]['b'] );
 		$this->assertSame( 'stretch', $back['elements'][0]['layout']['h']['mode'] );
+	}
+
+	public function test_a_text_keeps_the_words_in_brackets_that_are_not_fields() {
+		$design  = array(
+			'page'     => array(
+				'w' => 100,
+				'h' => 50,
+			),
+			'elements' => array(
+				array(
+					'id'   => 't',
+					'type' => 'text',
+					'x'    => 1,
+					'y'    => 2,
+					'w'    => 50,
+					'h'    => 10,
+					'runs' => array(
+						array( 'text' => 'Dear ' ),
+						array(
+							'field' => 'name',
+							'b'     => true,
+						),
+						array( 'text' => ' [not a field] and [other]' ),
+					),
+				),
+			),
+		);
+		$content = Designs\content( $design );
+
+		$this->assertStringContainsString( '"text":"Dear *[name]* \\\\[not a field] and \\\\[other]"', $content );
+		$back = Designs\decode( $content );
+		$this->assertSame( $design['elements'][0]['runs'], $back['elements'][0]['runs'] );
+		$read = Designs\decode( str_replace( '\\\\[other]', '[other]', $content ) );
+		$this->assertSame( ' [not a field] and [other]', $read['elements'][0]['runs'][2]['text'], 'A word in brackets that is not a field is text.' );
 	}
 }

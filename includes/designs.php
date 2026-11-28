@@ -309,6 +309,22 @@ function keep_json( $data, $postarr, $unsanitized = array() ) {
 }
 
 /**
+ * The keys of the fields a text may have (`[name]`, `[issued_date:long]`): templates/fields.json, which the editor reads too.
+ *
+ * @return array<int, string>
+ */
+function field_keys() {
+	static $keys = null;
+	if ( null === $keys ) {
+		$json    = file_get_contents( dirname( __DIR__ ) . '/templates/fields.json' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a file of the plugin.
+		$decoded = json_decode( (string) $json, true );
+		$keys    = is_array( $decoded ) ? array_values( array_map( 'strval', $decoded ) ) : array();
+	}
+
+	return $keys;
+}
+
+/**
  * How a design is kept as blocks (docs/decisions/0047): a block of the plugin for every shape (`events-certificates/certificate-text`,
  * `-rect`…), and an SVG is one block with its paths in the `paths` attribute. The same in src/editor/dialect.ts.
  *
@@ -321,6 +337,8 @@ function block_options() {
 	}
 
 	return array(
+		// The keys that are fields in a text (`[name]`); any other [word] is text (the same list as the editor's: templates/fields.json).
+		'fields'   => field_keys(),
 		'blocks'   => $blocks,
 		'fallback' => 'events-certificates/certificate-element',
 		'paths'    => 'attribute',

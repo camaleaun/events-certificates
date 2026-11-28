@@ -1608,7 +1608,12 @@ function element_runs( array $el ) {
 		return $variants[ $locale ];
 	}
 
-	return isset( $el['runs'] ) && is_array( $el['runs'] ) ? $el['runs'] : array( array( 'text' => (string) ( $el['text'] ?? '' ) ) );
+	if ( isset( $el['runs'] ) && is_array( $el['runs'] ) ) {
+		return $el['runs'];
+	}
+
+	// The text an earlier version kept (`{name}` and `**bold**`) is read as the package reads a text.
+	return \EventsCertificate\Vendor\Camaleaun\Draw\Runs::parse( (string) ( $el['text'] ?? '' ), \EventsCertificate\Designs\field_keys() );
 }
 
 /**
@@ -2124,7 +2129,7 @@ function is_verification( array $el ) {
 	if ( in_array( $el['type'] ?? '', array( 'qr', 'verification' ), true ) || in_array( $el['slot'] ?? '', array( 'verify', 'code' ), true ) ) {
 		return true;
 	}
-	foreach ( (array) ( $el['runs'] ?? array() ) as $run ) {
+	foreach ( element_runs( $el ) as $run ) {
 		if ( in_array( $run['field'] ?? '', array( 'code', 'verify_url', 'verify_hint' ), true ) ) {
 			return true;
 		}
