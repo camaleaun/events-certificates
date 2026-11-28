@@ -1,22 +1,30 @@
 import type { APIRoute } from 'astro';
-import { landing } from '@data/landing';
+import { hub } from '@data/hub';
+import { scenarios, scenarioIds } from '@data/scenarios';
+import { matrix, whereText } from '@libs/landing';
 import { site } from '@libs/site';
 
-// The landing page as Markdown, for agents: the same data as the page.
+// The home as Markdown, for agents: the same data as the page.
 export const GET: APIRoute = () => {
+	const abs = ( path: string ) => new URL( path, new URL( import.meta.env.BASE_URL, 'https://example.invalid' ) ).pathname;
 	const body = [
 		`# ${ site.name }`,
 		'',
-		`> ${ site.tagline }`,
+		`> ${ hub.hero.title }`,
 		'',
-		landing.lead,
+		hub.hero.lead,
 		'',
-		...landing.features.flatMap( ( feature ) => [ `## ${ feature.title }`, '', feature.text, '' ] ),
-		'## In three steps',
+		'## Which one is you?',
 		'',
-		...landing.steps.map( ( step, i ) => `${ i + 1 }. ${ step }` ),
+		...scenarioIds.map( ( id ) => `- [${ scenarios[ id ].name }](${ abs( `${ id }/index.md` ) }): ${ scenarios[ id ].audience } ${ scenarios[ id ].hero.title }` ),
 		'',
-		`Docs: ${ new URL( 'docs/start/introduction/', new URL( import.meta.env.BASE_URL, 'https://example.invalid' ) ).pathname }`,
+		'## What works where',
+		'',
+		'| Feature | ' + scenarioIds.map( ( id ) => scenarios[ id ].name ).join( ' | ' ) + ' |',
+		'| --- | ' + scenarioIds.map( () => '---' ).join( ' | ' ) + ' |',
+		...matrix( 'en', scenarioIds ).map( ( row ) => `| ${ row.feature.title } | ${ row.cells.map( ( cell ) => whereText( cell.where ) ).join( ' | ' ) } |` ),
+		'',
+		`Docs: ${ abs( 'docs/start/introduction/' ) }`,
 	].join( '\n' );
 
 	return new Response( body, { headers: { 'Content-Type': 'text/markdown; charset=utf-8' } } );

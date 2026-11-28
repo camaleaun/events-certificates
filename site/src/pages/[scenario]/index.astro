@@ -1,0 +1,8 @@
+---
+import ScenarioLanding from '../../views/ScenarioLanding.astro';
+import { scenarioIds } from '@data/scenarios';
+
+export const getStaticPaths = () => scenarioIds.map( ( id ) => ( { params: { scenario: id }, props: { id } } ) );
+const { id } = Astro.props;
+---
+<ScenarioLanding id={ id } />

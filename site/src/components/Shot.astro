@@ -1,0 +1,19 @@
+---
+// A screenshot of src/assets/screenshots/<id>.webp, responsive. The first one on a page is eager (it is the LCP).
+import { Image } from 'astro:assets';
+import { screenshots } from '@data/screenshots';
+
+interface Props {
+	id: string;
+	eager?: boolean;
+}
+const { id, eager = false } = Astro.props;
+const files = import.meta.glob< { default: ImageMetadata } >( '../assets/screenshots/*.webp', { eager: true } );
+const file = files[ `../assets/screenshots/${ id }.webp` ];
+const shot = screenshots.find( ( item ) => item.id === id );
+---
+{
+	file && (
+		<Image src={ file.default } alt={ shot?.caption ?? '' } widths={ [ 480, 960, 1440 ] } sizes="(min-width: 782px) 40rem, 100vw" loading={ eager ? 'eager' : 'lazy' } fetchpriority={ eager ? 'high' : undefined } format="webp" />
+	)
+}

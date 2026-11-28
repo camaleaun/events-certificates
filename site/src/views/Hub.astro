@@ -1,0 +1,79 @@
+---
+import Base from '../layouts/Base.astro';
+import Shot from '../components/Shot.astro';
+import { hub } from '@data/hub';
+import { features } from '@data/catalog';
+import { scenarioIds, scenarios } from '@data/scenarios';
+import { matrix, whereText } from '@libs/landing';
+import { site, href } from '@libs/site';
+
+interface Props {
+	locale?: string;
+}
+const { locale = 'en' } = Astro.props;
+const rows = matrix( locale, scenarioIds );
+---
+<Base title={ site.name } description={ hub.hero.lead } markdown={ href( 'index.md' ) }>
+	<div class="wrap">
+		<section class="hero">
+			<h1>{ hub.hero.title }</h1>
+			<p>{ hub.hero.lead }</p>
+			<div class="actions">
+				<a class="button" href={ site.playground }>{ hub.hero.primary }</a>
+				<a class="button secondary" href={ href( 'docs/start/introduction/' ) }>{ hub.hero.secondary }</a>
+				<a class="button secondary" href={ site.repo }>{ hub.hero.tertiary }</a>
+			</div>
+		</section>
+		<section aria-labelledby="pains">
+			<h2 id="pains">The problem</h2>
+			<div class="cards">
+				{ hub.order.pains.map( ( key ) => <div><h3>{ hub.pains[ key as keyof typeof hub.pains ].title }</h3><p>{ hub.pains[ key as keyof typeof hub.pains ].text }</p></div> ) }
+			</div>
+		</section>
+		<section aria-labelledby="which">
+			<h2 id="which">{ hub.which.title }</h2>
+			<p>{ hub.which.lead }</p>
+			<div class="cards">
+				{ scenarioIds.map( ( id ) => (
+					<a class="card" href={ href( `${ id }/` ) }>
+						<h3>{ scenarios[ id ].name }</h3>
+						<p>{ scenarios[ id ].audience }</p>
+						<p><strong>{ scenarios[ id ].hero.title }</strong></p>
+					</a>
+				) ) }
+			</div>
+		</section>
+		<section aria-labelledby="common" class="highlights">
+			<h2 id="common">{ hub.common.title }</h2>
+			{ hub.order.core.map( ( key ) => (
+				<article class="highlight">
+					<div>
+						<h3>{ features[ key ].title }</h3>
+						<p>{ features[ key ].text }</p>
+						<p><a href={ href( `docs/${ features[ key ].docs }/` ) }>How it works</a></p>
+					</div>
+					{ features[ key ].screenshot && <Shot id={ features[ key ].screenshot! } /> }
+				</article>
+			) ) }
+		</section>
+		<section aria-labelledby="compare">
+			<h2 id="compare">{ hub.compare.title }</h2>
+			<p>{ hub.compare.lead }</p>
+			<div class="table-scroll">
+				<table class="matrix">
+					<thead><tr><th scope="col">Feature</th>{ scenarioIds.map( ( id ) => <th scope="col">{ scenarios[ id ].name }</th> ) }</tr></thead>
+					<tbody>
+						{ rows.map( ( row ) => (
+							<tr><th scope="row">{ row.feature.title }</th>{ row.cells.map( ( cell ) => <td>{ whereText( cell.where ) }</td> ) }</tr>
+						) ) }
+					</tbody>
+				</table>
+			</div>
+		</section>
+		<section aria-labelledby="finale">
+			<h2 id="finale">{ hub.finale.title }</h2>
+			<p>{ hub.finale.text }</p>
+			<div class="actions"><a class="button" href={ site.playground }>{ hub.hero.primary }</a></div>
+		</section>
+	</div>
+</Base>

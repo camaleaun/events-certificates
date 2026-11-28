@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import { matrix, whereText } from '@libs/landing';
+import { scenarios, scenarioIds } from '@data/scenarios';
+import { href } from '@libs/site';
+
+const rows = matrix( 'en' );
+---
+<Base title="What works where" description="Every feature of Events Certificates in each case: your own events, GatherPress, WordCamp.org (CampTix) and both together." markdown={ href( 'docs/what-works-where.md' ) }>
+	<div class="wrap docs-page">
+		<h1>What works where</h1>
+		<p>The plugin adapts to the plugins active on the site. "Both" means GatherPress and CampTix active together. A "Yes:" explains a difference; a note under a feature is a limit.</p>
+		<div class="table-scroll">
+			<table class="matrix">
+				<thead><tr><th scope="col">Feature</th>{ scenarioIds.map( ( id ) => <th scope="col">{ scenarios[ id ].name }</th> ) }<th scope="col">Both</th></tr></thead>
+				<tbody>
+					{ rows.map( ( row ) => (
+						<tr>
+							<th scope="row">{ row.feature.title }{ row.feature.claimNote && <small> { row.feature.claimNote }</small> }</th>
+							{ row.cells.map( ( cell ) => <td>{ whereText( cell.where ) }</td> ) }
+						</tr>
+					) ) }
+				</tbody>
+			</table>
+		</div>
+	</div>
+</Base>
