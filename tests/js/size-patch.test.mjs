@@ -20,6 +20,16 @@ const built = await esbuild.build( {
 } );
 const sandbox = {};
 vm.runInNewContext( built.outputFiles[ 0 ].text + ';this.size = size;', sandbox );
+// The drawing package too: an axis written back must resolve to the box it was written from.
+const drawBuilt = await esbuild.build( {
+	absWorkingDir: root,
+	entryPoints: [ 'vendor/camaleaun/draw/packages/js/src/index.ts' ],
+	bundle: true,
+	write: false,
+	format: 'iife',
+	globalName: 'draw',
+} );
+vm.runInNewContext( drawBuilt.outputFiles[ 0 ].text + ';this.draw = draw;', sandbox );
 // Objects of the sandbox have its own prototypes: they are compared as the plain data they are.
 const plain = ( v ) => JSON.parse( JSON.stringify( v ) );
 const sizePatch = ( ...args ) => plain( sandbox.size.sizePatch( ...args ) );
@@ -88,7 +98,7 @@ test( 'the layout keeps its unit when the size is typed', () => {
 	assert.equal( patch.layout.v.size, '96pt' );
 } );
 
-const { alignAxis, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
+const { alignAxis, anchorAxis, axisAt, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
 
 test( 'a length says its unit, and a length in points is written in it', () => {
 	assert.deepEqual( [ '12mm', '3.5in', '10px', '5', 'calc(1pt + 1pt)', '50%' ].map( unitOf ), [ 'mm', 'in', 'px', 'pt', 'pt', '%' ] );
@@ -98,13 +108,81 @@ test( 'a length says its unit, and a length in points is written in it', () => {
 	assert.equal( lengthIn( 50, '%', 200 ), '25%' );
 } );
 
-test( 'aligning an axis zeroes the offsets in the unit it was written in and keeps the size', () => {
-	assert.deepEqual( plain( alignAxis( 'start', 96, { mode: 'center', start: '33mm', size: '96pt' }, 842 ) ), { mode: 'start', start: '0pt', size: '96pt' } );
-	assert.deepEqual( plain( alignAxis( 'start', 85.0395, { mode: 'start', start: '12mm', size: '30mm' }, 842 ) ), { mode: 'start', start: '0mm', size: '30mm' } );
-	assert.deepEqual( plain( alignAxis( 'center', 85.0395, { mode: 'start', start: '12mm', size: '30mm' }, 842 ) ), { mode: 'center', start: '0mm', size: '30mm' } );
-	assert.deepEqual( plain( alignAxis( 'end', 85.0395, { mode: 'start', start: '12mm', size: '30mm' }, 842 ) ), { mode: 'end', end: '0mm', size: '30mm' } );
-	assert.deepEqual( plain( alignAxis( 'stretch', 85.0395, { mode: 'start', start: '12mm', size: '30mm' }, 842 ) ), { mode: 'stretch', start: '0mm', end: '0mm' } );
-	assert.deepEqual( plain( alignAxis( 'end', 421, { mode: 'stretch', start: '10%', end: '10%' }, 842 ) ), { mode: 'end', end: '0%', size: '50%' }, 'a % axis stays a %' );
+const MM = 2.83465;
+
+test( 'changing the anchor keeps the place and the unit of the axis', () => {
+	const prev = { mode: 'start', start: '12mm', size: '30mm' };
+	const pos = 12 * MM;
+	const size = 30 * MM;
+	assert.deepEqual( plain( anchorAxis( 'end', pos, size, prev, 0, 842 ) ), { mode: 'end', end: lengthIn( 842 - pos - size, 'mm' ), size: '30mm' }, 'to the end: only the keys the mode reads' );
+	assert.deepEqual( plain( anchorAxis( 'center', pos, size, prev, 0, 842 ) ), { mode: 'center', start: lengthIn( pos - ( 842 - size ) / 2, 'mm' ), size: '30mm' } );
+	assert.deepEqual( plain( anchorAxis( 'stretch', pos, size, prev, 0, 842 ) ), { mode: 'stretch', start: lengthIn( pos, 'mm' ), end: lengthIn( 842 - pos - size, 'mm' ) }, 'to fill: two insets, no size' );
+	assert.deepEqual( plain( anchorAxis( 'start', pos, size, { mode: 'end', end: '80mm', size: '30mm' }, 0, 842 ) ), { mode: 'start', start: '12mm', size: '30mm' }, 'no end left on a start axis' );
+} );
+
+test( 'a % axis stays a %, and what is not a plain length is written in points', () => {
+	assert.deepEqual( plain( anchorAxis( 'end', 84.2, 168.4, { mode: 'start', start: '10%', size: '20%' }, 0, 842 ) ), { mode: 'end', end: '70%', size: '20%' } );
+	const calc = plain( anchorAxis( 'end', 100, 96, { mode: 'start', start: 'calc(10% + 4pt)', size: 'calc(10% + 4pt)' }, 0, 842 ) );
+	assert.match( calc.end, /pt$/ );
+	assert.match( calc.size, /pt$/ );
+} );
+
+test( 'a drawing that says no size keeps saying none, unless it comes from a fill', () => {
+	assert.deepEqual( plain( anchorAxis( 'end', 10, 100, { mode: 'start', start: '10pt' }, 0, 842 ) ), { mode: 'end', end: '732pt' } );
+	assert.equal( plain( anchorAxis( 'start', 10, 100, { mode: 'stretch', start: '10pt', end: '10pt' }, 0, 842 ) ).size, '100pt' );
+} );
+
+test( 'an anchor written back resolves to the box it was written from, in every mode and box', () => {
+	const box = { x: 123.4, y: 50, w: 85.04, h: 96 };
+	for ( const ref of [ 'page', 'safe' ] ) {
+		for ( const mode of [ 'start', 'center', 'end', 'stretch' ] ) {
+			const origin = ref === 'safe' ? page.safe : 0;
+			const total = ref === 'safe' ? page.w - page.safe * 2 : page.w;
+			const axis = plain( anchorAxis( mode, box.x, box.w, { mode: 'start', start: '1mm', size: '1mm' }, origin, total ) );
+			const el = { type: 'rect', x: 0, y: 0, w: 1, h: 1, layout: { ref, h: axis, v: { mode: 'start', start: '0pt', size: '10pt' } } };
+			const out = sandbox.draw.resolve( el, page );
+			// A length is written with two decimals in its unit (0.01 mm is 0.028 pt): the box comes back within 0.02 pt.
+			assert.ok( Math.abs( out.x - box.x ) < 0.02 && Math.abs( out.w - box.w ) < 0.02, `${ ref } ${ mode }: ${ out.x }, ${ out.w }` );
+		}
+	}
+} );
+
+test( 'aligning moves the element to the side of its box and keeps its anchor', () => {
+	const size = 30 * MM;
+	// Anchored to the end: aligned to the left it is at 0, which is "right" = the box minus its width.
+	const end = { mode: 'end', end: '12mm', size: '30mm' };
+	assert.deepEqual( plain( alignAxis( 'start', size, end, 0, 842 ) ), { mode: 'end', end: lengthIn( 842 - size, 'mm' ), size: '30mm' }, 'the anchor stays the end' );
+	assert.deepEqual( plain( alignAxis( 'end', size, end, 0, 842 ) ), { mode: 'end', end: '0mm', size: '30mm' } );
+	assert.deepEqual( plain( alignAxis( 'center', size, end, 0, 842 ) ), { mode: 'end', end: lengthIn( ( 842 - size ) / 2, 'mm' ), size: '30mm' } );
+	// Anchored to the start: left is 0, center is half of what is left, right is what is left.
+	const start = { mode: 'start', start: '12mm', size: '30mm' };
+	assert.deepEqual( plain( alignAxis( 'start', size, start, 0, 842 ) ), { mode: 'start', start: '0mm', size: '30mm' } );
+	assert.deepEqual( plain( alignAxis( 'center', size, start, 0, 842 ) ), { mode: 'start', start: lengthIn( ( 842 - size ) / 2, 'mm' ), size: '30mm' } );
+	assert.deepEqual( plain( alignAxis( 'end', size, start, 0, 842 ) ), { mode: 'start', start: lengthIn( 842 - size, 'mm' ), size: '30mm' } );
+	// Anchored to the center: the offset is the shift from the center.
+	const center = { mode: 'center', start: '33mm', size: '30mm' };
+	assert.deepEqual( plain( alignAxis( 'center', size, center, 0, 842 ) ), { mode: 'center', start: '0mm', size: '30mm' } );
+	assert.deepEqual( plain( alignAxis( 'start', size, center, 0, 842 ) ), { mode: 'center', start: lengthIn( -( 842 - size ) / 2, 'mm' ), size: '30mm' } );
+	// An axis that fills has nothing to align.
+	const fill = { mode: 'stretch', start: '10mm', end: '10mm' };
+	assert.deepEqual( plain( alignAxis( 'start', size, fill, 0, 842 ) ), plain( fill ) );
+} );
+
+test( 'an aligned axis resolves to the side it was aligned to, from any anchor and from a margin', () => {
+	const w = 85.04;
+	for ( const ref of [ 'page', 'safe' ] ) {
+		const origin = ref === 'safe' ? page.safe : 0;
+		const total = ref === 'safe' ? page.w - page.safe * 2 : page.w;
+		for ( const mode of [ 'start', 'center', 'end' ] ) {
+			for ( const side of [ 'start', 'center', 'end' ] ) {
+				const axis = plain( alignAxis( side, w, { mode, start: '5mm', end: '5mm', size: `${ w }pt` }, origin, total ) );
+				assert.equal( axis.mode, mode, 'the anchor stays' );
+				const out = sandbox.draw.resolve( { type: 'rect', x: 0, y: 0, w: 1, h: 1, layout: { ref, h: axis, v: { mode: 'start', start: '0pt', size: '10pt' } } }, page );
+				const want = side === 'start' ? origin : side === 'center' ? origin + ( total - w ) / 2 : origin + total - w;
+				assert.ok( Math.abs( out.x - want ) < 0.02, `${ ref } ${ mode } ${ side }: ${ out.x } vs ${ want }` );
+			}
+		}
+	}
 } );
 
 test( 'the size of an element is shown in the unit of its layout', () => {

@@ -30,7 +30,7 @@ import { elementIcon } from './icons';
 import { naturalSize, type Picked } from './media';
 import SvgPanel from './SvgPanel';
 import { ElementSize } from './SizeRow';
-import { alignAxis, radiusConvert, radiusFrom, radiusNumber, radiusUnit, unitOf, type RadiusUnit } from './size';
+import { alignAxis, anchorAxis, radiusConvert, radiusFrom, radiusNumber, radiusUnit, unitOf, type RadiusUnit } from './size';
 import { fields, tokenOnly } from './FieldText';
 import TextByLanguage from './TextByLanguage';
 import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, type GroupEl, fieldValue, runsOf } from './model';
@@ -618,8 +618,10 @@ function Anchors( { el, stored, page, onChange, withSize = true, inGroup = false
 	const ref = refBox( page, layout.ref );
 	const sameBox = ! ( page.safe > 0 );
 	const set = ( next: Layout ) => onChange( { layout: next } as Partial< Element > );
-	// Left, center, right or fill: the offsets are zero in the unit of the axis, and the element keeps its size (not the place it had).
-	const setMode = ( axis: 'h' | 'v', mode: AxisMode ) => set( { ...layout, [ axis ]: alignAxis( mode, axis === 'h' ? b.w : b.h, layout[ axis ], axis === 'h' ? ref.w : ref.h ) } );
+	// The anchor (left, center, right or fill) is what the element is measured from: the element stays where it is and the offset is written again from the
+	// new anchor, in the unit it had. What moves it to a side is the Align row.
+	const setMode = ( axis: 'h' | 'v', mode: AxisMode ) =>
+		set( { ...layout, [ axis ]: anchorAxis( mode, axis === 'h' ? b.x : b.y, axis === 'h' ? b.w : b.h, layout[ axis ], axis === 'h' ? ref.x : ref.y, axis === 'h' ? ref.w : ref.h ) } );
 	const setRef = ( r: 'page' | 'safe' ) => set( layoutFrom( { ...layout, ref: r }, b, page ) );
 	const ratio = lockedRatio( stored );
 	const side = ratio ? lockedSide( layout ) : null;

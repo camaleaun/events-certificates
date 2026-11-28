@@ -70,17 +70,48 @@ export function lengthIn( pt: number, unit: Unit, total = 0, digits?: number ): 
 }
 
 /**
- * An axis aligned to the start, the center, the end or the whole of its box: the offsets are zero ("0 left", "0 center", "0 right", "0 and 0
- * fill") in the unit the axis was written in, and the element keeps its size (not the place it had). `total` is the length of the box on that axis.
+ * An axis in `mode` that puts the element's first edge at `pos` (points on the page, or in the group): the offsets the mode reads, in the unit the
+ * axis was written in (a `%` stays a `%`, a calc() is written in points). `origin` and `total` are the box the axis is measured from. Only the keys the mode
+ * reads are written, so no `start` is left on an axis anchored to the end. A drawing that says no size keeps saying none (its size is the viewBox's),
+ * unless it comes from a fill, where the size was not its own.
  */
-export function alignAxis( mode: AxisMode, sizePt: number, previous: Axis | undefined, total: number ): Axis {
+export function axisAt( mode: AxisMode, pos: number, sizePt: number, previous: Axis | undefined, origin: number, total: number ): Axis {
 	const unit = unitOf( previous?.size ?? previous?.start ?? previous?.end );
-	const zero = `0${ unit }`;
-	if ( mode === 'stretch' ) {
-		return { mode, start: zero, end: zero };
+	const offset = pos - origin;
+	const len = ( pt: number ) => lengthIn( pt, unit, total );
+	const noSize = !! previous && previous.mode !== 'stretch' && previous.size === undefined;
+	const size = noSize ? {} : { size: len( sizePt ) };
+	switch ( mode ) {
+		case 'end':
+			return { mode, end: len( total - offset - sizePt ), ...size };
+		case 'center':
+			return { mode, start: len( offset - ( total - sizePt ) / 2 ), ...size };
+		case 'stretch':
+			return { mode, start: len( offset ), end: len( total - offset - sizePt ) };
+		default:
+			return { mode, start: len( offset ), ...size };
 	}
-	const size = lengthIn( sizePt, unit, total );
-	return mode === 'end' ? { mode, end: zero, size } : { mode, start: zero, size };
+}
+
+/**
+ * Changing the anchor of an axis (what the element is measured from: its left, its center or its right; or both, to fill): the element stays where it is
+ * and the offset is written again from the new anchor, in the unit the axis had.
+ */
+export function anchorAxis( mode: AxisMode, pos: number, sizePt: number, previous: Axis | undefined, origin: number, total: number ): Axis {
+	return axisAt( mode, pos, sizePt, previous, origin, total );
+}
+
+/**
+ * Aligning an element to the start, the center or the end of its box: it moves there and keeps its anchor (anchored to the end and aligned to the
+ * start, it is at "right = the box minus its width"). An axis that fills has nothing to align and is returned as it is.
+ */
+export function alignAxis( side: 'start' | 'center' | 'end', sizePt: number, previous: Axis | undefined, origin: number, total: number ): Axis {
+	const mode = previous?.mode ?? 'start';
+	if ( mode === 'stretch' && previous ) {
+		return previous;
+	}
+	const pos = side === 'start' ? origin : side === 'center' ? origin + ( total - sizePt ) / 2 : origin + total - sizePt;
+	return axisAt( mode, pos, sizePt, previous, origin, total );
 }
 
 /** The layout an element has, or the one that holds it where it is (anchored to the start of the page). */
