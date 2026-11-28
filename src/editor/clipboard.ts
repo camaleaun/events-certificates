@@ -15,6 +15,14 @@ export type ClipboardPayload = { version: 1; elements: Element[]; source: Source
 
 export const CLIPBOARD_TYPE = 'application/x-events-certificates+json';
 
+/**
+ * Whether a copy or a cut is of the selected elements: they are selected, the focus is not in a field (which has its own copy) and the user has not selected text of their own
+ * (a line of the sidebar, a notice): that is copied as the text it is, with the element still selected.
+ */
+export function copyIsOfElements( { selected, editable, hasTextSelection, defaultPrevented }: { selected: number; editable: boolean; hasTextSelection: boolean; defaultPrevented: boolean } ): boolean {
+	return selected > 0 && ! editable && ! hasTextSelection && ! defaultPrevented;
+}
+
 /** The elements of a copy: the selected ones as they are on the page, not one that is in another that is copied too. */
 export function copyPayload( tree: Element[], page: Page, ids: string[], source: Source ): ClipboardPayload {
 	const picked = inListOrder( tree, ids );

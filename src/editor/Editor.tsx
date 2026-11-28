@@ -50,7 +50,7 @@ import SvgEditor from './SvgEditor';
 import type { Picked } from './media';
 import { parse, serialize } from '@wordpress/blocks';
 import { BlockLayers, BlocksProvider, registerBlocks, toBlocks, toElements, type Selection } from './blocks';
-import { adoptColors, CLIPBOARD_TYPE, copyPayload, pasteEls, plainTextOf, type ClipboardPayload } from './clipboard';
+import { adoptColors, CLIPBOARD_TYPE, copyIsOfElements, copyPayload, pasteEls, plainTextOf, type ClipboardPayload } from './clipboard';
 import { runsFromText } from './rich';
 import { FIELD_KEYS } from './fieldKeys';
 import { BLOCK_NAMES } from './dialect';
@@ -639,7 +639,9 @@ export default function Editor() {
 			return ! event.defaultPrevented && !! target && ! target.closest?.( 'input, textarea, [contenteditable="true"], .block-editor-list-view' );
 		};
 		const onCopy = ( event: ClipboardEvent ) => {
-			if ( mine( event ) && selection.ids.length && event.clipboardData && toClipboard( event.clipboardData, event.type === 'cut' ) ) {
+			// Text the user selected (the sidebar, a notice) is copied as the text it is; the elements are copied when they are what is selected.
+			const hasTextSelection = !! window.getSelection()?.toString().trim();
+			if ( mine( event ) && copyIsOfElements( { selected: selection.ids.length, editable: false, hasTextSelection, defaultPrevented: false } ) && event.clipboardData && toClipboard( event.clipboardData, event.type === 'cut' ) ) {
 				event.preventDefault();
 			}
 		};

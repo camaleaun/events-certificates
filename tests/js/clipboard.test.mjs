@@ -51,6 +51,15 @@ test( 'the plain text of a copy is the words of its texts, one a line', () => {
 	assert.equal( c.plainTextOf( els ), 'Dear [[name]]\n**Thanks**' );
 } );
 
+test( 'a copy or a cut is the selected elements\' unless the user selected text of their own, or is in a field', () => {
+	const base = { selected: 1, editable: false, hasTextSelection: false, defaultPrevented: false };
+	assert.equal( c.copyIsOfElements( base ), true, 'an element is selected and nothing else' );
+	assert.equal( c.copyIsOfElements( { ...base, hasTextSelection: true } ), false, 'text selected anywhere on the page (the sidebar, a notice) is copied as text' );
+	assert.equal( c.copyIsOfElements( { ...base, editable: true } ), false, 'in a field the field copies' );
+	assert.equal( c.copyIsOfElements( { ...base, selected: 0 } ), false, 'nothing selected: nothing of ours to copy' );
+	assert.equal( c.copyIsOfElements( { ...base, defaultPrevented: true } ), false, 'what another handler took' );
+} );
+
 test( 'a paste has new ids, goes in the selected group when it holds them, and keeps its place on the page', () => {
 	const copy = c.copyPayload( tree(), page, [ 'e' ], design );
 	const out = c.pasteEls( tree(), page, copy.elements, { selected: [ 'g' ], offset: 0 } );
