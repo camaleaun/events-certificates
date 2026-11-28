@@ -92,6 +92,7 @@ function register_screen() {
 	add_action( 'admin_menu', __NAMESPACE__ . '\hide_settings_page', 999 );
 	// The address of the tab goes to the short one.
 	add_action( 'admin_init', __NAMESPACE__ . '\redirect_tab_address' );
+	add_filter( 'submenu_file', __NAMESPACE__ . '\highlight_settings' );
 }
 
 /**
@@ -146,6 +147,18 @@ function render_settings_tab( $page ) {
 function register_settings_page() {
 	$title = __( 'Certificates', 'events-certificates' );
 	add_submenu_page( PARENT_SLUG, $title, $title, Admin\CAPABILITY, SETTINGS_SLUG, __NAMESPACE__ . '\render_settings_page' );
+}
+
+/**
+ * The menu item that is highlighted on the settings page, which has none: Events > Settings, the screen it is a tab of (GatherPress highlights it for its own tabs; the short
+ * address is the plugin's, and WordPress does not know where it belongs).
+ *
+ * @param string|null $submenu_file The submenu item to highlight.
+ * @return string|null
+ */
+function highlight_settings( $submenu_file ) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which page is shown.
+	return isset( $_GET['page'] ) && SETTINGS_SLUG === sanitize_key( wp_unslash( $_GET['page'] ) ) ? 'gatherpress_events_settings' : $submenu_file;
 }
 
 /**

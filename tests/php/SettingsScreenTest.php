@@ -304,6 +304,21 @@ class SettingsScreenTest extends Test_Case {
 	}
 
 	/**
+	 * The short address of the settings (page=certificates) is a page with no menu item: the menu item of the settings it belongs to is the one that is highlighted
+	 * (Tickets > Setup with CampTix; Events > Settings with GatherPress), and any other page is left as WordPress says.
+	 */
+	public function test_the_hidden_settings_page_highlights_the_settings_it_belongs_to() {
+		$saved = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$_GET['page'] = 'certificates';
+		$this->assertSame( 'camptix_options', \EventsCertificate\Compat\CampTix\highlight_setup( 'certificates' ), 'CampTix: Setup.' );
+		$this->assertSame( 'gatherpress_events_settings', \EventsCertificate\Compat\GatherPress\highlight_settings( 'certificates' ), 'GatherPress: Settings.' );
+		$_GET['page'] = 'camptix_options';
+		$this->assertSame( 'camptix_options', \EventsCertificate\Compat\CampTix\highlight_setup( 'camptix_options' ) );
+		$this->assertSame( 'edit.php?post_type=x', \EventsCertificate\Compat\GatherPress\highlight_settings( 'edit.php?post_type=x' ), 'Another page is left alone.' );
+		$_GET = $saved; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
 	 * A tab taken away (or added) once is taken away in every mount: the list of tabs is one.
 	 */
 	public function test_a_tab_changed_in_the_filter_is_changed_in_every_mount() {

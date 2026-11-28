@@ -61,6 +61,7 @@ function register() {
 	add_action( 'admin_menu', __NAMESPACE__ . '\hide_settings_page', 999 );
 	add_action( 'admin_menu', __NAMESPACE__ . '\move_after_attendees', 99 );
 	add_action( 'admin_init', __NAMESPACE__ . '\redirect_setup_tab' );
+	add_filter( 'submenu_file', __NAMESPACE__ . '\highlight_setup' );
 }
 
 /**
@@ -87,6 +88,18 @@ function settings_slug() {
 function register_settings_page() {
 	$title = __( 'Certificates', 'events-certificates' );
 	add_submenu_page( MENU, $title, $title, Admin\CAPABILITY, SETTINGS_SLUG, __NAMESPACE__ . '\render_settings_page' );
+}
+
+/**
+ * The menu item that is highlighted on the settings page, which has none: Tickets > Setup, the screen it is a tab of (the address of the page is short, and WordPress
+ * does not know where it belongs).
+ *
+ * @param string|null $submenu_file The submenu item to highlight.
+ * @return string|null
+ */
+function highlight_setup( $submenu_file ) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which page is shown.
+	return isset( $_GET['page'] ) && SETTINGS_SLUG === sanitize_key( wp_unslash( $_GET['page'] ) ) ? 'camptix_options' : $submenu_file;
 }
 
 /**
