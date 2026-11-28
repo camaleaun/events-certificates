@@ -43,6 +43,7 @@ function strings(): Record< string, string > {
 		Line: __( 'Line', 'events-certificates' ),
 		Image: __( 'Image', 'events-certificates' ),
 		SVG: __( 'SVG', 'events-certificates' ),
+		Group: __( 'Group', 'events-certificates' ),
 		'Took part': __( 'Took part', 'events-certificates' ),
 		Verification: __( 'Verification', 'events-certificates' ),
 		Title: __( 'Title', 'events-certificates' ),

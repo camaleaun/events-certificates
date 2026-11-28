@@ -366,4 +366,140 @@ class RenderTest extends Test_Case {
 		$this->assertEqualsWithDelta( 28.35, $page['safe'], 0.01 );
 		$this->assertEqualsWithDelta( 36.0, $page['bleed'], 0.01 );
 	}
+
+	/**
+	 * A group: its own box, and what is in it placed from its corner and anchored to its size, shown even where it goes out of the box unless the group clips.
+	 */
+	public function test_a_group_holds_its_elements_from_its_corner() {
+		$group  = array(
+			'id'       => 'box',
+			'type'     => 'group',
+			'x'        => 100,
+			'y'        => 50,
+			'w'        => 200,
+			'h'        => 80,
+			'fill'     => '#eeeeee',
+			'children' => array(
+				array(
+					'id'     => 'box-rect-1',
+					'type'   => 'rect',
+					'fill'   => '#ff0000',
+					'layout' => array(
+						'ref' => 'parent',
+						'h'   => array(
+							'mode'  => 'stretch',
+							'start' => '10pt',
+							'end'   => '10pt',
+						),
+						'v'   => array(
+							'mode'  => 'start',
+							'start' => '5pt',
+							'size'  => '20pt',
+						),
+					),
+				),
+			),
+		);
+		$design = array(
+			'page'     => array(
+				'w'    => 800,
+				'h'    => 600,
+				'safe' => 0,
+				'bg'   => '$background',
+			),
+			'colors'   => array(),
+			'elements' => array( $group ),
+		);
+		$html   = Render\artwork( $design, array(), array() );
+		// The container is at the group's place, shows what goes out of it by default, and its child is at 10, 5 with the width of the group less the two margins.
+		$this->assertMatchesRegularExpression( '/left:100\.00pt;top:50\.00pt;width:200\.00pt;height:80\.00pt;[^"]*overflow:visible;/', $html );
+		$this->assertMatchesRegularExpression( '/left:10\.00pt;top:5\.00pt;width:180\.00pt;height:20\.00pt/', $html );
+		$group['clip']      = true;
+		$design['elements'] = array( $group );
+		$this->assertMatchesRegularExpression( '/left:100\.00pt;top:50\.00pt;width:200\.00pt;height:80\.00pt;[^"]*overflow:hidden;/', Render\artwork( $design, array(), array() ), 'A group that clips cuts what goes out of it.' );
+		// Out of a group the same anchors are the page's.
+		$loose = Render\resolve( $group['children'][0], $design['page'] );
+		$this->assertEqualsWithDelta( 780.0, $loose['w'], 0.001 );
+	}
+
+	/**
+	 * An ellipse is drawn with its outline, centered on the edge.
+	 */
+	public function test_an_ellipse_has_its_outline() {
+		$design = array(
+			'page'     => array(
+				'w'    => 800,
+				'h'    => 600,
+				'safe' => 0,
+				'bg'   => '$background',
+			),
+			'colors'   => array(),
+			'elements' => array(
+				array(
+					'id'          => 'ring',
+					'type'        => 'ellipse',
+					'x'           => 10,
+					'y'           => 10,
+					'w'           => 80,
+					'h'           => 80,
+					'fill'        => '',
+					'stroke'      => '#ff0000',
+					'strokeWidth' => 4,
+				),
+			),
+		);
+		$html   = Render\artwork( $design, array(), array() );
+		$this->assertStringContainsString( 'left:8.00pt;top:8.00pt;width:84.00pt;height:84.00pt', $html, 'The picture is bigger by half the outline on each side.' );
+		$this->assertStringContainsString( 'src="data:image/svg+xml', $html );
+	}
+
+	/**
+	 * A group that is a row places what is in it one after the other, a stack one under the other.
+	 */
+	public function test_a_row_group_places_its_elements_in_a_row() {
+		$kids   = array(
+			array(
+				'id'   => 'a',
+				'type' => 'rect',
+				'fill' => '#111111',
+				'w'    => 40,
+				'h'    => 10,
+			),
+			array(
+				'id'   => 'b',
+				'type' => 'rect',
+				'fill' => '#222222',
+				'w'    => 30,
+				'h'    => 10,
+			),
+		);
+		$design = array(
+			'page'     => array(
+				'w'    => 800,
+				'h'    => 600,
+				'safe' => 0,
+				'bg'   => '$background',
+			),
+			'colors'   => array(),
+			'elements' => array(
+				array(
+					'id'       => 'row',
+					'type'     => 'group',
+					'x'        => 100,
+					'y'        => 50,
+					'w'        => 200,
+					'h'        => 60,
+					'arrange'  => 'row',
+					'gap'      => 10,
+					'padding'  => 5,
+					'children' => $kids,
+				),
+			),
+		);
+		$html   = Render\artwork( $design, array(), array() );
+		$this->assertMatchesRegularExpression( '/left:5\.00pt;top:5\.00pt;width:40\.00pt;height:10\.00pt/', $html );
+		$this->assertMatchesRegularExpression( '/left:55\.00pt;top:5\.00pt;width:30\.00pt;height:10\.00pt/', $html );
+		$design['elements'][0]['arrange'] = 'stack';
+		$this->assertMatchesRegularExpression( '/left:5\.00pt;top:25\.00pt;width:30\.00pt;height:10\.00pt/', Render\artwork( $design, array(), array() ) );
+	}
 }

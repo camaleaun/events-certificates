@@ -96,6 +96,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 		line: __( 'Line', 'events-certificates' ),
 		rect: __( 'Rectangle', 'events-certificates' ),
 		ellipse: __( 'Ellipse', 'events-certificates' ),
+		group: __( 'Group', 'events-certificates' ),
 		path: __( 'Shape', 'events-certificates' ),
 		image: __( 'Image', 'events-certificates' ),
 		svg: __( 'SVG', 'events-certificates' ),

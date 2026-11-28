@@ -316,7 +316,7 @@ function keep_json( $data, $postarr, $unsanitized = array() ) {
  */
 function block_options() {
 	$blocks = array();
-	foreach ( array( 'text', 'rect', 'ellipse', 'path', 'line', 'image', 'svg', 'signature' ) as $type ) {
+	foreach ( array( 'text', 'rect', 'ellipse', 'path', 'line', 'image', 'svg', 'group', 'signature' ) as $type ) {
 		$blocks[ $type ] = 'events-certificates/certificate-' . $type;
 	}
 

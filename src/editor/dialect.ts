@@ -5,7 +5,7 @@
  */
 import type { Options } from '@camaleaun/draw';
 
-const SHAPES = [ 'text', 'rect', 'ellipse', 'path', 'line', 'image', 'svg', 'signature' ];
+const SHAPES = [ 'text', 'rect', 'ellipse', 'path', 'line', 'image', 'svg', 'group', 'signature' ];
 
 export const BLOCK_NAMES: Record< string, string > = {
 	...Object.fromEntries( SHAPES.map( ( type ) => [ type, `events-certificates/certificate-${ type }` ] ) ),

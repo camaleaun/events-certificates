@@ -104,6 +104,11 @@ export type RectEl = Base & { type: 'rect'; fill?: string; stroke?: string; stro
 /** An SVG drawing kept as fields, never as markup: a viewBox size and a list of filled paths. */
 /** title: names the drawing (the SVG's <title> and the image's alt text); empty for decoration. */
 export type SvgEl = Base & { type: 'svg'; title?: string; vw: number; vh: number; paths: SvgPath[]; color?: string; markup?: string; fill?: string };
+/**
+ * A box like a rectangle that holds other elements. What is in it (`children`) is placed from its top-left corner, and its anchors (`ref: 'parent'`) are
+ * to its size; it clips them to its box unless `clip` is false. It holds no authenticity code, verification or signature.
+ */
+export type GroupEl = Base & { type: 'group'; fill?: string; stroke?: string; strokeWidth?: number; radius?: Array< number | string >; corner?: CornerShape; clip?: boolean; children: Element[] };
 export type EllipseEl = Base & { type: 'ellipse'; fill?: string; stroke?: string; strokeWidth?: number };
 export type PathEl = Base & { type: 'path'; d: string; vw: number; vh: number; fill?: string; stroke?: string; strokeWidth?: number };
 export type LineEl = Omit< Base, 'x' | 'y' | 'w' | 'h' > & {
@@ -138,7 +143,7 @@ export type VerificationEl = Base & {
 	hint?: { size?: number; weight?: number; color?: string; lh?: number };
 };
 
-export type Element = TextEl | RectEl | EllipseEl | PathEl | LineEl | ImageEl | QrEl | SignatureEl | SvgEl | VerificationEl;
+export type Element = TextEl | RectEl | EllipseEl | PathEl | LineEl | ImageEl | QrEl | SignatureEl | SvgEl | VerificationEl | GroupEl;
 
 export type Design = {
 	// bg: one color for both modes, or one per mode (e.g. none in Light, a dark color in Dark); '' = the page's own color.
@@ -446,6 +451,8 @@ export function create( type: Element[ 'type' ] | 'logo', design: Design, paint?
 			return { id, type, name: 'Text', x: cx - 120, y: cy - 10, w: 240, h: 20, runs: [ { text: 'Text' } ], font: 'CertSans', weight: 400, size: 14, color: '$text', align: 'center', lh: 1.3 };
 		case 'rect':
 			return { id, type, name: 'Rectangle', x: cx - 60, y: cy - 40, w: 120, h: 80, fill: paint?.fill ?? '#000000', stroke: paint?.stroke ?? '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ] };
+		case 'group':
+			return { id, type, name: 'Group', x: cx - 100, y: cy - 60, w: 200, h: 120, fill: '', stroke: '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ], children: [] };
 		case 'ellipse':
 			return { id, type, name: 'Ellipse', x: cx - 40, y: cy - 40, w: 80, h: 80, fill: paint?.fill ?? '#000000', stroke: paint?.stroke ?? '', strokeWidth: 1 };
 		case 'line':

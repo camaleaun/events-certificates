@@ -89,19 +89,25 @@ function resolve_axis( array $axis, $origin, $total, $forced = null ) {
 /**
  * An element with its anchors resolved to x, y, w, h.
  *
- * @param array<string, mixed> $el   Element.
- * @param array<string, mixed> $page Page.
+ * @param array<string, mixed> $el     Element.
+ * @param array<string, mixed> $page   Page.
+ * @param array<string, mixed> $group  The box (w, h) of the group the element is in; its corner is 0, 0 (ref "parent").
  * @return array<string, mixed>
  */
-function resolve( array $el, array $page ) {
+function resolve( array $el, array $page, array $group = array() ) {
 	if ( empty( $el['layout'] ) || 'line' === ( $el['type'] ?? '' ) ) {
 		return $el;
 	}
-	$layout                    = $el['layout'];
-	$safe                      = (float) ( $page['safe'] ?? 0 );
-	$ref                       = 'safe' === ( $layout['ref'] ?? 'page' )
-		? array( $safe, $safe, $page['w'] - $safe * 2, $page['h'] - $safe * 2 )
-		: array( 0, 0, $page['w'], $page['h'] );
+	$layout = $el['layout'];
+	$safe   = (float) ( $page['safe'] ?? 0 );
+	$kind   = $layout['ref'] ?? 'page';
+	if ( 'parent' === $kind && isset( $group['w'], $group['h'] ) ) {
+		$ref = array( 0, 0, (float) $group['w'], (float) $group['h'] );
+	} else {
+		$ref = 'safe' === $kind
+			? array( $safe, $safe, $page['w'] - $safe * 2, $page['h'] - $safe * 2 )
+			: array( 0, 0, $page['w'], $page['h'] );
+	}
 	list( $el['x'], $el['w'] ) = resolve_axis( (array) ( $layout['h'] ?? array() ), $ref[0], $ref[2] );
 	list( $el['y'], $el['h'] ) = resolve_axis( (array) ( $layout['v'] ?? array() ), $ref[1], $ref[3] );
 
@@ -1903,15 +1909,42 @@ function element_html( array $el, array $design, array $values, array $options )
 			return $img( svg_src( $svg ), sprintf( 'position:absolute;left:%.2Fpt;top:%.2Fpt;width:%.2Fpt;height:%.2Fpt;%s%s', $el['x'] - $sw / 2, $el['y'] - $sw / 2, $el['w'] + $sw, $el['h'] + $sw, $rotate, $alpha ) );
 
 		case 'ellipse':
+			// The outline is centered on the edge, as the editor draws it: the picture is a little bigger than the box, by half the width on each side.
+			$sw  = (float) ( $el['strokeWidth'] ?? 0 );
 			$svg = sprintf(
-				'<svg xmlns="http://www.w3.org/2000/svg" width="%1$.2F" height="%2$.2F" viewBox="0 0 %1$.2F %2$.2F"><ellipse cx="%3$.2F" cy="%4$.2F" rx="%3$.2F" ry="%4$.2F" fill="%5$s"/></svg>',
-				$el['w'],
-				$el['h'],
+				'<svg xmlns="http://www.w3.org/2000/svg" width="%1$.2F" height="%2$.2F" viewBox="%6$.2F %6$.2F %1$.2F %2$.2F"><ellipse cx="%3$.2F" cy="%4$.2F" rx="%3$.2F" ry="%4$.2F" fill="%5$s" stroke="%7$s" stroke-width="%8$.2F"/></svg>',
+				$el['w'] + $sw,
+				$el['h'] + $sw,
 				$el['w'] / 2,
 				$el['h'] / 2,
-				esc_attr( color( $design, $el['fill'] ?? '', $mode ) )
+				esc_attr( color( $design, $el['fill'] ?? '', $mode ) ),
+				-$sw / 2,
+				esc_attr( color( $design, $el['stroke'] ?? '', $mode ) ),
+				$sw
 			);
-			return $img( svg_src( $svg ), $box . $alpha );
+			return $img( svg_src( $svg ), sprintf( 'position:absolute;left:%.2Fpt;top:%.2Fpt;width:%.2Fpt;height:%.2Fpt;%s%s', $el['x'] - $sw / 2, $el['y'] - $sw / 2, $el['w'] + $sw, $el['h'] + $sw, $rotate, $alpha ) );
+
+		case 'group':
+			// A group is a rectangle with other elements in it: its own box drawn as a rectangle, then a container at the same place holding what is in
+			// it, placed from the corner of the group and shown even where it goes out of the box, unless the group clips (clip).
+			$frame         = $el;
+			$frame['type'] = 'rect';
+			unset( $frame['children'] );
+			$back  = element_html( $frame, $design, $values, $options );
+			$own   = array(
+				'w'    => (float) $el['w'],
+				'h'    => (float) $el['h'],
+				'safe' => 0,
+			);
+			$inner = '';
+			// In a row, a stack or a grid the flow places what is in it (camaleaun/draw's Flow); in a free group each is placed by its own anchors, to the size of the group.
+			$flowed = in_array( $el['arrange'] ?? '', array( 'row', 'stack', 'grid' ), true );
+			foreach ( \EventsCertificate\Vendor\Camaleaun\Draw\Svg::place_children( $el ) as $child ) {
+				if ( empty( $child['hidden'] ) ) {
+					$inner .= element_html( $flowed ? $child : resolve( $child, $own, $own ), $design, $values, $options );
+				}
+			}
+			return $back . sprintf( '<div style="%soverflow:%s;">%s</div>', esc_attr( $box . $alpha ), ! empty( $el['clip'] ) ? 'hidden' : 'visible', $inner );
 
 		case 'line':
 			$sw   = max( 0.25, (float) ( $el['strokeWidth'] ?? 1 ) );
