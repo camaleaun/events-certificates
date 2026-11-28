@@ -2,8 +2,12 @@
 // One landing per scenario, built from the catalog by landingFor(): what a feature says, whether it shows and how loud it is are decided there.
 import Base from '../layouts/Base.astro';
 import Shot from '../components/Shot.astro';
+import ScenarioSwitch from '../components/ScenarioSwitch.astro';
+import { href as at } from '@libs/i18n';
+import { uiOf } from '@libs/strings';
 import { landingFor, type ScenarioId } from '@libs/landing';
-import { scenarioIds, scenarios } from '@data/scenarios';
+import { scenarioIds } from '@data/scenarios';
+import { scenarioOf } from '@libs/strings';
 import { site, href } from '@libs/site';
 
 interface Props {
@@ -12,10 +16,12 @@ interface Props {
 }
 const { id, locale = 'en' } = Astro.props;
 const page = landingFor( id, locale );
+const strings = uiOf( locale );
+const loc = { code: locale, lang: '', og: '', label: '' };
 const { hero } = page.scenario;
 const first = page.highlight.find( ( item ) => item.feature.screenshot )?.id;
 ---
-<Base title={ page.scenario.name } description={ hero.lead } markdown={ href( `${ id }/index.md` ) }>
+<Base title={ page.scenario.name } description={ hero.lead } markdown={ locale === 'en' ? href( `${ id }/index.md` ) : undefined }>
 	<div class="wrap">
 		<section class="hero">
 			<p class="eyebrow">{ page.scenario.audience }</p>
@@ -23,18 +29,19 @@ const first = page.highlight.find( ( item ) => item.feature.screenshot )?.id;
 			<p>{ hero.lead }</p>
 			<div class="actions">
 				<a class="button" href={ site.playground }>{ hero.primary }</a>
-				<a class="button secondary" href={ href( `docs/${ page.scenario.docs }/` ) }>Read the docs</a>
+				<a class="button secondary" href={ href( `docs/${ page.scenario.docs }/` ) }>{ strings.readDocs }</a>
 			</div>
 			<p class="note">{ hero.note }</p>
+			<ScenarioSwitch current={ id } />
 		</section>
 		<section aria-labelledby="pains">
-			<h2 id="pains">The problem</h2>
+			<h2 id="pains">{ strings.problem }</h2>
 			<div class="cards">
 				{ page.pains.map( ( pain ) => <div><h3>{ pain.title }</h3><p>{ pain.text }</p></div> ) }
 			</div>
 		</section>
 		<section aria-labelledby="steps">
-			<h2 id="steps">In three steps</h2>
+			<h2 id="steps">{ strings.steps }</h2>
 			<ol>{ page.steps.map( ( step ) => <li>{ step.text }</li> ) }</ol>
 		</section>
 		<section aria-label="What it does" class="highlights">
@@ -44,27 +51,27 @@ const first = page.highlight.find( ( item ) => item.feature.screenshot )?.id;
 						<h2>{ feature.title }</h2>
 						<p>{ feature.text }</p>
 						{ feature.claimNote && <p class="note">{ feature.claimNote }</p> }
-						<p><a href={ href( `docs/${ feature.docs }/` ) }>How it works</a></p>
+						<p><a href={ href( `docs/${ feature.docs }/` ) }>{ strings.howItWorks }</a></p>
 					</div>
 					{ feature.screenshot && <Shot id={ feature.screenshot } eager={ key === first } /> }
 				</article>
 			) ) }
 		</section>
 		<section aria-labelledby="also">
-			<h2 id="also">Also included</h2>
+			<h2 id="also">{ strings.also }</h2>
 			<ul class="also">
 				{ page.secondary.map( ( { feature } ) => <li><strong>{ feature.title }.</strong> { feature.text }{ feature.claimNote && <> <em>{ feature.claimNote }</em></> }</li> ) }
 			</ul>
 		</section>
 		<section aria-labelledby="limits">
-			<h2 id="limits">What it does not do</h2>
+			<h2 id="limits">{ strings.limits }</h2>
 			<ul>{ page.limits.map( ( limit ) => <li>{ limit.text }</li> ) }</ul>
 		</section>
 		<section aria-labelledby="others">
-			<h2 id="others">Another case?</h2>
+			<h2 id="others">{ strings.another }</h2>
 			<p>
-				{ scenarioIds.filter( ( other ) => other !== id ).map( ( other, i ) => <>{ i > 0 && ' · ' }<a href={ href( `${ other }/` ) }>{ scenarios[ other ].name }</a></> ) }
-				· <a href={ href() }>All cases</a> · <a href={ href( 'docs/what-works-where/' ) }>What works where</a>
+				{ scenarioIds.filter( ( other ) => other !== id ).map( ( other, i ) => <>{ i > 0 && ' · ' }<a href={ at( loc, `${ other }/` ) }>{ scenarioOf( other, locale ).name }</a></> ) }
+				· <a href={ at( loc, '' ) }>{ strings.allCases }</a> · <a href={ href( 'docs/what-works-where/' ) }>{ strings.whatWorksWhere }</a>
 			</p>
 			<div class="actions"><a class="button" href={ site.playground }>{ hero.primary }</a></div>
 		</section>

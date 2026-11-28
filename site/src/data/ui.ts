@@ -1,0 +1,26 @@
+// The small texts of the site's chrome and pages (labels, headings). Keyed by name so a translation can never shift.
+export const ui = {
+	skip: 'Skip to the content',
+	docs: 'Docs',
+	try: 'Try it in Playground',
+	github: 'GitHub',
+	cases: 'Your case',
+	casesLabel: 'I use WordPress',
+	language: 'Language',
+	problem: 'The problem',
+	steps: 'In three steps',
+	also: 'Also included',
+	limits: 'What it does not do',
+	howItWorks: 'How it works',
+	readDocs: 'Read the docs',
+	another: 'Another case?',
+	allCases: 'All cases',
+	whatWorksWhere: 'What works where',
+	feature: 'Feature',
+	footer: 'GPL-2.0-or-later · for WordPress {requires}+ and PHP {php}+',
+	yes: 'Yes',
+	no: 'No',
+	yesNote: 'Yes: {note}',
+	notFound: 'Page not found',
+};
+export type Ui = typeof ui;

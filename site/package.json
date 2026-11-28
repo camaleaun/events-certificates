@@ -10,7 +10,8 @@
     "check": "node scripts/check-screenshots.mjs && node scripts/check-prominence.mjs && astro check",
     "brand": "node scripts/brand.mjs",
     "screenshots": "node scripts/screenshots.mjs",
-    "lighthouse": "node scripts/lighthouse.mjs"
+    "lighthouse": "node scripts/lighthouse.mjs",
+    "translations": "node scripts/translations.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.6",

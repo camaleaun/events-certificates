@@ -1,0 +1,73 @@
+---
+// "Your case" in the header: a dropdown with the three cases (opens without JavaScript).
+import { scenarioIds } from '@data/scenarios';
+import { href as at, localeOf, pathWithoutLocale } from '@libs/i18n';
+import { scenarioOf, uiOf } from '@libs/strings';
+
+const locale = localeOf( Astro.url.pathname );
+const strings = uiOf( locale.code );
+const here = pathWithoutLocale( Astro.url.pathname ).replace( /\/$/, '' );
+---
+<details class="cases">
+	<summary>{ strings.cases }<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="m7 10 5 5 5-5H7Z"/></svg></summary>
+	<ul>
+		{ scenarioIds.map( ( id ) => (
+			<li><a href={ at( locale, `${ id }/` ) } aria-current={ id === here ? 'page' : undefined }>{ scenarioOf( id, locale.code ).name }</a></li>
+		) ) }
+		<li><a href={ at( locale ) }>{ strings.allCases }</a></li>
+	</ul>
+</details>
+<script>
+	const menu = document.querySelector< HTMLDetailsElement >( 'details.cases' );
+	if ( menu ) {
+		document.addEventListener( 'keydown', ( event ) => event.key === 'Escape' && menu.removeAttribute( 'open' ) );
+		document.addEventListener( 'click', ( event ) => ! menu.contains( event.target as Node ) && menu.removeAttribute( 'open' ) );
+	}
+</script>
+<style lang="scss">
+	.cases {
+		position: relative;
+		margin: 0;
+	}
+	summary {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		min-height: 40px;
+		cursor: pointer;
+		list-style: none;
+		font-weight: 600;
+		&::-webkit-details-marker {
+			display: none;
+		}
+	}
+	ul {
+		position: absolute;
+		inset-inline-start: 0;
+		z-index: 10;
+		min-width: 14rem;
+		margin: 0.25rem 0 0;
+		padding: 0.25rem;
+		list-style: none;
+		background: Canvas;
+		color: CanvasText;
+		border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+		border-radius: 4px;
+		box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
+	}
+	li a {
+		display: flex;
+		align-items: center;
+		min-height: 40px;
+		padding: 0 0.75rem;
+		color: inherit;
+		text-decoration: none;
+		&:hover,
+		&[aria-current] {
+			background: color-mix(in srgb, currentColor 10%, transparent);
+		}
+		&[aria-current] {
+			font-weight: 700;
+		}
+	}
+</style>

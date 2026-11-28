@@ -2,6 +2,7 @@
 // (the language's rules). The pages, the Markdown twins, llms.txt, the comparison table and the "what works where" page all call this.
 import { features, prominenceOf, type Feature, type ScenarioId, type Where, type WhereKey } from '@data/catalog';
 import { scenarios, scenarioIds, type Scenario } from '@data/scenarios';
+import { featureOf, scenarioOf } from './strings';
 
 export type { ScenarioId };
 export interface Item {
@@ -13,15 +14,16 @@ const available = ( feature: Feature, key: WhereKey ) => feature.where[ key ] !=
 
 /** The features of a scenario in a language, loud ones and quiet ones, in the scenario's order. */
 export function landingFor( id: ScenarioId, locale = 'en' ) {
-	const scenario: Scenario = scenarios[ id ];
+	const scenario: Scenario = scenarioOf( id, locale );
 	const pick = ( ids: string[], wanted: 'highlight' | 'secondary' ): Item[] =>
 		ids
-			.map( ( key ) => ( { id: key, feature: features[ key ] } ) )
-			.filter( ( item ) => item.feature && available( item.feature, id ) && prominenceOf( item.feature, locale ) === wanted );
+			.filter( ( key ) => features[ key ] && available( features[ key ], id ) && prominenceOf( features[ key ], locale ) === wanted )
+			.map( ( key ) => ( { id: key, feature: featureOf( key, locale ) } ) );
 	// A feature the language makes loud but the scenario lists as secondary is promoted; one it hides is dropped.
 	const every = [ ...scenario.order.highlight, ...scenario.order.secondary ];
 	return {
 		scenario,
+		scenarioId: id,
 		pains: scenario.order.pains.map( ( key ) => ( { id: key, ...scenario.pains[ key ] } ) ),
 		steps: scenario.order.steps.map( ( key ) => ( { id: key, text: scenario.steps[ key ] } ) ),
 		highlight: pick( every, 'highlight' ),
@@ -34,10 +36,11 @@ export function landingFor( id: ScenarioId, locale = 'en' ) {
 export function matrix( locale = 'en', keys: WhereKey[] = [ ...scenarioIds, 'both' ] ) {
 	return Object.entries( features )
 		.filter( ( [ , feature ] ) => prominenceOf( feature, locale ) !== 'hidden' )
-		.map( ( [ id, feature ] ) => ( { id, feature, cells: keys.map( ( key ) => ( { key, where: feature.where[ key ] as Where } ) ) } ) );
+		.map( ( [ id ] ) => ( { id, feature: featureOf( id, locale ), cells: keys.map( ( key ) => ( { key, where: features[ id ].where[ key ] as Where } ) ) } ) );
 }
 
-export const whereText = ( where: Where ): string => ( where === 'yes' ? 'Yes' : where === 'no' ? 'No' : `Yes: ${ where.note }` );
+export const whereText = ( where: Where, strings = { yes: 'Yes', no: 'No', yesNote: 'Yes: {note}' } ): string =>
+	where === 'yes' ? strings.yes : where === 'no' ? strings.no : strings.yesNote.replace( '{note}', where.note );
 
 /** A landing as Markdown, for agents: the same data as the page. */
 export function landingMarkdown( id: ScenarioId, locale = 'en' ): string {

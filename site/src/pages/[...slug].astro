@@ -1,0 +1,17 @@
+---
+// The scenario landings and the home of each other language: /standalone/, /br/, /br/standalone/ ... (the English home is index.astro).
+import Hub from '../views/Hub.astro';
+import ScenarioLanding from '../views/ScenarioLanding.astro';
+import { scenarioIds } from '@data/scenarios';
+import { translatedLocales } from '@libs/i18n';
+
+export const getStaticPaths = () => [
+	...scenarioIds.map( ( id ) => ( { params: { slug: id }, props: { id, locale: 'en' } } ) ),
+	...translatedLocales().flatMap( ( locale ) => [
+		{ params: { slug: locale.code }, props: { id: undefined, locale: locale.code } },
+		...scenarioIds.map( ( id ) => ( { params: { slug: `${ locale.code }/${ id }` }, props: { id, locale: locale.code } } ) ),
+	] ),
+];
+const { id, locale } = Astro.props;
+---
+{ id ? <ScenarioLanding id={ id } locale={ locale } /> : <Hub locale={ locale } /> }

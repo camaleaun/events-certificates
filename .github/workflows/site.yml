@@ -7,6 +7,8 @@ name: Site
 on:
   push:
     tags: [ '[0-9]+.[0-9]+*' ]
+  repository_dispatch:
+    types: [ translations ]
   workflow_dispatch:
     inputs:
       ref:
@@ -35,6 +37,9 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
       - run: npm ci
+        working-directory: site
+      # The languages (translations.json): each one is a repository; a language that cannot be downloaded is left out.
+      - run: npm run translations -- --ref site
         working-directory: site
       - run: npx astro check
         working-directory: site

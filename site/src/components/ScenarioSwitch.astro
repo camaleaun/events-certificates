@@ -1,0 +1,50 @@
+---
+// The three cases as tabs, under the headline: the first thing a visitor can choose. The current one is marked.
+import { scenarioIds } from '@data/scenarios';
+import { href as at, localeOf } from '@libs/i18n';
+import { scenarioOf, uiOf } from '@libs/strings';
+
+interface Props {
+	current?: string;
+}
+const { current } = Astro.props;
+const locale = localeOf( Astro.url.pathname );
+const strings = uiOf( locale.code );
+---
+<nav class="switch" aria-label={ strings.cases }>
+	<span class="switch__label">{ strings.casesLabel }:</span>
+	{ scenarioIds.map( ( id ) => (
+		<a href={ at( locale, `${ id }/` ) } aria-current={ id === current ? 'page' : undefined }>{ scenarioOf( id, locale.code ).name }</a>
+	) ) }
+</nav>
+<style lang="scss">
+	.switch {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 1.25rem 0 0;
+	}
+	.switch__label {
+		color: var(--muted);
+		font-weight: 600;
+	}
+	a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 40px;
+		padding: 0 1rem;
+		border: 1px solid var(--accent);
+		border-radius: 999px;
+		color: var(--accent);
+		font-weight: 600;
+		text-decoration: none;
+		&:hover {
+			background: color-mix(in srgb, var(--accent) 10%, transparent);
+		}
+		&[aria-current] {
+			background: var(--accent);
+			color: #fff;
+		}
+	}
+</style>

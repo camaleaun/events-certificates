@@ -1,9 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
 import Shot from '../components/Shot.astro';
-import { hub } from '@data/hub';
-import { features } from '@data/catalog';
-import { scenarioIds, scenarios } from '@data/scenarios';
+import { scenarioIds } from '@data/scenarios';
+import ScenarioSwitch from '../components/ScenarioSwitch.astro';
+import { featureOf, hubOf, scenarioOf, uiOf } from '@libs/strings';
+import { href as at } from '@libs/i18n';
 import { matrix, whereText } from '@libs/landing';
 import { site, href } from '@libs/site';
 
@@ -11,9 +12,12 @@ interface Props {
 	locale?: string;
 }
 const { locale = 'en' } = Astro.props;
+const hub = hubOf( locale );
+const strings = uiOf( locale );
+const loc = { code: locale, lang: '', og: '', label: '' };
 const rows = matrix( locale, scenarioIds );
 ---
-<Base title={ site.name } description={ hub.hero.lead } markdown={ href( 'index.md' ) }>
+<Base title={ site.name } description={ hub.hero.lead } markdown={ locale === 'en' ? href( 'index.md' ) : undefined }>
 	<div class="wrap">
 		<section class="hero">
 			<h1>{ hub.hero.title }</h1>
@@ -23,9 +27,10 @@ const rows = matrix( locale, scenarioIds );
 				<a class="button secondary" href={ href( 'docs/start/introduction/' ) }>{ hub.hero.secondary }</a>
 				<a class="button secondary" href={ site.repo }>{ hub.hero.tertiary }</a>
 			</div>
+			<ScenarioSwitch />
 		</section>
 		<section aria-labelledby="pains">
-			<h2 id="pains">The problem</h2>
+			<h2 id="pains">{ strings.problem }</h2>
 			<div class="cards">
 				{ hub.order.pains.map( ( key ) => <div><h3>{ hub.pains[ key as keyof typeof hub.pains ].title }</h3><p>{ hub.pains[ key as keyof typeof hub.pains ].text }</p></div> ) }
 			</div>
@@ -35,10 +40,10 @@ const rows = matrix( locale, scenarioIds );
 			<p>{ hub.which.lead }</p>
 			<div class="cards">
 				{ scenarioIds.map( ( id ) => (
-					<a class="card" href={ href( `${ id }/` ) }>
-						<h3>{ scenarios[ id ].name }</h3>
-						<p>{ scenarios[ id ].audience }</p>
-						<p><strong>{ scenarios[ id ].hero.title }</strong></p>
+					<a class="card" href={ at( loc, `${ id }/` ) }>
+						<h3>{ scenarioOf( id, locale ).name }</h3>
+						<p>{ scenarioOf( id, locale ).audience }</p>
+						<p><strong>{ scenarioOf( id, locale ).hero.title }</strong></p>
 					</a>
 				) ) }
 			</div>
@@ -48,11 +53,11 @@ const rows = matrix( locale, scenarioIds );
 			{ hub.order.core.map( ( key ) => (
 				<article class="highlight">
 					<div>
-						<h3>{ features[ key ].title }</h3>
-						<p>{ features[ key ].text }</p>
-						<p><a href={ href( `docs/${ features[ key ].docs }/` ) }>How it works</a></p>
+						<h3>{ featureOf( key, locale ).title }</h3>
+						<p>{ featureOf( key, locale ).text }</p>
+						<p><a href={ href( `docs/${ featureOf( key, locale ).docs }/` ) }>{ strings.howItWorks }</a></p>
 					</div>
-					{ features[ key ].screenshot && <Shot id={ features[ key ].screenshot! } /> }
+					{ featureOf( key, locale ).screenshot && <Shot id={ featureOf( key, locale ).screenshot! } /> }
 				</article>
 			) ) }
 		</section>
@@ -61,10 +66,10 @@ const rows = matrix( locale, scenarioIds );
 			<p>{ hub.compare.lead }</p>
 			<div class="table-scroll">
 				<table class="matrix">
-					<thead><tr><th scope="col">Feature</th>{ scenarioIds.map( ( id ) => <th scope="col">{ scenarios[ id ].name }</th> ) }</tr></thead>
+					<thead><tr><th scope="col">{ strings.feature }</th>{ scenarioIds.map( ( id ) => <th scope="col">{ scenarioOf( id, locale ).name }</th> ) }</tr></thead>
 					<tbody>
 						{ rows.map( ( row ) => (
-							<tr><th scope="row">{ row.feature.title }</th>{ row.cells.map( ( cell ) => <td>{ whereText( cell.where ) }</td> ) }</tr>
+							<tr><th scope="row">{ row.feature.title }</th>{ row.cells.map( ( cell ) => <td>{ whereText( cell.where, strings ) }</td> ) }</tr>
 						) ) }
 					</tbody>
 				</table>

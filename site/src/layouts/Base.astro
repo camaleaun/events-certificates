@@ -3,6 +3,9 @@ import '../styles/global.scss';
 import { site, href } from '@libs/site';
 import { alternates, localeOf } from '@libs/i18n';
 import LanguageMenu from '../components/LanguageMenu.astro';
+import ScenarioMenu from '../components/ScenarioMenu.astro';
+import { fill, uiOf } from '@libs/strings';
+import { href as at } from '@libs/i18n';
 
 interface Props {
 	title: string;
@@ -14,6 +17,7 @@ const canonical = new URL( Astro.url.pathname, Astro.site );
 const og = new URL( href( 'og-image.png' ), Astro.site );
 const locale = localeOf( Astro.url.pathname );
 const languages = alternates( Astro.url.pathname );
+const strings = uiOf( locale.code );
 const full = title === site.name ? title : `${ title } · ${ site.name }`;
 ---
 <!doctype html>
@@ -38,21 +42,22 @@ const full = title === site.name ? title : `${ title } · ${ site.name }`;
 		<meta name="twitter:card" content="summary_large_image" />
 	</head>
 	<body>
-		<a class="skip" href="#main">Skip to the content</a>
+		<a class="skip" href="#main">{ strings.skip }</a>
 		<header class="top">
 			<div class="wrap">
-				<a class="brand" href={ href() }><img src={ href( 'favicon.svg' ) } alt="" width="32" height="32" />{ site.name }</a>
+				<a class="brand" href={ at( locale ) }><img src={ href( 'favicon.svg' ) } alt="" width="32" height="32" />{ site.name }</a>
 				<nav aria-label="Main">
-					<a href={ href( 'docs/' ) }>Docs</a>
-					<a href={ site.playground }>Try it in Playground</a>
-					<a href={ site.repo }>GitHub</a>
+					<ScenarioMenu />
+					<a href={ href( 'docs/' ) }>{ strings.docs }</a>
+					<a href={ site.playground }>{ strings.try }</a>
+					<a href={ site.repo }>{ strings.github }</a>
 					<LanguageMenu />
 				</nav>
 			</div>
 		</header>
 		<main id="main"><slot /></main>
 		<footer class="bottom">
-			<div class="wrap">Events Certificates { site.version && `${ site.version } · ` }GPL-2.0-or-later · for WordPress { site.requires }+ and PHP { site.php }+</div>
+			<div class="wrap">Events Certificates { site.version && `${ site.version } · ` }{ fill( strings.footer, { requires: site.requires, php: site.php } ) }</div>
 		</footer>
 	</body>
 </html>

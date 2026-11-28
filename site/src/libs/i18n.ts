@@ -7,6 +7,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import config from '../../translations.json';
 import { href as url } from './site';
+import { scenarioIds } from '@data/scenarios';
 
 export interface Locale {
 	code: string;
@@ -59,8 +60,14 @@ export const pathWithoutLocale = ( pathname: string ): string => {
 	return locale.code === defaultLocale.code ? path : path.slice( locale.code.length + 1 );
 };
 
-/** The same page in every language (the 404 page is only in English: GitHub Pages serves one). */
+/** Pages that exist in every language: the home and the scenario landings. The rest (docs...) is English until translated. */
+const translated = ( path: string ) => path === '' || scenarioIds.some( ( id ) => path === `${ id }/` );
+
+/** The same page in every language; a page with no translation points to the language's home (the 404 page is only in English). */
 export const alternates = ( pathname: string ): { locale: Locale; href: string }[] => {
 	const path = pathWithoutLocale( pathname );
-	return ( path.startsWith( '404' ) ? [ defaultLocale ] : locales() ).map( ( locale ) => ( { locale, href: href( locale, path ) } ) );
+	return ( path.startsWith( '404' ) ? [ defaultLocale ] : locales() ).map( ( locale ) => ( {
+		locale,
+		href: href( locale, locale.code === defaultLocale.code || translated( path ) ? path : '' ),
+	} ) );
 };
