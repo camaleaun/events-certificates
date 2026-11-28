@@ -350,6 +350,45 @@ export function nudgeEls( list: Element[], ids: string[], dx: number, dy: number
 	return ids.reduce( ( out, id ) => mapEl( out, id, ( el ) => ( canMove( el ) ? shift( el, dx, dy ) : el ) ), list );
 }
 
+export type AlignSide = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
+
+/**
+ * Several elements aligned to one side (or the center) of the box they make together, as the align bar of a design tool does. The boxes are on the page (what is
+ * in a group counts from the page); each element is moved by the difference with `shift`, the one that knows anchors, so it keeps its own mode and unit.
+ * What `canMove` refuses (locked, placed by a row...) stays, and still counts in the box. Fewer than two elements, or all already there: the same list.
+ */
+export function alignEls( list: Element[], page: Page, ids: string[], side: AlignSide, shift: ( el: Element, dx: number, dy: number ) => Element, canMove: ( el: Element ) => boolean ): Element[] {
+	const resolved = resolveTree( list, page );
+	const boxes = ids.map( ( id ) => ( { id, el: findEl( resolved, id ) } ) ).filter( ( item ) => !! item.el ).map( ( item ) => ( { id: item.id, b: pageBox( item.el as Placed ) } ) );
+	if ( boxes.length < 2 ) {
+		return list;
+	}
+	const left = Math.min( ...boxes.map( ( { b } ) => b.x ) );
+	const right = Math.max( ...boxes.map( ( { b } ) => b.x + b.w ) );
+	const top = Math.min( ...boxes.map( ( { b } ) => b.y ) );
+	const bottom = Math.max( ...boxes.map( ( { b } ) => b.y + b.h ) );
+	const delta = ( b: Box ): { dx: number; dy: number } => {
+		switch ( side ) {
+			case 'left':
+				return { dx: left - b.x, dy: 0 };
+			case 'center':
+				return { dx: ( left + right ) / 2 - ( b.x + b.w / 2 ), dy: 0 };
+			case 'right':
+				return { dx: right - ( b.x + b.w ), dy: 0 };
+			case 'top':
+				return { dx: 0, dy: top - b.y };
+			case 'middle':
+				return { dx: 0, dy: ( top + bottom ) / 2 - ( b.y + b.h / 2 ) };
+			default:
+				return { dx: 0, dy: bottom - ( b.y + b.h ) };
+		}
+	};
+	return boxes.reduce( ( out, { id, b } ) => {
+		const { dx, dy } = delta( b );
+		return Math.abs( dx ) < 0.005 && Math.abs( dy ) < 0.005 ? out : mapEl( out, id, ( el ) => ( canMove( el ) ? shift( el, dx, dy ) : el ) );
+	}, list );
+}
+
 /**
  * What is in a group with the box it has now written as numbers (and no anchors): the group may change how it places them (free, row, stack, grid) and
  * each keeps the size it had, and the place it had to start from.

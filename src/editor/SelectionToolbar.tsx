@@ -6,7 +6,8 @@
 import { DropdownMenu, MenuGroup, MenuItem, Popover, Toolbar, ToolbarButton, ToolbarDropdownMenu, ToolbarGroup, ToolbarItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { arrowDown, arrowUp, chevronDown, chevronUp, copy, copySmall, lock, moreVertical, seen, trash, unlock, unseen } from '@wordpress/icons';
-import { cut, elementIcon } from './icons';
+import { alignEdge, cut, elementIcon } from './icons';
+import type { AlignSide } from './tree';
 import { VARIATIONS } from './GroupPanel';
 import type { Element } from './model';
 
@@ -25,9 +26,21 @@ type Props = {
 	onRemove: () => void;
 	onCopy?: () => void;
 	onCut?: () => void;
+	/** Aligns them to a side of the box they make together. */
+	onAlign?: ( side: AlignSide ) => void;
 };
 
-export default function SelectionToolbar( { anchor, els, type, canGroup, required, onGroup, onOrder, onToggle, onDuplicate, onRemove, onCopy, onCut }: Props ) {
+/** The six alignments, in the order of a design tool's align bar: the three of the horizontal axis, then the three of the vertical. */
+export const ALIGNS = (): Array< [ AlignSide, JSX.Element, string ] > => [
+	[ 'left', alignEdge.left, __( 'Align left', 'events-certificates' ) ],
+	[ 'center', alignEdge.centerH, __( 'Align center', 'events-certificates' ) ],
+	[ 'right', alignEdge.right, __( 'Align right', 'events-certificates' ) ],
+	[ 'top', alignEdge.top, __( 'Align top', 'events-certificates' ) ],
+	[ 'middle', alignEdge.middleV, __( 'Align middle', 'events-certificates' ) ],
+	[ 'bottom', alignEdge.bottom, __( 'Align bottom', 'events-certificates' ) ],
+];
+
+export default function SelectionToolbar( { anchor, els, type, canGroup, required, onGroup, onOrder, onToggle, onDuplicate, onRemove, onCopy, onCut, onAlign }: Props ) {
 	if ( ! anchor ) {
 		return null;
 	}
@@ -83,6 +96,15 @@ export default function SelectionToolbar( { anchor, els, type, canGroup, require
 												{ __( 'Duplicate', 'events-certificates' ) }
 											</MenuItem>
 										</MenuGroup>
+										{ onAlign && (
+											<MenuGroup label={ __( 'Align', 'events-certificates' ) }>
+												{ ALIGNS().map( ( [ side, icon, text ] ) => (
+													<MenuItem key={ side } icon={ icon } onClick={ () => { onAlign( side ); onClose(); } }>
+														{ text }
+													</MenuItem>
+												) ) }
+											</MenuGroup>
+										) }
 										<MenuGroup>
 											<MenuItem icon={ arrowUp } onClick={ () => { onOrder( 'top' ); onClose(); } }>
 												{ __( 'Bring to front', 'events-certificates' ) }

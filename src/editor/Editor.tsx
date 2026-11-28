@@ -6,7 +6,7 @@
 import { fontStack, weightFor } from './fonts';
 import { darkEnabled, declarationEnabled } from './darkMode';
 import apiFetch from '@wordpress/api-fetch';
-import { Button, ColorPalette, DropdownMenu, Icon, MenuGroup, MenuItem, Popover, Snackbar, Spinner, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/components';
+import { Button, ColorPalette, DropdownMenu, Icon, MenuGroup, MenuItem, Popover, Snackbar, Spinner, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalConfirmDialog as ConfirmDialog, __experimentalHStack as HStack } from '@wordpress/components';
 import { store as commandsStore, useCommand } from '@wordpress/commands';
 import { dispatch as wpDispatch } from '@wordpress/data';
 import { check, chevronLeft, closeSmall, copy, download, drawerRight, external, lineSolid, listView, moreVertical, pages, plus, redo as redoIcon, seen, styles, trash, undo as undoIcon, upload } from '@wordpress/icons';
@@ -55,9 +55,9 @@ import { runsFromText } from './rich';
 import { FIELD_KEYS } from './fieldKeys';
 import { BLOCK_NAMES } from './dialect';
 import { canGroupIds, escapeIds, selectAllIds, selectionType } from './selection';
-import SelectionToolbar from './SelectionToolbar';
+import SelectionToolbar, { ALIGNS } from './SelectionToolbar';
 import BlockCanvas from './BlockCanvas';
-import { bakeChildren, cloneEl, duplicateEls, nudgeEls, removeEls, reorderEls, setFlag, findEl, holderFor, insertInto, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
+import { alignEls, bakeChildren, cloneEl, duplicateEls, nudgeEls, removeEls, reorderEls, setFlag, findEl, holderFor, insertInto, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type AlignSide, type Placed } from './tree';
 import { cleanForSlug } from '@wordpress/url';
 import { fromMarkup, isMarkup, lineHeightFactor, toMarkup } from '@camaleaun/draw';
 import { BLOCK_OPTIONS, fromFile, toFile } from './dialect';
@@ -521,6 +521,9 @@ export default function Editor() {
 	const reorder = ( id: string, to: 'up' | 'down' | 'top' | 'bottom' ) => commit( { ...design, elements: reorderEl( design.elements, id, to ) } );
 	// The same for several at once: each list keeps their order; lock and hide are on for all, or off when all had it.
 	const reorderMany = ( ids: string[], to: 'up' | 'down' | 'top' | 'bottom' ) => commit( { ...design, elements: reorderEls( design.elements, ids, to ) } );
+	/** Several elements aligned to a side of the box they make together (one undo). What is locked, or placed by a row, a stack or a grid, stays where it is. */
+	const alignMany = ( ids: string[], side: AlignSide ) =>
+		commit( { ...design, elements: alignEls( design.elements, design.page, ids, side, ( e, x, y ) => shift( e, x, y ), ( el ) => ! el.locked && ! parentOf( resolvedShown.elements, el.id )?.arrange ) } );
 	const toggleMany = ( ids: string[], key: 'locked' | 'hidden' ) => commit( { ...design, elements: setFlag( design.elements, ids, key ) } );
 	const insert = ( type: Insertable ) => {
 		let el = create( type, design, paintRef.current );
@@ -1051,6 +1054,14 @@ export default function Editor() {
 										<h2 className="evcert-card__title">{ sprintf( /* translators: %d: how many elements are selected. */ _n( '%d element selected', '%d elements selected', selectedMany.length, 'events-certificates' ), selectedMany.length ) }</h2>
 									</div>
 								</div>
+								<div className="evcert-anchors__align" role="group" aria-label={ __( 'Align', 'events-certificates' ) }>
+									<span className="components-base-control__label">{ __( 'Align', 'events-certificates' ) }</span>
+									<HStack spacing={ 1 } justify="flex-start">
+										{ ALIGNS().map( ( [ side, icon, text ] ) => (
+											<Button key={ side } icon={ icon } size="compact" label={ text } onClick={ () => alignMany( selectedMany, side ) } />
+										) ) }
+									</HStack>
+								</div>
 								<ul className="evcert-selected-list">
 									{ selectedMany.map( ( id ) => {
 										const el = findEl( design.elements, id );
@@ -1085,6 +1096,7 @@ export default function Editor() {
 					onRemove={ () => removeMany( selectedMany ) }
 					onCopy={ () => document.execCommand( 'copy' ) }
 					onCut={ () => document.execCommand( 'cut' ) }
+					onAlign={ ( side ) => alignMany( selectedMany, side ) }
 				/>
 			) }
 			{ current && selectedMany.length < 2 && ( tab === 'art' || editing ) && ! drawing && (

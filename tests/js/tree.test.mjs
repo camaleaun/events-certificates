@@ -201,3 +201,39 @@ test( 'several elements are moved together, but not the ones that cannot move', 
 	const out = t.nudgeEls( list, [ 'a', 'b' ], 5, -2, shiftBy, ( el ) => ! el.locked );
 	assert.deepEqual( plain( out.map( ( e ) => [ e.id, e.x, e.y ] ) ), [ [ 'a', 5, -2 ], [ 'b', 0, 0 ], [ 'c', 0, 0 ] ] );
 } );
+
+const slide = ( el, dx, dy ) => ( { ...el, x: el.x + dx, y: el.y + dy } );
+const any = () => true;
+
+test( 'several elements align to the box they make together, side by side', () => {
+	const list = [ rect( 'a', 100, 40, 50, 20 ), rect( 'b', 30, 200, 80, 10 ), rect( 'c', 300, 120, 20, 60 ) ];
+	const all = [ 'a', 'b', 'c' ];
+	// The union is x 30 to 320 and y 40 to 210.
+	const to = ( side ) => ( id ) => at( t.alignEls( list, page, all, side, slide, any ), id );
+	assert.deepEqual( all.map( to( 'left' ) ).map( ( b ) => b.x ), [ 30, 30, 30 ] );
+	assert.deepEqual( all.map( to( 'right' ) ).map( ( b ) => b.x + b.w ), [ 320, 320, 320 ] );
+	assert.deepEqual( all.map( to( 'center' ) ).map( ( b ) => b.x + b.w / 2 ), [ 175, 175, 175 ] );
+	assert.deepEqual( all.map( to( 'top' ) ).map( ( b ) => b.y ), [ 40, 40, 40 ] );
+	assert.deepEqual( all.map( to( 'bottom' ) ).map( ( b ) => b.y + b.h ), [ 210, 210, 210 ] );
+	assert.deepEqual( all.map( to( 'middle' ) ).map( ( b ) => b.y + b.h / 2 ), [ 125, 125, 125 ] );
+	// Aligning on one axis leaves the other alone.
+	assert.deepEqual( [ at( t.alignEls( list, page, all, 'left', slide, any ), 'c' ).y ], [ 120 ] );
+} );
+
+test( 'aligning counts what is in a group from the page, and does not move what cannot move', () => {
+	const list = [ rect( 'a', 50, 10, 20, 20 ), { id: 'g', type: 'group', x: 100, y: 100, w: 200, h: 100, children: [ rect( 'b', 10, 5, 20, 10 ) ] }, rect( 'c', 400, 0, 20, 20, { locked: true } ) ];
+	const out = t.alignEls( list, page, [ 'a', 'b', 'c' ], 'left', slide, ( el ) => ! el.locked );
+	// The union starts at 50 (a): b is at 110 on the page and goes to 50, so its own x (from its group) is 10 - 60; c is locked: it stays.
+	assert.equal( at( out, 'b' ).x, 50 );
+	assert.equal( t.findEl( out, 'b' ).x, -50 );
+	assert.equal( at( out, 'c' ).x, 400 );
+	assert.equal( at( out, 'a' ).x, 50 );
+} );
+
+test( 'aligning needs two elements, and an element already there stays the same object', () => {
+	const list = [ rect( 'a', 10, 10, 20, 20 ), rect( 'b', 10, 50, 40, 20 ) ];
+	assert.equal( t.alignEls( list, page, [ 'a' ], 'left', slide, any ), list );
+	const out = t.alignEls( list, page, [ 'a', 'b' ], 'left', slide, any );
+	assert.equal( out[ 0 ], list[ 0 ], 'a is already at the left' );
+	assert.equal( out[ 1 ], list[ 1 ], 'and so is b' );
+} );
