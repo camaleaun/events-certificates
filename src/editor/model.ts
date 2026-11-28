@@ -95,8 +95,9 @@ export type TextEl = Base & {
 	size: number;
 	color: string;
 	align?: 'left' | 'center' | 'right';
-	lh?: number;
-	ls?: number;
+	// A number (a multiplier; points) or a length with a unit (camaleaun/draw's typography.ts): lh, %, px, pt, mm, cm, in.
+	lh?: number | string;
+	ls?: number | string;
 	upper?: boolean;
 	fit?: boolean;
 	min?: number;

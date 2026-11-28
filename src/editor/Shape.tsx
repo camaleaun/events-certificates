@@ -7,6 +7,7 @@ import { fontStack, weightFor } from './fonts';
 import { stockName } from './base';
 import { QR_PLACEHOLDER } from './qr-placeholder';
 import { verificationParts } from './verification';
+import { letterSpacingPt, lineHeightFactor } from '@camaleaun/draw';
 import { color, rectPath, runsHtml, runsOf, svgPaths, type Design, type Element, type Mode, type SvgPath, type TextEl } from './model';
 
 /** A text element's CSS, shared by the canvas and the inline editor. */
@@ -15,8 +16,9 @@ export function textStyle( el: TextEl, design: Design, mode: Mode ) {
 		fontFamily: fontStack( el.font ),
 		fontWeight: weightFor( el.font, el.weight ),
 		fontSize: `${ el.size }px`,
-		lineHeight: el.lh ?? 1.2,
-		letterSpacing: el.ls ? `${ el.ls }px` : undefined,
+		// A line height is a multiplier of the size and a letter spacing is points (a point is a pixel here), whatever unit they were said in.
+		lineHeight: lineHeightFactor( el.lh, el.size ),
+		letterSpacing: letterSpacingPt( el.ls, el.size ) ? `${ letterSpacingPt( el.ls, el.size ) }px` : undefined,
 		color: color( design, el.color, mode ),
 		textAlign: el.align || 'left',
 		whiteSpace: el.fit ? ( 'nowrap' as const ) : ( 'pre-line' as const ),
@@ -199,7 +201,7 @@ export function Shape( { el, design, mode, sample }: { el: Element; design: Desi
 		case 'text': {
 			const style = textStyle( el, design, mode );
 			return (
-				<foreignObject x={ el.x } y={ el.y } width={ el.w } height={ Math.max( el.h, el.size * ( el.lh ?? 1.2 ) * 6 ) } opacity={ opacity } style={ { overflow: 'visible' } }>
+				<foreignObject x={ el.x } y={ el.y } width={ el.w } height={ Math.max( el.h, el.size * lineHeightFactor( el.lh, el.size ) * 6 ) } opacity={ opacity } style={ { overflow: 'visible' } }>
 					{ /* Only the lines of the text take a click, not the whole box (a tall box would hide the text under it): a click beside the text goes to what is under it. */ }
 					<div className="evcert-text" style={ { ...style, pointerEvents: 'none' } }>
 						<span style={ { pointerEvents: 'auto' } } dangerouslySetInnerHTML={ { __html: runsHtml( runsOf( el ), sample, LOCALE, el.upper ) } } />

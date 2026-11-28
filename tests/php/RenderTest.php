@@ -679,4 +679,46 @@ class RenderTest extends Test_Case {
 		);
 		$this->assertEqualsWithDelta( 0.0, Render\resolve( $rect, $page )['w'], 0.001, 'Only a drawing has a size of its own.' );
 	}
+
+	/**
+	 * A line height and a letter spacing may have a unit: the page says them in points and a multiplier, whatever unit they were written in.
+	 */
+	public function test_a_line_height_and_a_letter_spacing_with_a_unit() {
+		$design = array(
+			'page'     => array(
+				'w'    => 800,
+				'h'    => 600,
+				'safe' => 0,
+				'bg'   => '$background',
+			),
+			'colors'   => array(),
+			'elements' => array(
+				array(
+					'id'   => 't',
+					'type' => 'text',
+					'x'    => 10,
+					'y'    => 10,
+					'w'    => 300,
+					'h'    => 40,
+					'text' => 'Hello',
+					'size' => 20,
+					'lh'   => '150%',
+					'ls'   => '5%',
+				),
+			),
+		);
+		$html   = Render\artwork( $design, array(), array() );
+		$this->assertStringContainsString( 'line-height:1.5;', $html, '150% of the size is a multiplier of 1.5.' );
+		$this->assertStringContainsString( 'letter-spacing:1pt;', $html, '5% of 20 is one point.' );
+		$design['elements'][0]['lh'] = '30px';
+		$design['elements'][0]['ls'] = '2px';
+		$html                        = Render\artwork( $design, array(), array() );
+		$this->assertStringContainsString( 'line-height:1.5;', $html, '30 points of a 20 point text.' );
+		$this->assertStringContainsString( 'letter-spacing:2pt;', $html );
+		$design['elements'][0]['lh'] = 1.4;
+		$design['elements'][0]['ls'] = 0.5;
+		$html                        = Render\artwork( $design, array(), array() );
+		$this->assertStringContainsString( 'line-height:1.4;', $html, 'A number is what files wrote before.' );
+		$this->assertStringContainsString( 'letter-spacing:0.5pt;', $html );
+	}
 }

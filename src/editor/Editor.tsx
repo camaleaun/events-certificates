@@ -50,7 +50,7 @@ import { BlockLayers, BlocksProvider, registerBlocks } from './blocks';
 import BlockCanvas from './BlockCanvas';
 import { bakeChildren, cloneEl, findEl, holderFor, insertInto, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
 import { cleanForSlug } from '@wordpress/url';
-import { fromMarkup, isMarkup, toMarkup } from '@camaleaun/draw';
+import { fromMarkup, isMarkup, lineHeightFactor, toMarkup } from '@camaleaun/draw';
 import { BLOCK_OPTIONS, fromFile, toFile } from './dialect';
 import { baseDesign, blankDesign, stockName, withRequired } from './base';
 import { verificationParts } from './verification';
@@ -839,7 +839,7 @@ export default function Editor() {
 									? ( flatten( resolvedShown.elements ) as Placed[] )
 											.filter( ( el ) => el.id === editing.id && el.type === 'text' )
 											.map( ( el ) => (
-												<foreignObject key={ el.id } x={ ( el.x || 0 ) + ( el.ox || 0 ) } y={ ( el.y || 0 ) + ( el.oy || 0 ) } width={ el.w } height={ Math.max( ( el as TextEl ).h, ( el as TextEl ).size * ( ( el as TextEl ).lh ?? 1.2 ) * 6 ) } style={ { overflow: 'visible' } } onPointerDown={ ( event ) => event.stopPropagation() }>
+												<foreignObject key={ el.id } x={ ( el.x || 0 ) + ( el.ox || 0 ) } y={ ( el.y || 0 ) + ( el.oy || 0 ) } width={ el.w } height={ Math.max( ( el as TextEl ).h, ( el as TextEl ).size * lineHeightFactor( ( el as TextEl ).lh, ( el as TextEl ).size ) * 6 ) } style={ { overflow: 'visible' } } onPointerDown={ ( event ) => event.stopPropagation() }>
 													<FieldText
 														inline
 														label={ stockName( el.name || '' ) || __( 'Text', 'events-certificates' ) }

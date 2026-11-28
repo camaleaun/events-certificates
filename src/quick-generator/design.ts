@@ -9,6 +9,7 @@
  * hint): the generator keeps none, as the server leaves them out on a site
  * where they would mean nothing.
  */
+import { letterSpacingPt, lineHeightFactor } from '@camaleaun/draw';
 import { flattenTree } from '../editor/tree';
 import { box, color, isWhite, pageBg, rectPath, resolve, runsIn, type Design, type Element, type Run, type TextEl } from '../editor/model';
 
@@ -160,16 +161,18 @@ function drawText( b: Backend, design: Design, el: TextEl, value: Value, locale:
 		return;
 	}
 	const font = fontOf( b, el );
-	const spacing = ( el.ls || 0 ) * PT;
+	// The letter spacing is points whatever unit it was said in (a percentage is of the size: said again if the text is shrunk to fit).
+	let spacing = letterSpacingPt( el.ls, el.size || 14 ) * PT;
 	const width = el.w * PT;
 	let size = el.size || 14;
 	if ( el.fit ) {
 		const natural = b.measure( text.replace( /\n/g, ' ' ), font, size, spacing );
 		if ( natural > width && natural > 0 ) {
 			size = Math.max( el.min || 8, ( size * width ) / natural );
+			spacing = letterSpacingPt( el.ls, size ) * PT;
 		}
 	}
-	const lh = el.lh || 1.2;
+	const lh = lineHeightFactor( el.lh, size );
 	const lines = el.fit ? [ text.replace( /\n/g, ' ' ) ] : wrap( b, text, font, size, width, spacing );
 	// The browser centres the font's own ascent + descent in the line: the first baseline sits half the leading plus the ascent below the box top.
 	const m = metricsOf( font );

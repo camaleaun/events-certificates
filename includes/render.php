@@ -1450,15 +1450,33 @@ function text_size( array $el, array $values, array $options ) {
 }
 
 /**
+ * The letter-spacing a text has, as CSS ("letter-spacing:3.40pt;"), or nothing when it has none: its points (it may have been said as a percentage of the size or with a unit),
+ * to three decimals and without the zeros at the end.
+ *
+ * @param mixed $value Value of `ls`.
+ * @param float $size  Font size.
+ * @return string
+ */
+function letter_spacing_css( $value, $size ) {
+	$points = \EventsCertificate\Vendor\Camaleaun\Draw\Text::letter_spacing( $value, (float) $size );
+	if ( 0.0 === $points ) {
+		return '';
+	}
+	// Without the zeros at the end (3.4, 0.425), as the workload is said.
+	return 'letter-spacing:' . rtrim( rtrim( sprintf( '%.3F', $points ), '0' ), '.' ) . 'pt;';
+}
+
+/**
  * How far up the PDF moves a text of the generator's fonts, in font sizes, so
  * its first line sits where the browser puts it: the browser's baseline is
  * ((line height - 1.3) / 2 + ascent) below the top of the box, and dompdf's
  * measured on these fonts is 0.004 + 1.146 × line height.
  *
- * @param array<string, mixed> $el Text element.
+ * @param array<string, mixed> $el   Text element.
+ * @param float                $size Its font size (a line height in px or % is of it).
  * @return float
  */
-function pdf_baseline_shift( array $el ) {
+function pdf_baseline_shift( array $el, $size = 14.0 ) {
 	$ascent = array(
 		'CertSans'  => 1.025,
 		'CertSerif' => 0.99,
@@ -1467,7 +1485,7 @@ function pdf_baseline_shift( array $el ) {
 	if ( ! isset( $ascent[ $font ] ) ) {
 		return 0.0;
 	}
-	$lh = (float) ( $el['lh'] ?? 1.2 );
+	$lh = \EventsCertificate\Vendor\Camaleaun\Draw\Text::line_height( $el['lh'] ?? null, (float) $size );
 
 	return ( ( $lh - 1.3 ) / 2 + $ascent[ $font ] ) - ( 0.004 + 1.146 * $lh );
 }
@@ -1834,7 +1852,8 @@ function element_html( array $el, array $design, array $values, array $options )
 	$opacity = isset( $el['opacity'] ) ? (float) $el['opacity'] : 1.0;
 	$rotate  = ! empty( $el['rotation'] ) && 'line' !== $type ? sprintf( 'transform:rotate(%ddeg);transform-origin:50%% 50%%;', (int) $el['rotation'] ) : '';
 	if ( 'text' === $type && ! empty( $options['for_pdf'] ) ) {
-		$el['y'] += pdf_baseline_shift( $el ) * text_size( $el, $values, $options );
+		$size     = text_size( $el, $values, $options );
+		$el['y'] += pdf_baseline_shift( $el, $size ) * $size;
 	}
 	$box   = 'line' === $type ? '' : sprintf( 'position:absolute;left:%.2Fpt;top:%.2Fpt;width:%.2Fpt;height:%.2Fpt;%s', $el['x'], $el['y'], max( 0, $el['w'] ), max( 0, $el['h'] ), $rotate );
 	$alpha = $opacity < 1 ? sprintf( 'opacity:%.3F;', $opacity ) : '';
@@ -1881,10 +1900,11 @@ function element_html( array $el, array $design, array $values, array $options )
 				\EventsCertificate\Fonts\stack( (string) ( $el['font'] ?? '' ), ! empty( $options['for_pdf'] ) ),
 				\EventsCertificate\Fonts\weight_for( (string) ( $el['font'] ?? '' ), (int) ( $el['weight'] ?? 400 ), ! empty( $options['for_pdf'] ) ),
 				$size,
-				(float) ( $el['lh'] ?? 1.2 ),
+				\EventsCertificate\Vendor\Camaleaun\Draw\Text::line_height( $el['lh'] ?? null, $size ),
 				color( $design, $el['color'] ?? '$text', $mode ),
 				in_array( $el['align'] ?? 'left', array( 'left', 'center', 'right' ), true ) ? ( $el['align'] ?? 'left' ) : 'left',
-				! empty( $el['ls'] ) ? sprintf( 'letter-spacing:%.2Fpt;', $el['ls'] ) : '',
+				// A letter spacing is points whatever unit it was said in (a percentage is of the font size): two decimals, three when the third is not a zero.
+				letter_spacing_css( $el['ls'] ?? null, $size ),
 				! empty( $el['fit'] ) ? 'white-space:nowrap;' : '',
 				$alpha
 			);

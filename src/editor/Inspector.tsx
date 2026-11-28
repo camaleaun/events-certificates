@@ -35,6 +35,7 @@ import TextByLanguage from './TextByLanguage';
 import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, type GroupEl, fieldValue, runsOf } from './model';
 import { stockName } from './base';
 import GroupPanel from './GroupPanel';
+import TypeLength, { LETTER_SPACING_UNITS, LINE_HEIGHT_UNITS } from './TypeLength';
 import LineFields from './LineFields';
 import { innerPage } from './tree';
 import { ColorItem } from './ColorChoices';
@@ -252,11 +253,12 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 							onChange={ ( weight ) => onChange( { weight: Number( weight ) } ) }
 						/>
 					</ToolsPanelItem>
+					{ /* Empty by default: what none is, is the placeholder. A line height is - (no unit: a multiplier of the size, the default) or %, px, pt…; a letter spacing is % of the size (the default) or px, pt… */ }
 					<ToolsPanelItem className="single-column" label={ __( 'Line height', 'events-certificates' ) } hasValue={ () => el.lh !== undefined } onDeselect={ () => onChange( { lh: undefined } ) } isShownByDefault>
-						<NumberControl __next40pxDefaultSize label={ __( 'Line height', 'events-certificates' ) } step={ 0.05 } min={ 0.8 } max={ 3 } value={ el.lh ?? '' } placeholder="1.2" onChange={ ( v ) => onChange( { lh: v === undefined || v === '' ? undefined : Number( v ) } ) } />
+						<TypeLength label={ __( 'Line height', 'events-certificates' ) } value={ el.lh } units={ LINE_HEIGHT_UNITS } defaultUnit="-" placeholder="1.2" onChange={ ( lh ) => onChange( { lh } ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem className="single-column" label={ __( 'Letter spacing', 'events-certificates' ) } hasValue={ () => el.ls !== undefined } onDeselect={ () => onChange( { ls: undefined } ) } isShownByDefault>
-						<NumberControl __next40pxDefaultSize label={ __( 'Letter spacing', 'events-certificates' ) } step={ 0.05 } value={ el.ls ?? '' } placeholder="0" onChange={ ( v ) => onChange( { ls: v === undefined || v === '' ? undefined : Number( v ) } ) } />
+						<TypeLength label={ __( 'Letter spacing', 'events-certificates' ) } value={ el.ls } units={ LETTER_SPACING_UNITS } defaultUnit="%" placeholder="0" onChange={ ( ls ) => onChange( { ls } ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem label={ __( 'Alignment', 'events-certificates' ) } hasValue={ () => ( el.align || 'left' ) !== 'left' } onDeselect={ () => onChange( { align: 'left' } ) } isShownByDefault>
 						<ToggleGroupControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Alignment', 'events-certificates' ) } value={ el.align || 'left' } onChange={ ( v ) => onChange( { align: v as 'left' } ) }>
@@ -293,16 +295,16 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 						</ToggleGroupControl>
 					</ToolsPanelItem>
 					<ToolsPanelItem className="single-column" label={ __( 'QR code size', 'events-certificates' ) } hasValue={ () => ( el.qr ?? 44 ) !== 44 } onDeselect={ () => onChange( { qr: 44 } as Partial< Element > ) } isShownByDefault>
-						<NumberControl __next40pxDefaultSize label={ __( 'QR code size', 'events-certificates' ) } min={ 8 } value={ el.qr ?? 44 } onChange={ ( v ) => onChange( { qr: Math.max( 8, Number( v ) || 44 ) } as Partial< Element > ) } />
+						<NumberControl __next40pxDefaultSize step="any" label={ __( 'QR code size', 'events-certificates' ) } min={ 8 } value={ el.qr ?? 44 } onChange={ ( v ) => onChange( { qr: Math.max( 8, Number( v ) || 44 ) } as Partial< Element > ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem className="single-column" label={ __( 'Gap', 'events-certificates' ) } hasValue={ () => ( el.gap ?? 2 ) !== 2 } onDeselect={ () => onChange( { gap: 2 } as Partial< Element > ) } isShownByDefault>
-						<NumberControl __next40pxDefaultSize label={ __( 'Gap', 'events-certificates' ) } min={ 0 } value={ el.gap ?? 2 } onChange={ ( v ) => onChange( { gap: Math.max( 0, Number( v ) || 0 ) } as Partial< Element > ) } />
+						<NumberControl __next40pxDefaultSize step="any" spinFactor={ 0.1 } label={ __( 'Gap', 'events-certificates' ) } min={ 0 } value={ el.gap ?? 2 } onChange={ ( v ) => onChange( { gap: Math.max( 0, Number( v ) || 0 ) } as Partial< Element > ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem className="single-column" label={ __( 'Code size', 'events-certificates' ) } hasValue={ () => ( el.code?.size ?? 6.5 ) !== 6.5 } onDeselect={ () => onChange( { code: { ...el.code, size: 6.5 } } as Partial< Element > ) } isShownByDefault>
-						<NumberControl __next40pxDefaultSize label={ __( 'Code size', 'events-certificates' ) } step={ 0.5 } min={ 3 } value={ el.code?.size ?? 6.5 } onChange={ ( v ) => onChange( { code: { ...el.code, size: Math.max( 3, Number( v ) || 6.5 ) } } as Partial< Element > ) } />
+						<NumberControl __next40pxDefaultSize label={ __( 'Code size', 'events-certificates' ) } step="any" spinFactor={ 0.5 } min={ 3 } value={ el.code?.size ?? 6.5 } onChange={ ( v ) => onChange( { code: { ...el.code, size: Math.max( 3, Number( v ) || 6.5 ) } } as Partial< Element > ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem className="single-column" label={ __( 'Hint size', 'events-certificates' ) } hasValue={ () => ( el.hint?.size ?? 6 ) !== 6 } onDeselect={ () => onChange( { hint: { ...el.hint, size: 6 } } as Partial< Element > ) } isShownByDefault>
-						<NumberControl __next40pxDefaultSize label={ __( 'Hint size', 'events-certificates' ) } step={ 0.5 } min={ 3 } value={ el.hint?.size ?? 6 } onChange={ ( v ) => onChange( { hint: { ...el.hint, size: Math.max( 3, Number( v ) || 6 ) } } as Partial< Element > ) } />
+						<NumberControl __next40pxDefaultSize label={ __( 'Hint size', 'events-certificates' ) } step="any" spinFactor={ 0.5 } min={ 3 } value={ el.hint?.size ?? 6 } onChange={ ( v ) => onChange( { hint: { ...el.hint, size: Math.max( 3, Number( v ) || 6 ) } } as Partial< Element > ) } />
 					</ToolsPanelItem>
 					<div className="evcert-color-items">
 						<ColorItem label={ __( 'Code color', 'events-certificates' ) } value={ el.code?.color || '$muted' } clearTo="$muted" design={ design } mode={ mode } onChange={ ( c ) => onChange( { code: { ...el.code, color: c } } as Partial< Element > ) } />

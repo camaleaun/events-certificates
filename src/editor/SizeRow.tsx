@@ -67,7 +67,7 @@ export default function SizeRow( { w, h, units, onUnit, placeholder, disabled, o
 				} }
 			/>
 		) : (
-			<NumberControl __next40pxDefaultSize label={ label } min={ 1 } step={ 0.01 } disabled={ disabled?.[ side ] } placeholder={ placeholder ? String( placeholder[ side === 'w' ? 0 : 1 ] ) : undefined } value={ value ?? '' } onChange={ ( v ) => onChange( side, v ) } />
+			<NumberControl __next40pxDefaultSize label={ label } min={ 1 } step="any" spinFactor={ 0.01 } disabled={ disabled?.[ side ] } placeholder={ placeholder ? String( placeholder[ side === 'w' ? 0 : 1 ] ) : undefined } value={ value ?? '' } onChange={ ( v ) => onChange( side, v ) } />
 		);
 	return (
 		<DropdownRow label={ __( 'Size', 'events-certificates' ) } value={ summary }>

@@ -45,9 +45,10 @@ export default function GroupPanel( { el, onChange }: { el: GroupEl; onChange: (
 	const flowed = !! arrange;
 	const vertical = arrange === 'stack';
 	const set = ( patch: Partial< GroupEl > ) => onChange( patch as Partial< Element > );
+	// "any" keeps what is typed with its decimals (the field does not round to a step); the arrows step by 0.1 (the spin factor).
 	const field = ( key: 'gap' | 'padding', label: string ) => (
 		<ToolsPanelItem label={ label } hasValue={ () => !! el[ key ] } onDeselect={ () => set( { [ key ]: undefined } ) } isShownByDefault>
-			<NumberControl __next40pxDefaultSize label={ label } min={ 0 } step={ 1 } value={ el[ key ] ?? 0 } suffix={ <span className="evcert-suffix">pt</span> } onChange={ ( v ) => set( { [ key ]: Number( v ) > 0 ? Number( v ) : undefined } ) } />
+			<NumberControl __next40pxDefaultSize label={ label } min={ 0 } step="any" spinFactor={ 0.1 } value={ el[ key ] ?? 0 } suffix={ <span className="evcert-suffix">pt</span> } onChange={ ( v ) => set( { [ key ]: Number( v ) > 0 ? Number( v ) : undefined } ) } />
 		</ToolsPanelItem>
 	);
 	// Along the row (the width), or the stack (the height); across it the other way. What a grid has is its columns.

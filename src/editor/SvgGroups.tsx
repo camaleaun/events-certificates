@@ -13,8 +13,8 @@ export function ViewBoxRow( { vw, vh, onChange }: { vw: number; vh: number; onCh
 		<DropdownRow label={ __( 'ViewBox', 'events-certificates' ) } value={ `${ vw } × ${ vh }` }>
 			{ () => (
 				<HStack alignment="top">
-					<NumberControl __next40pxDefaultSize label={ __( 'Width', 'events-certificates' ) } min={ 1 } value={ vw } onChange={ ( v ) => Number( v ) > 0 && onChange( { vw: Number( v ) } ) } />
-					<NumberControl __next40pxDefaultSize label={ __( 'Height', 'events-certificates' ) } min={ 1 } value={ vh } onChange={ ( v ) => Number( v ) > 0 && onChange( { vh: Number( v ) } ) } />
+					<NumberControl __next40pxDefaultSize step="any" label={ __( 'Width', 'events-certificates' ) } min={ 1 } value={ vw } onChange={ ( v ) => Number( v ) > 0 && onChange( { vw: Number( v ) } ) } />
+					<NumberControl __next40pxDefaultSize step="any" label={ __( 'Height', 'events-certificates' ) } min={ 1 } value={ vh } onChange={ ( v ) => Number( v ) > 0 && onChange( { vh: Number( v ) } ) } />
 				</HStack>
 			) }
 		</DropdownRow>
