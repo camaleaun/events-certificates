@@ -9,7 +9,8 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { resizeBox, snap, type Guide } from '@camaleaun/draw';
 import { Button, Toolbar, ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { toElements } from './blocks';
+import { toElements, type Selection } from './blocks';
+import { clickTarget, rangeIds, toggleIds } from './selection';
 import { box, lockedRatio, moved, pageColor, placed, type Design, type Element, type GroupEl, type Mode } from './model';
 import { Shape } from './Shape';
 import { VARIATIONS } from './GroupPanel';
@@ -42,19 +43,19 @@ type Props = {
 	onGroup: ( ids: string[], arrange?: GroupEl[ 'arrange' ] ) => void;
 	/** What the editor draws in place of a picture with nothing chosen yet (a foreignObject, or null for the usual drawing). */
 	placeholder: ( el: Element, select: () => void, startMove: ( event: React.PointerEvent ) => void ) => React.ReactNode;
+	/** What is selected (the editor's list of ids and where a range starts), and how to change it. */
+	selection: Selection;
+	onSelect: ( ids: string[], anchor: string | null ) => void;
 };
 
 const diff = ( before: Record< string, unknown >, after: Record< string, unknown > ) => Object.fromEntries( Object.entries( after ).filter( ( [ key, value ] ) => JSON.stringify( before[ key ] ) !== JSON.stringify( value ) ) );
 
-export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: true, y: true }, svgRef, selRef, tab, editingId, overlay, onEdit, placeholder, choosing, onChoose, onGroup }: Props ) {
-	const { blocks, selected, many } = ( useSelect as any )(
-		( select: any ) => {
-			const store = select( blockEditorStore );
-			return { blocks: store.getBlocks(), selected: store.getSelectedBlockClientId(), many: ( store.getSelectedBlockClientIds() as string[] ).length > 1 ? store.getSelectedBlockClientIds() : [] };
-		},
-		[]
-	) as { blocks: any[]; selected: string | null; many: string[] };
-	const { updateBlockAttributes, selectBlock, multiSelect } = ( useDispatch as any )( blockEditorStore ) as { updateBlockAttributes: ( id: string, patch: Record< string, unknown > ) => void; selectBlock: ( id: string ) => void; multiSelect: ( first: string, last: string ) => void };
+export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: true, y: true }, svgRef, selRef, tab, editingId, overlay, onEdit, placeholder, choosing, onChoose, onGroup, selection, onSelect }: Props ) {
+	const blocks = ( useSelect as any )( ( select: any ) => select( blockEditorStore ).getBlocks(), [] ) as any[];
+	// What is selected is the editor's own list (the store can only hold a run of siblings).
+	const selected = selection.ids.length === 1 ? selection.ids[ 0 ] : null;
+	const many = selection.ids.length > 1 ? selection.ids : [];
+	const { updateBlockAttributes } = ( useDispatch as any )( blockEditorStore ) as { updateBlockAttributes: ( id: string, patch: Record< string, unknown > ) => void };
 	const dragRef = useRef< Drag | null >( null );
 	const [ preview, setPreview ] = useState< Element | null >( null );
 	const [ guides, setGuides ] = useState< Guide[] >( [] );
@@ -82,7 +83,7 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 		( event.target as Element & globalThis.Element ).setPointerCapture?.( event.pointerId );
 		dragRef.current = { ...drag, wasSelected: selected === drag.id, moved: false };
 	};
-	const select = ( id: string ) => selectBlock( id );
+	const select = ( id: string ) => onSelect( [ id ], id );
 
 	const onMove = ( event: React.PointerEvent ) => {
 		const drag = dragRef.current;
@@ -145,15 +146,19 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 
 
 	const extend = ( event: React.PointerEvent, id: string ) => {
-		// Shift or Cmd/Ctrl adds to the selection: the elements of one list, from the one that is selected to this one (as the core's List View does).
-		const ids = many.length ? many : selected ? [ selected ] : [];
-		const first = ids[ 0 ];
-		if ( first && first !== id && parentOf( shownTree, first )?.id === parentOf( shownTree, id )?.id ) {
-			multiSelect( first, id );
-			event.stopPropagation();
-			return true;
+		// Shift selects a range, in the order of the list, from where the selection started to this one; Cmd or Ctrl adds this one or takes it out (as the post editor and the layers do).
+		// Both ends are lifted to one list when they are in different groups.
+		if ( ! selection.ids.length || ( ! event.shiftKey && ! event.metaKey && ! event.ctrlKey ) ) {
+			return false;
 		}
-		return false;
+		event.stopPropagation();
+		if ( event.metaKey || event.ctrlKey ) {
+			onSelect( toggleIds( shownTree, selection.ids, id ), selection.anchor ?? selection.ids[ 0 ] );
+		} else {
+			const anchor = selection.anchor ?? selection.ids[ 0 ];
+			onSelect( rangeIds( shownTree, anchor, id ), anchor );
+		}
+		return true;
 	};
 
 	/** An element as it is drawn; a group is its own box, and what is in it from its corner. */
@@ -167,7 +172,7 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 			chain.unshift( up as unknown as Placed );
 		}
 		const at = chain.findIndex( ( c ) => c.id === selected || many.includes( c.id ) );
-		const target = tab === 'content' ? el : at >= 0 ? chain[ at ] : chain[ 0 ];
+		const target = tab === 'content' ? el : ( findEl( shownTree, clickTarget( shownTree, el.id, selection.ids ) ) as Placed ) || chain[ 0 ];
 		const begin = ( event: React.PointerEvent ) => start( event, { kind: 'move', id: target.id, start: toPage( event ), origin: target } );
 		const ph = el.type === 'image' && ! el.src && el.slot !== 'logo' ? placeholder( el, () => select( target.id ), begin ) : null;
 		if ( ph ) {

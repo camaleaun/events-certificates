@@ -6,12 +6,13 @@
 import { fontStack, weightFor } from './fonts';
 import { darkEnabled, declarationEnabled } from './darkMode';
 import apiFetch from '@wordpress/api-fetch';
-import { Button, ColorPalette, DropdownMenu, MenuGroup, MenuItem, Popover, Snackbar, Spinner, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/components';
+import { Button, ColorPalette, DropdownMenu, Icon, MenuGroup, MenuItem, Popover, Snackbar, Spinner, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/components';
 import { store as commandsStore, useCommand } from '@wordpress/commands';
 import { dispatch as wpDispatch } from '@wordpress/data';
 import { check, chevronLeft, closeSmall, copy, download, drawerRight, external, lineSolid, listView, moreVertical, pages, plus, redo as redoIcon, seen, styles, trash, undo as undoIcon, upload } from '@wordpress/icons';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { elementIcon } from './icons';
 import {
 	box,
 	color,
@@ -47,9 +48,10 @@ import Inspector from './Inspector';
 import PreviewDropdown from './PreviewDropdown';
 import SvgEditor from './SvgEditor';
 import type { Picked } from './media';
-import { BlockLayers, BlocksProvider, registerBlocks } from './blocks';
+import { BlockLayers, BlocksProvider, registerBlocks, type Selection } from './blocks';
+import { escapeIds, selectAllIds } from './selection';
 import BlockCanvas from './BlockCanvas';
-import { bakeChildren, cloneEl, findEl, holderFor, insertInto, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
+import { bakeChildren, cloneEl, duplicateEls, nudgeEls, removeEls, findEl, holderFor, insertInto, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
 import { cleanForSlug } from '@wordpress/url';
 import { fromMarkup, isMarkup, lineHeightFactor, toMarkup } from '@camaleaun/draw';
 import { BLOCK_OPTIONS, fromFile, toFile } from './dialect';
@@ -180,9 +182,13 @@ export default function Editor() {
 	const resolvedShown = useMemo( () => ( { ...shown, elements: resolveTree( shown.elements, shown.page ) as Element[] } ), [ shown ] );
 	// The group that has just been put in and has no layout chosen yet.
 	const [ choosing, setChoosing ] = useState< string | null >( null );
-	// What is selected when more than one is (the block editor's range): they can be put in a group.
-	const [ selectedMany, setSelectedMany ] = useState< string[] >( [] );
-	const [ selected, setSelected ] = useState< string | null >( null );
+	// What is selected: the editor's own list of ids (the block editor's store can only hold a run of siblings), and where a range starts.
+	const [ selection, setSelection ] = useState< Selection >( { ids: [], anchor: null } );
+	// One element (what the Inspector and the toolbar show), or several (they can be put in a group, moved, copied or deleted together).
+	const selected = selection.ids.length === 1 ? selection.ids[ 0 ] : null;
+	const selectedMany = selection.ids.length > 1 ? selection.ids : [];
+	const setSelected = ( id: string | null ) => setSelection( id ? { ids: [ id ], anchor: id } : { ids: [], anchor: null } );
+	const selectIds = ( ids: string[], anchor: string | null = ids[ 0 ] ?? null ) => setSelection( { ids, anchor } );
 	const [ mode, setMode ] = useState< Mode >( 'light' );
 	// One mode, like the block editor: click selects and drags, double-click edits text.
 	const tab = 'art' as 'content' | 'art';
@@ -419,23 +425,29 @@ export default function Editor() {
 	// The group the selected element is in (resolved): in a row, a stack or a grid its place is not the element's to say.
 	const currentHolder = current ? parentOf( resolvedShown.elements, current.id ) : null;
 
-	const remove = ( id: string ) => {
-		const el = findEl( design.elements, id );
-		if ( ! el || isRequired( el, flatten( design.elements ) ) ) {
+	/** Several elements deleted at once (one undo): what must stay (the code of authenticity…) is left, and stays selected. */
+	const removeMany = ( ids: string[] ) => {
+		const out = removeEls( design.elements, ids, ( el ) => isRequired( el, flatten( design.elements ) ) );
+		if ( out.kept.length ) {
+			setNotice( _n( 'Kept: it has to be on every certificate.', 'Kept: they have to be on every certificate.', out.kept.length, 'events-certificates' ) );
+		}
+		if ( out.list === design.elements ) {
 			return;
 		}
-		commit( { ...design, elements: removeEl( design.elements, id ) } );
-		setSelected( null );
+		commit( { ...design, elements: out.list } );
+		selectIds( out.kept );
 	};
-	const duplicate = ( id: string ) => {
-		const el = findEl( design.elements, id );
-		if ( ! el || flatten( design.elements ).length + flatten( [ el ] ).length > MAX_ELEMENTS ) {
+	const remove = ( id: string ) => removeMany( [ id ] );
+	/** Several elements copied at once, each after the last that was selected of its list; the copies are selected. */
+	const duplicateMany = ( ids: string[] ) => {
+		const out = duplicateEls( design.elements, ids, shift, MAX_ELEMENTS );
+		if ( ! out.ids.length ) {
 			return;
 		}
-		const copy = shift( cloneEl( el, `${ el.name || el.type } copy` ), 10, 10, el );
-		commit( { ...design, elements: insertAfter( design.elements, id, copy ) } );
-		setSelected( copy.id );
+		commit( { ...design, elements: out.list } );
+		selectIds( out.ids );
 	};
+	const duplicate = ( id: string ) => duplicateMany( [ id ] );
 	const reorder = ( id: string, to: 'up' | 'down' | 'top' | 'bottom' ) => commit( { ...design, elements: reorderEl( design.elements, id, to ) } );
 	const insert = ( type: Insertable ) => {
 		let el = create( type, design, paintRef.current );
@@ -541,6 +553,10 @@ export default function Editor() {
 	// Keyboard: arrows nudge, Delete removes, Cmd/Ctrl+Z/Shift+Z/D/S.
 	useEffect( () => {
 		const onKey = ( event: KeyboardEvent ) => {
+			// What the layers (or anything else) already did with the key is theirs: Cmd+Shift+D there duplicates once.
+			if ( event.defaultPrevented ) {
+				return;
+			}
 			// Open or close the settings (the core's toggle-sidebar shortcut: Shift + Cmd/Ctrl + comma), wherever the focus is. With Shift the key is "<": the code is the comma's.
 			if ( ( event.metaKey || event.ctrlKey ) && event.shiftKey && event.code === 'Comma' ) {
 				event.preventDefault();
@@ -589,12 +605,15 @@ export default function Editor() {
 				} else {
 					group( selectedMany.length > 1 ? selectedMany : [ selected as string ] );
 				}
-			} else if ( mod && event.key.toLowerCase() === 'd' && selected ) {
+			} else if ( mod && event.key.toLowerCase() === 'd' && selection.ids.length ) {
 				event.preventDefault();
-				duplicate( selected );
-			} else if ( ( event.key === 'Delete' || event.key === 'Backspace' ) && selected ) {
+				duplicateMany( selection.ids );
+			} else if ( mod && event.key.toLowerCase() === 'a' && ! editing ) {
 				event.preventDefault();
-				remove( selected );
+				selectIds( selectAllIds( design.elements, selection.ids ) );
+			} else if ( ( event.key === 'Delete' || event.key === 'Backspace' ) && selection.ids.length ) {
+				event.preventDefault();
+				removeMany( selection.ids );
 			} else if ( event.key === 'Enter' && selected && ! editing ) {
 				const el = findEl( design.elements, selected );
 				if ( el && el.type === 'text' ) {
@@ -602,16 +621,18 @@ export default function Editor() {
 					startEditing( el );
 				}
 			} else if ( event.key === 'Escape' ) {
-				setSelected( null );
+				// Several become the first, one goes up to its group, then nothing.
+				selectIds( escapeIds( design.elements, selection.ids ) );
 				setPanel( null );
-			} else if ( selected && event.key.startsWith( 'Arrow' ) ) {
+			} else if ( selection.ids.length && event.key.startsWith( 'Arrow' ) ) {
 				event.preventDefault();
 				const step = event.shiftKey ? 10 : 1;
-				const el = findEl( design.elements, selected );
-				if ( el && ! el.locked && ! ( currentHolder && currentHolder.arrange ) ) {
-					const dx = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0;
-					const dy = event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0;
-					commit( { ...design, elements: mapEl( design.elements, selected, ( e ) => shift( e, dx, dy ) ) } );
+				const dx = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0;
+				const dy = event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0;
+				// What is locked, or placed by a row, a stack or a grid, does not move by hand.
+				const movable = ( el: Element ) => ! el.locked && ! parentOf( resolvedShown.elements, el.id )?.arrange;
+				if ( ( dx || dy ) && selection.ids.some( ( id ) => { const el = findEl( design.elements, id ); return !! el && movable( el ); } ) ) {
+					commit( { ...design, elements: nudgeEls( design.elements, selection.ids, dx, dy, ( e, x, y ) => shift( e, x, y ), movable ) } );
 				}
 			}
 		};
@@ -668,8 +689,8 @@ export default function Editor() {
 	useCommand( palette( 'preview', __( 'Preview in new tab', 'events-certificates' ), external, () => preview() ) );
 	useCommand( palette( 'mode', mode === 'light' ? __( 'Preview in dark mode', 'events-certificates' ) : __( 'Preview in light mode', 'events-certificates' ), seen, () => setMode( mode === 'light' ? 'dark' : 'light' ), ! darkEnabled() ) );
 	fitLabels().forEach( ( [ mode, label ] ) => useCommand( palette( `fit-${ mode }`, label, seen, () => fit( mode ) ) ) );
-	useCommand( palette( 'duplicate', __( 'Duplicate the selected element', 'events-certificates' ), copy, () => selected && duplicate( selected ), ! selectedEl ) );
-	useCommand( palette( 'delete', __( 'Delete the selected element', 'events-certificates' ), trash, () => selected && remove( selected ), ! selectedEl || isRequired( selectedEl, flatten( design.elements ) ) ) );
+	useCommand( palette( 'duplicate', __( 'Duplicate the selection', 'events-certificates' ), copy, () => selection.ids.length && duplicateMany( selection.ids ), ! selection.ids.length ) );
+	useCommand( palette( 'delete', __( 'Delete the selection', 'events-certificates' ), trash, () => selection.ids.length && removeMany( selection.ids ), ! selection.ids.length || selection.ids.every( ( id ) => { const el = findEl( design.elements, id ); return ! el || isRequired( el, flatten( design.elements ) ); } ) ) );
 	useCommand( palette( 'export', __( 'Export', 'events-certificates' ), download, () => exportBlocks() ) );
 	useCommand( palette( 'import', __( 'Import…', 'events-certificates' ), upload, () => setImporting( true ) ) );
 	useCommand( palette( 'clear', __( 'Clear the design', 'events-certificates' ), trash, () => replaceDesign( blankDesign() ) ) );
@@ -749,11 +770,10 @@ export default function Editor() {
 			<BlocksProvider
 				elements={ design.elements }
 				page={ design.page }
-				onMany={ setSelectedMany }
-				selected={ selected }
-				onSelect={ ( id ) => {
-					setSelected( id );
-					if ( id ) {
+				selection={ selection }
+				onSelection={ ( ids, anchor ) => {
+					selectIds( ids, anchor );
+					if ( ids.length ) {
 						setSidebar( 'element' );
 					}
 				} }
@@ -789,7 +809,10 @@ export default function Editor() {
 				<div
 					className={ `evcert-stage${ fullFit ? ' is-fit-full' : '' }${ flush ? ' is-fit-flush' : '' }${ status === 'loading' || ! area ? ' is-waiting' : '' }${ panning ? ' is-panning' : '' }${ panRef.current ? ' is-grabbing' : '' }` }
 					ref={ wrapRef }
+					tabIndex={ -1 }
 					onPointerDownCapture={ ( event ) => {
+						// A click on the stage takes the focus from the layers: their own keys (copy, paste, delete) would otherwise answer to the canvas.
+						( event.currentTarget as HTMLElement ).focus( { preventScroll: true } );
 						if ( ! panning || ! wrapRef.current ) {
 							return;
 						}
@@ -837,6 +860,13 @@ export default function Editor() {
 								setChoosing( null );
 							} }
 							onGroup={ group }
+							selection={ selection }
+							onSelect={ ( ids, anchor ) => {
+								selectIds( ids, anchor );
+								if ( ids.length ) {
+									setSidebar( 'element' );
+								}
+							} }
 							overlay={
 								editing
 									? ( flatten( resolvedShown.elements ) as Placed[] )
@@ -896,7 +926,7 @@ export default function Editor() {
 								role="tab"
 								aria-selected={ sidebarTab === 'element' }
 								className={ sidebarTab === 'element' ? 'is-active' : '' }
-								disabled={ ! current }
+								disabled={ ! current && ! selectedMany.length }
 								onClick={ () => setSidebar( 'element' ) }
 							>
 								{ __( 'Element', 'events-certificates' ) }
@@ -906,6 +936,30 @@ export default function Editor() {
 						</div>
 						{ sidebarTab === 'element' && current && (
 							<Inspector el={ current } stored={ currentStored } design={ design } mode={ mode } tab={ tab } locale={ LOCALE } sample={ sample } onChange={ ( patch ) => update( current.id, patch ) } onBox={ ( b ) => setBox( current.id, b ) } onImage={ ( picked ) => pickImage( current.id, picked ) } holder={ currentHolder } />
+						) }
+						{ sidebarTab === 'element' && ! current && selectedMany.length > 0 && (
+							<div className="evcert-inspector">
+								<div className="evcert-card">
+									<span className="evcert-card__icon">
+										<Icon icon={ copy } />
+									</span>
+									<div>
+										<h2 className="evcert-card__title">{ sprintf( /* translators: %d: how many elements are selected. */ _n( '%d element selected', '%d elements selected', selectedMany.length, 'events-certificates' ), selectedMany.length ) }</h2>
+									</div>
+								</div>
+								<ul className="evcert-selected-list">
+									{ selectedMany.map( ( id ) => {
+										const el = findEl( design.elements, id );
+										return el ? (
+											<li key={ id }>
+												<Button variant="tertiary" icon={ elementIcon( el.type, el.slot ) } onClick={ () => setSelected( id ) }>
+													{ layerName( el ) }
+												</Button>
+											</li>
+										) : null;
+									} ) }
+								</ul>
+							</div>
 						) }
 						{ sidebarTab === 'design' && <DesignPanel design={ stored } mode={ mode } title={ title } status={ statusLabel } sample={ sample } defaults={ config.sample } onTitle={ setTitle } roles={ roles } roleLabels={ config.roles } isDefault={ config.isDefault } onRoles={ setRoles } onChange={ replaceDesign } onMode={ setMode } /> }
 					</aside>
@@ -944,6 +998,12 @@ export default function Editor() {
 						<>
 							<span aria-hidden="true"> › </span>
 							<span>{ layerName( current ) }</span>
+						</>
+					) }
+					{ selectedMany.length > 0 && (
+						<>
+							<span aria-hidden="true"> › </span>
+							<span>{ sprintf( /* translators: %d: how many elements are selected. */ _n( '%d element', '%d elements', selectedMany.length, 'events-certificates' ), selectedMany.length ) }</span>
 						</>
 					) }
 				</nav>

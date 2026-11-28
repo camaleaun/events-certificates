@@ -188,6 +188,8 @@ $evcert-sidebar-width: 280px;
 }
 
 .evcert-stage {
+	// Focusable by a click (to take the focus from the layers), not drawn with a focus ring.
+	outline: none;
 	flex: 1;
 	min-width: 0;
 	display: flex;

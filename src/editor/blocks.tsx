@@ -3,7 +3,7 @@
  * has its paths as an attribute), and the block's clientId is the element's id, so a selection means the same in both. The block editor's own
  * List View shows them (as layers) and its store is where a drawing is edited.
  */
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { BlockEditorProvider, __experimentalListView as ListView, store as blockEditorStore } from '@wordpress/block-editor';
 import { registerBlockType, getBlockType } from '@wordpress/blocks';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -11,6 +11,7 @@ import { elementIcon } from './icons';
 import { stockName } from './base';
 import { BLOCK_NAMES, FALLBACK } from './dialect';
 import type { Element } from './model';
+import { inListOrder, isContiguous } from './selection';
 import { groupsDeep, canHold, flatten, isGroup, moveEl, findEl, mapEl, MAX_DEPTH, MAX_ELEMENTS } from './tree';
 
 /** The block of each element type (the names the design is written with: src/editor/dialect.ts). */
@@ -96,33 +97,51 @@ export function toElements( blocks: Instance[] ): Element[] {
 	} );
 }
 
-/** Keeps the editor's selection and the block editor's the same one. */
-function SyncSelection( { selected, onSelect, onMany }: { selected: string | null; onSelect: ( id: string | null ) => void; onMany?: ( ids: string[] ) => void } ) {
-	// More than one selected (a range, with Shift): the editor needs to know to group them.
-	const many = ( useSelect as any )( ( select: any ) => ( select( blockEditorStore ).getSelectedBlockClientIds() as string[] ), [] ) as string[];
-	const more = many.length > 1 ? many : [];
+/** What is selected: the editor's own list of ids (the core's store can only hold a run of siblings), and where a range from the keyboard or Shift starts. */
+export type Selection = { ids: string[]; anchor: string | null };
+
+/**
+ * Keeps the editor's selection and the block editor's (the layers') the same one: the editor's list is the truth, the store mirrors it when it can (one element, or a run of siblings),
+ * and what is selected in the layers is taken back as the selection.
+ */
+function SyncSelection( { selection, tree, onChange }: { selection: Selection; tree: Element[]; onChange: ( ids: string[], anchor: string | null ) => void } ) {
+	const key = selection.ids.join( ',' );
+	const inStore = ( useSelect as any )( ( select: any ) => ( select( blockEditorStore ).getSelectedBlockClientIds() as string[] ).join( ',' ), [] ) as string;
+	const start = ( useSelect as any )( ( select: any ) => select( blockEditorStore ).getBlockSelectionStart() as string | null, [] ) as string | null;
+	const { selectBlock, multiSelect, clearSelectedBlock } = ( useDispatch as any )( blockEditorStore ) as { selectBlock: ( id: string ) => void; multiSelect: ( a: string, b: string ) => void; clearSelectedBlock: () => void };
+	// What the store should say after what was pushed to it: the echo of that is not a choice made in the layers.
+	const expected = useRef( '' );
 	useEffect( () => {
-		onMany?.( more );
-		// Only when the selection changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ more.join( ',' ) ] );
-	const inStore = ( useSelect as any )( ( select: any ) => select( blockEditorStore ).getSelectedBlockClientId() as string | null, [] ) as string | null;
-	const { selectBlock, clearSelectedBlock } = ( useDispatch as any )( blockEditorStore ) as { selectBlock: ( id: string ) => void; clearSelectedBlock: () => void };
-	useEffect( () => {
-		if ( inStore !== selected ) {
-			if ( selected ) {
-				selectBlock( selected );
-			} else {
-				clearSelectedBlock();
-			}
+		const ids = selection.ids;
+		const ordered = inListOrder( tree, ids );
+		let want = '';
+		if ( ids.length === 1 ) {
+			want = ids[ 0 ];
+		} else if ( ids.length > 1 && isContiguous( tree, ids ) ) {
+			want = ordered.join( ',' );
+		}
+		expected.current = want;
+		if ( want === inStore ) {
+			return;
+		}
+		if ( ids.length === 1 ) {
+			selectBlock( ids[ 0 ] );
+		} else if ( want ) {
+			multiSelect( ordered[ 0 ], ordered[ ordered.length - 1 ] );
+		} else {
+			clearSelectedBlock();
 		}
 		// Only when the editor's selection changes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ selected ] );
+	}, [ key ] );
 	useEffect( () => {
-		if ( inStore && inStore !== selected && ! inStore.includes( ':' ) ) {
-			onSelect( inStore );
+		if ( inStore === expected.current || inStore === key ) {
+			return;
 		}
+		// Chosen in the layers (not a tree id such as an inner block of a path, which has a colon).
+		const ids = inStore ? inStore.split( ',' ).filter( ( id ) => ! id.includes( ':' ) ) : [];
+		expected.current = inStore;
+		onChange( ids, ids.length > 1 ? start ?? ids[ 0 ] : ids[ 0 ] ?? null );
 		// Only when the block editor's selection changes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ inStore ] );
@@ -194,7 +213,7 @@ export function reparented( before: Element[], after: Element[], page: Parameter
 }
 
 /** The block editor's store for the editor: the elements as blocks, the selection kept the same, what changes in it written back. */
-export function BlocksProvider( { elements, page, selected, onSelect, onMany, onElements, children }: { elements: Element[]; page: Parameters< typeof moveEl >[ 1 ]; selected: string | null; onSelect: ( id: string | null ) => void; onMany?: ( ids: string[] ) => void; onElements: ( next: Element[] ) => void; children: React.ReactNode } ) {
+export function BlocksProvider( { elements, page, selection, onSelection, onElements, children }: { elements: Element[]; page: Parameters< typeof moveEl >[ 1 ]; selection: Selection; onSelection: ( ids: string[], anchor: string | null ) => void; onElements: ( next: Element[] ) => void; children: React.ReactNode } ) {
 	// A key that changes when a change was refused, so the store goes back to the elements.
 	const [ refused, setRefused ] = useState( 0 );
 	const blocks = useMemo( () => toBlocks( elements ), [ elements ] );
@@ -208,7 +227,7 @@ export function BlocksProvider( { elements, page, selected, onSelect, onMany, on
 	};
 	return (
 		<BlockEditorProvider key={ refused } value={ blocks } onChange={ change } onInput={ change } settings={ {} }>
-			<SyncSelection selected={ selected } onSelect={ onSelect } onMany={ onMany } />
+			<SyncSelection selection={ selection } tree={ elements } onChange={ onSelection } />
 			<GroupLists />
 			{ children }
 		</BlockEditorProvider>
