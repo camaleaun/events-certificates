@@ -153,3 +153,51 @@ test( 'a copy of the date of emission is a date of emission (its slot is of a ki
 	assert.equal( t.cloneEl( date ).slot, 'date-of-emission' );
 	assert.equal( t.cloneEl( { ...date, slot: 'title' } ).slot, undefined );
 } );
+
+const mini = () => [ rect( 'a', 0, 0, 1, 1 ), { id: 'g', type: 'group', x: 0, y: 0, w: 50, h: 50, children: [ rect( 'b', 0, 0, 1, 1 ), rect( 'c', 0, 0, 1, 1 ), rect( 'd', 0, 0, 1, 1 ) ] }, rect( 'e', 0, 0, 1, 1 ), rect( 'f', 0, 0, 1, 1 ) ];
+const ids = ( list ) => plain( list.map( ( e ) => e.id ) );
+
+test( 'several elements are removed in one go, except the ones that must stay', () => {
+	const out = t.removeEls( mini(), [ 'a', 'c', 'f' ], ( el ) => el.id === 'f' );
+	assert.deepEqual( ids( out.list ), [ 'g', 'e', 'f' ] );
+	assert.deepEqual( ids( out.list[ 0 ].children ), [ 'b', 'd' ] );
+	assert.deepEqual( plain( out.kept ), [ 'f' ] );
+} );
+
+test( 'several elements are copied after the last of them, in order, and the copies are what is selected', () => {
+	const shiftBy = ( el, dx, dy ) => ( { ...el, x: el.x + dx, y: el.y + dy } );
+	const out = t.duplicateEls( mini(), [ 'a', 'e' ], shiftBy, 300 );
+	assert.equal( out.list.length, 6 );
+	assert.deepEqual( ids( out.list ).filter( ( id ) => ! [ 'g', 'f' ].includes( id ) ).slice( 0, 2 ), [ 'a', 'e' ] );
+	assert.equal( out.ids.length, 2 );
+	assert.deepEqual( plain( out.ids.map( ( id ) => t.findEl( out.list, id ).x ) ), [ 10, 10 ], 'shifted' );
+	assert.deepEqual( ids( out.list ).slice( 0, 2 ), [ 'a', 'g' ] );
+	assert.equal( ids( out.list ).indexOf( out.ids[ 0 ] ) < ids( out.list ).indexOf( out.ids[ 1 ] ), true );
+	assert.equal( ids( out.list ).indexOf( out.ids[ 0 ] ) > ids( out.list ).indexOf( 'e' ), true, 'after the last one that was selected' );
+	assert.equal( t.duplicateEls( mini(), [ 'a', 'e' ], shiftBy, 5 ).list.length, 4, 'not over the most elements' );
+	const inGroup = t.duplicateEls( mini(), [ 'b', 'c' ], shiftBy, 300 );
+	assert.deepEqual( ids( t.findEl( inGroup.list, 'g' ).children ).slice( 0, 3 ), [ 'b', 'c', inGroup.ids[ 0 ] ], 'in their own group' );
+} );
+
+test( 'several elements go forward or back together, keeping their order, in their own lists', () => {
+	assert.deepEqual( ids( t.reorderEls( mini(), [ 'a', 'e' ], 'up' ) ), [ 'g', 'a', 'f', 'e' ] );
+	assert.deepEqual( ids( t.reorderEls( mini(), [ 'e', 'f' ], 'up' ) ), [ 'a', 'g', 'e', 'f' ], 'the front stays the front' );
+	assert.deepEqual( ids( t.reorderEls( mini(), [ 'a', 'e' ], 'top' ) ), [ 'g', 'f', 'a', 'e' ] );
+	assert.deepEqual( ids( t.reorderEls( mini(), [ 'e', 'f' ], 'bottom' ) ), [ 'e', 'f', 'a', 'g' ] );
+	assert.deepEqual( ids( t.reorderEls( mini(), [ 'e', 'f' ], 'down' ) ), [ 'a', 'e', 'f', 'g' ] );
+	assert.deepEqual( ids( t.findEl( t.reorderEls( mini(), [ 'b', 'd' ], 'up' ), 'g' ).children ), [ 'c', 'b', 'd' ] );
+} );
+
+test( 'lock and hide: if all have it, it is taken off; otherwise it is put on all', () => {
+	assert.deepEqual( plain( t.setFlag( mini(), [ 'a', 'e' ], 'locked' ).filter( ( e ) => e.locked ).map( ( e ) => e.id ) ), [ 'a', 'e' ] );
+	const some = t.setFlag( mini(), [ 'a' ], 'locked' );
+	assert.deepEqual( plain( t.setFlag( some, [ 'a', 'e' ], 'locked' ).filter( ( e ) => e.locked ).map( ( e ) => e.id ) ), [ 'a', 'e' ], 'one had it: all get it' );
+	assert.deepEqual( plain( t.setFlag( t.setFlag( mini(), [ 'a', 'e' ], 'hidden' ), [ 'a', 'e' ], 'hidden' ).filter( ( e ) => e.hidden ).map( ( e ) => e.id ) ), [], 'all had it: off' );
+} );
+
+test( 'several elements are moved together, but not the ones that cannot move', () => {
+	const shiftBy = ( el, dx, dy ) => ( { ...el, x: el.x + dx, y: el.y + dy } );
+	const list = [ rect( 'a', 0, 0, 1, 1 ), rect( 'b', 0, 0, 1, 1, { locked: true } ), rect( 'c', 0, 0, 1, 1 ) ];
+	const out = t.nudgeEls( list, [ 'a', 'b' ], 5, -2, shiftBy, ( el ) => ! el.locked );
+	assert.deepEqual( plain( out.map( ( e ) => [ e.id, e.x, e.y ] ) ), [ [ 'a', 5, -2 ], [ 'b', 0, 0 ], [ 'c', 0, 0 ] ] );
+} );

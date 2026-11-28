@@ -261,6 +261,95 @@ export function reorderEl( list: Element[], id: string, to: 'up' | 'down' | 'top
 	return list.map( ( e ) => ( isGroup( e ) ? { ...e, children: reorderEl( e.children || [], id, to ) } : e ) );
 }
 
+/** Several elements taken out of the tree; the ones `keep` says must stay (the code of authenticity…) are left, and named. */
+export function removeEls( list: Element[], ids: string[], keep: ( el: Element ) => boolean = () => false ): { list: Element[]; kept: string[] } {
+	const kept: string[] = [];
+	let out = list;
+	for ( const id of ids ) {
+		const el = findEl( out, id );
+		if ( ! el ) {
+			continue;
+		}
+		if ( keep( el ) ) {
+			kept.push( id );
+			continue;
+		}
+		out = removeEl( out, id );
+	}
+	return { list: out, kept };
+}
+
+/**
+ * Several elements copied: each copy is after the last of the selected ones of its own list, in order (as the core's Duplicate does), moved by `shift`, and the copies are what ends up
+ * selected. None are made past `max` elements in all.
+ */
+export function duplicateEls( list: Element[], ids: string[], shift: ( el: Element, dx: number, dy: number, from: Element ) => Element, max: number ): { list: Element[]; ids: string[] } {
+	const order = flatten( list ).map( ( el ) => el.id );
+	const picked = ids.filter( ( id ) => order.includes( id ) ).sort( ( a, b ) => order.indexOf( a ) - order.indexOf( b ) );
+	const after = new Map< string, string >();
+	for ( const id of picked ) {
+		after.set( parentOf( list, id )?.id ?? '', id );
+	}
+	let out = list;
+	const made: string[] = [];
+	for ( const id of picked ) {
+		const el = findEl( out, id );
+		if ( ! el || flatten( out ).length + flatten( [ el ] ).length > max ) {
+			continue;
+		}
+		const key = parentOf( list, id )?.id ?? '';
+		const copy = shift( cloneEl( el, `${ el.name || el.type } copy` ), 10, 10, el );
+		out = insertAfter( out, after.get( key ) as string, copy );
+		after.set( key, copy.id );
+		made.push( copy.id );
+	}
+	return { list: out, ids: made };
+}
+
+/** Several elements sent forward or back together: each list they are in keeps their order, and the first one at the front stays there. */
+export function reorderEls( list: Element[], ids: string[], to: 'up' | 'down' | 'top' | 'bottom' ): Element[] {
+	const picked = new Set( ids );
+	const apply = ( items: Element[] ): Element[] => {
+		let out = items;
+		if ( items.some( ( el ) => picked.has( el.id ) ) ) {
+			const sel = ( el: Element ) => picked.has( el.id );
+			if ( to === 'top' ) {
+				out = [ ...items.filter( ( el ) => ! sel( el ) ), ...items.filter( sel ) ];
+			} else if ( to === 'bottom' ) {
+				out = [ ...items.filter( sel ), ...items.filter( ( el ) => ! sel( el ) ) ];
+			} else if ( to === 'up' ) {
+				out = [ ...items ];
+				for ( let i = out.length - 2; i >= 0; i-- ) {
+					if ( sel( out[ i ] ) && ! sel( out[ i + 1 ] ) ) {
+						[ out[ i ], out[ i + 1 ] ] = [ out[ i + 1 ], out[ i ] ];
+					}
+				}
+			} else {
+				out = [ ...items ];
+				for ( let i = 1; i < out.length; i++ ) {
+					if ( sel( out[ i ] ) && ! sel( out[ i - 1 ] ) ) {
+						[ out[ i ], out[ i - 1 ] ] = [ out[ i - 1 ], out[ i ] ];
+					}
+				}
+			}
+		}
+		return out.map( ( el ) => ( isGroup( el ) ? { ...el, children: apply( el.children || [] ) } : el ) );
+	};
+	return apply( list );
+}
+
+/** Lock or hide (`key`) several elements: if all have it, it is taken off; otherwise all get it. */
+export function setFlag( list: Element[], ids: string[], key: 'locked' | 'hidden' ): Element[] {
+	const els = ids.map( ( id ) => findEl( list, id ) ).filter( Boolean ) as Element[];
+	const on = ! els.every( ( el ) => !! el[ key ] );
+	return ids.reduce( ( out, id ) => mapEl( out, id, ( el ) => ( { ...el, [ key ]: on ? true : undefined } as Element ) ), list );
+}
+
+/** Several elements moved by dx, dy with `shift` (the one that knows anchors), except the ones `canMove` refuses (locked, placed by a row…). */
+export function nudgeEls( list: Element[], ids: string[], dx: number, dy: number, shift: ( el: Element, dx: number, dy: number ) => Element, canMove: ( el: Element ) => boolean ): Element[] {
+	return ids.reduce( ( out, id ) => mapEl( out, id, ( el ) => ( canMove( el ) ? shift( el, dx, dy ) : el ) ), list );
+}
+
 /**
  * What is in a group with the box it has now written as numbers (and no anchors): the group may change how it places them (free, row, stack, grid) and
  * each keeps the size it had, and the place it had to start from.
