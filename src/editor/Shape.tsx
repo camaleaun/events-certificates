@@ -8,7 +8,7 @@ import { stockName } from './base';
 import { QR_PLACEHOLDER } from './qr-placeholder';
 import { verificationParts } from './verification';
 import { letterSpacingPt, lineHeightFactor } from '@camaleaun/draw';
-import { color, rectPath, runsHtml, runsOf, svgPaths, type Design, type Element, type Mode, type SvgPath, type TextEl } from './model';
+import { color, datedRuns, rectPath, runsHtml, runsOf, svgPaths, type Design, type Element, type Mode, type SvgPath, type TextEl } from './model';
 
 /** A text element's CSS, shared by the canvas and the inline editor. */
 export function textStyle( el: TextEl, design: Design, mode: Mode ) {
@@ -204,7 +204,7 @@ export function Shape( { el, design, mode, sample }: { el: Element; design: Desi
 				<foreignObject x={ el.x } y={ el.y } width={ el.w } height={ Math.max( el.h, el.size * lineHeightFactor( el.lh, el.size ) * 6 ) } opacity={ opacity } style={ { overflow: 'visible' } }>
 					{ /* Only the lines of the text take a click, not the whole box (a tall box would hide the text under it): a click beside the text goes to what is under it. */ }
 					<div className="evcert-text" style={ { ...style, pointerEvents: 'none' } }>
-						<span style={ { pointerEvents: 'auto' } } dangerouslySetInnerHTML={ { __html: runsHtml( runsOf( el ), sample, LOCALE, el.upper ) } } />
+						<span style={ { pointerEvents: 'auto' } } dangerouslySetInnerHTML={ { __html: runsHtml( datedRuns( el, runsOf( el ) ), sample, LOCALE, el.upper ) } } />
 					</div>
 				</foreignObject>
 			);

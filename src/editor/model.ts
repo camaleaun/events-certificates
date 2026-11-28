@@ -23,6 +23,7 @@ export const placed = < T extends Element >( stored: T, b: Box, page: Design[ 'p
 import { __ } from '@wordpress/i18n';
 import { parseRuns } from '@camaleaun/draw';
 import { FIELD_KEYS } from './fieldKeys';
+import { phpDate } from './dates';
 
 export type Mode = 'light' | 'dark';
 
@@ -380,7 +381,12 @@ export function fieldValue( field: string, format: string | undefined, sample: R
 		if ( ! format || format === 'site' ) {
 			return sample.date_site || sample.date_iso;
 		}
-		const date = new Date( sample.date_iso || Date.now() );
+		// The date of the sample in the site's time zone (not the browser's), as a date for a pattern.
+		const date = new Date( sample.date_local || sample.date_iso || Date.now() );
+		// Any other format is a date pattern, with the letters of Settings → General (the date of emission writes its own).
+		if ( ! [ 'site', 'iso', 'long', 'medium', 'short', 'month' ].includes( format ) ) {
+			return phpDate( format, date, locale );
+		}
 		const options: Record< string, Intl.DateTimeFormatOptions > = {
 			long: { day: 'numeric', month: 'long', year: 'numeric' },
 			medium: { day: 'numeric', month: 'short', year: 'numeric' },
@@ -401,6 +407,17 @@ export function fieldValue( field: string, format: string | undefined, sample: R
 		return pattern.replace( '%s', hours );
 	}
 	return sample[ field ] !== undefined ? sample[ field ] : field;
+}
+
+/** The date of emission (a text with that slot): its words are the format of the date, none is the site's; its runs, for drawing (what is saved is the words). */
+export function datedRuns( el: { type: string; slot?: string }, runs: Run[] ): Run[] {
+	if ( el.type !== 'text' || el.slot !== 'date-of-emission' ) {
+		return runs;
+	}
+	if ( runs.every( ( run ) => 'text' in run && ! run.text.trim() ) ) {
+		return [ { field: 'issued_date' } ];
+	}
+	return runs.map( ( run ) => ( 'text' in run && run.text.trim() ? { field: 'issued_date', format: run.text, ...( run.b ? { b: true } : {} ), ...( run.i ? { i: true } : {} ) } : run ) );
 }
 
 /** Runs as HTML with the sample values in place of the fields. */

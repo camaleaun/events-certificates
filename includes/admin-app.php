@@ -231,6 +231,9 @@ function enqueue() {
 					// The date of issue as certificates show it (today, or the event's last day: Settings).
 					'date_iso'              => gmdate( 'Y-m-d\TH:i:s\Z', $issued ),
 					'date_site'             => wp_date( (string) get_option( 'date_format' ), $issued ),
+					// The same moment in the site's time zone (a date pattern is drawn from it) and the site's date format (the placeholder of the date of emission).
+					'date_local'            => wp_date( 'Y-m-d\TH:i:s', $issued ),
+					'date_format'           => (string) get_option( 'date_format' ),
 					'hours'                 => '8',
 					'community'             => __( 'Community name', 'events-certificates' ),
 					'speakers'              => 'Alex Rivera',

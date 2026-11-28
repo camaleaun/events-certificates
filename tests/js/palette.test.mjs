@@ -233,6 +233,20 @@ test( 'a text an earlier version kept as a string is runs once it is loaded', ()
 } );
 
 
+test( 'the date of emission: no words are the date in the format of the site; its words are the format', () => {
+	const slot = { type: 'text', slot: 'date-of-emission' };
+	const plainJson = ( v ) => JSON.parse( JSON.stringify( v ) );
+	assert.deepEqual( plainJson( m.datedRuns( slot, [] ) ), [ { field: 'issued_date' } ] );
+	assert.deepEqual( plainJson( m.datedRuns( slot, [ { text: '  ' } ] ) ), [ { field: 'issued_date' } ] );
+	assert.deepEqual( plainJson( m.datedRuns( slot, [ { text: 'd', b: true }, { text: ' ' }, { text: 'm', i: true } ] ) ), [ { field: 'issued_date', format: 'd', b: true }, { text: ' ' }, { field: 'issued_date', format: 'm', i: true } ] );
+	assert.deepEqual( plainJson( m.datedRuns( { type: 'text' }, [ { text: 'd/m/Y' } ] ) ), [ { text: 'd/m/Y' } ], 'Another text keeps its words.' );
+	const sample = { date_site: 'October 31, 2026', date_iso: '2026-10-31T15:00:00Z', date_local: '2026-10-31T12:00:00' };
+	assert.equal( m.fieldValue( 'issued_date', undefined, sample, 'en-US' ), 'October 31, 2026' );
+	assert.equal( m.fieldValue( 'issued_date', 'd/m/Y', sample, 'en-US' ), '31/10/2026', 'A format that is not a named one is a pattern.' );
+	assert.equal( m.fieldValue( 'issued_date', 'iso', sample, 'en-US' ), '2026-10-31' );
+} );
+
+
 test( 'a fill that is a color of the Theme goes to the file and comes back, with the Elements and a literal beside it', () => {
 	// The pickers keep a color of the Theme as "$slug"; the file says it as a preset and reads it back (docs/decisions/0050, 0051).
 	assert.equal( m.color( { page: { bg: '$background' }, colors: {}, palette: [ { slug: 'white', color: '#ffffff' } ], elements: [] }, '$white', 'light' ), '#ffffff' );

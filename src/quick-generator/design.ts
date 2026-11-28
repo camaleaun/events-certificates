@@ -11,7 +11,7 @@
  */
 import { letterSpacingPt, lineHeightFactor } from '@camaleaun/draw';
 import { flattenTree } from '../editor/tree';
-import { box, color, isWhite, pageBg, rectPath, resolve, runsIn, type Design, type Element, type Run, type TextEl } from '../editor/model';
+import { box, color, datedRuns, isWhite, pageBg, rectPath, resolve, runsIn, type Design, type Element, type Run, type TextEl } from '../editor/model';
 
 /** Points to millimetres. */
 const PT = 0.3528;
@@ -153,7 +153,7 @@ function isFilled( value: string ): boolean {
 
 /** Draws a text element. */
 function drawText( b: Backend, design: Design, el: TextEl, value: Value, locale: string ): void {
-	let text = textOf( runsIn( el, locale ), value );
+	let text = textOf( datedRuns( el, runsIn( el, locale ) ), value );
 	if ( el.upper ) {
 		text = text.toLocaleUpperCase( locale );
 	}

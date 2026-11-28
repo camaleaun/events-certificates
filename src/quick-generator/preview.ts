@@ -3,6 +3,7 @@
  * as the public generator does (assets/es/quick-generator.js): no round trip to the server while the form is filled in.
  * The values of the fields follow that script's valueOf(); the drawing is design.ts's.
  */
+import { phpDate } from '../editor/dates';
 import type { Design } from '../editor/model';
 import { cssFont, draw, prepare, type Pic } from './design';
 
@@ -34,44 +35,6 @@ export function fmt( text: string, ...args: Array< string | number > ): string {
 	} );
 }
 
-/** A date or time as PHP's date() writes it (the formats of Settings → General), with the names of the language. */
-export function phpDate( format: string, d: Date, locale: string ): string {
-	const pad = ( n: number ) => String( n ).padStart( 2, '0' );
-	const name = ( options: Intl.DateTimeFormatOptions ) => new Intl.DateTimeFormat( locale, options ).format( d );
-	const hours12 = d.getHours() % 12 || 12;
-	const period = () => {
-		const part = new Intl.DateTimeFormat( locale, { hour: 'numeric', hour12: true } ).formatToParts( d ).find( ( p ) => 'dayPeriod' === p.type );
-		return part ? part.value : d.getHours() < 12 ? 'AM' : 'PM';
-	};
-	let out = '';
-	for ( let i = 0; i < format.length; i++ ) {
-		const c = format[ i ];
-		switch ( c ) {
-			case '\\': out += format[ ++i ] || ''; break;
-			case 'd': out += pad( d.getDate() ); break;
-			case 'j': out += d.getDate(); break;
-			case 'D': out += name( { weekday: 'short' } ); break;
-			case 'l': out += name( { weekday: 'long' } ); break;
-			case 'm': out += pad( d.getMonth() + 1 ); break;
-			case 'n': out += d.getMonth() + 1; break;
-			case 'M': out += name( { month: 'short' } ); break;
-			case 'F': out += name( { month: 'long' } ); break;
-			case 'Y': out += d.getFullYear(); break;
-			case 'y': out += pad( d.getFullYear() % 100 ); break;
-			case 'H': out += pad( d.getHours() ); break;
-			case 'G': out += d.getHours(); break;
-			case 'h': out += pad( hours12 ); break;
-			case 'g': out += hours12; break;
-			case 'i': out += pad( d.getMinutes() ); break;
-			case 's': out += pad( d.getSeconds() ); break;
-			case 'a': out += period().toLowerCase(); break;
-			case 'A': out += period().toUpperCase(); break;
-			default: out += c;
-		}
-	}
-	return out;
-}
-
 /** A date for a field's format: long, medium, short, month or iso by the language, the site's date format otherwise. */
 export function dateText( cfg: PreviewConfig, iso: string, format?: string ): string {
 	if ( ! iso ) {
@@ -88,7 +51,8 @@ export function dateText( cfg: PreviewConfig, iso: string, format?: string ): st
 	if ( 'long' === format || 'medium' === format || 'short' === format ) {
 		return new Intl.DateTimeFormat( cfg.locale, { dateStyle: format } ).format( date );
 	}
-	return phpDate( cfg.dateFormat, date, cfg.locale );
+	// Any other format is a date pattern (the date of emission writes its own); none is the site's.
+	return phpDate( format && 'site' !== format ? format : cfg.dateFormat, date, cfg.locale );
 }
 
 const timeText = ( cfg: PreviewConfig, hhmm: string ) => {
