@@ -48,11 +48,21 @@ function emptyPlace( el: { x: number; y: number; w: number; h: number; name?: st
 	);
 }
 
+/** The width of what can be clicked along the outline of a shape with no fill (its stroke may be a line of one point). */
+const EDGE = 10;
+/** A shape with no fill (empty, or transparent) has only its outline to click on: it gets a wider, invisible one. */
+const unfilled = ( design: Design, fill: string | undefined, mode: Mode ) => color( design, fill, mode ) === 'none';
+
 export function Shape( { el, design, mode, sample }: { el: Element; design: Design; mode: Mode; sample: Record< string, string > } ) {
 	const opacity = el.opacity ?? 1;
 	switch ( el.type ) {
 		case 'rect':
-			return <path d={ rectPath( el.x, el.y, el.w, el.h, el.radius, el.corner ) } fill={ color( design, el.fill, mode ) } stroke={ color( design, el.stroke, mode ) } strokeWidth={ el.strokeWidth || 0 } opacity={ opacity } />;
+			return (
+				<>
+					{ unfilled( design, el.fill, mode ) && <path d={ rectPath( el.x, el.y, el.w, el.h, el.radius, el.corner ) } fill="none" stroke="transparent" strokeWidth={ Math.max( el.strokeWidth || 0, EDGE ) } pointerEvents="stroke" /> }
+					<path d={ rectPath( el.x, el.y, el.w, el.h, el.radius, el.corner ) } fill={ color( design, el.fill, mode ) } stroke={ color( design, el.stroke, mode ) } strokeWidth={ el.strokeWidth || 0 } opacity={ opacity } />
+				</>
+			);
 		case 'signature': {
 			// The signature element previews the organizer's signature when one is set, upright like on certificates (includes/render.php).
 			const signer = signatureOf( sample );
@@ -114,7 +124,12 @@ export function Shape( { el, design, mode, sample }: { el: Element; design: Desi
 			);
 		}
 		case 'ellipse':
-			return <ellipse cx={ el.x + el.w / 2 } cy={ el.y + el.h / 2 } rx={ el.w / 2 } ry={ el.h / 2 } fill={ color( design, el.fill, mode ) } stroke={ color( design, el.stroke, mode ) } strokeWidth={ el.strokeWidth || 0 } opacity={ opacity } />;
+			return (
+				<>
+					{ unfilled( design, el.fill, mode ) && <ellipse cx={ el.x + el.w / 2 } cy={ el.y + el.h / 2 } rx={ el.w / 2 } ry={ el.h / 2 } fill="none" stroke="transparent" strokeWidth={ Math.max( el.strokeWidth || 0, EDGE ) } pointerEvents="stroke" /> }
+					<ellipse cx={ el.x + el.w / 2 } cy={ el.y + el.h / 2 } rx={ el.w / 2 } ry={ el.h / 2 } fill={ color( design, el.fill, mode ) } stroke={ color( design, el.stroke, mode ) } strokeWidth={ el.strokeWidth || 0 } opacity={ opacity } />
+				</>
+			);
 		case 'path':
 			return (
 				<svg x={ el.x } y={ el.y } width={ el.w } height={ el.h } viewBox={ `0 0 ${ el.vw } ${ el.vh }` } preserveAspectRatio="none" overflow="visible">
