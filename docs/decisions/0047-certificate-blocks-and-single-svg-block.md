@@ -12,7 +12,7 @@ heavy for a template, where the paths of an SVG are one thing: the shape.
 ## Decision
 
 - Every shape of a design is a block of **this plugin**: `events-certificates/certificate-text`, `-rect`, `-ellipse`, `-line`, `-path`,
-  `-image`, `-svg`, next to the ones it already had (`-qr`, `-verification`, `-back`); a type this version does not know keeps its place as
+  `-image`, `-svg`, next to the ones it already had (`-qr`, `-verification`, `-back`) and the date of emission (`-date-of-emission`, a text with a slot: ADR 0055); a type this version does not know keeps its place as
   `events-certificates/certificate-element`. A design uses no `draw/*` block.
 - An SVG is **one block** with its paths in the `paths` attribute, and no inner blocks:
   `<!-- wp:events-certificates/certificate-svg {"name":"Seal","x":600,"y":480,"width":120,"height":44,"viewBox":"0 0 120 44","paths":[{"d":"M0 0L10 10Z","fill":"$text"},{"d":"…"}]} /-->` (the names of the attributes: ADR 0050).

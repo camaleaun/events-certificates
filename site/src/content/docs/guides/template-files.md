@@ -29,7 +29,7 @@ The **Export** screens of Certificates, Events and the rest also write each temp
 
 - The page has lengths with their unit and no version: its size is in the unit that makes it round (`297mm` by `210mm` for an A4, `11in` by `8.5in` for a letter), and the safe margin and the bleed are in millimeters.
 - Positions and sizes (`x`, `y`, `width`, `height`) are points; a drawing's `viewBox` is its own units. An element has no `id` unless the id means something (`title`, a label and its value). Colors are a color or a variable of the template (`$primary`).
-- Every shape is a block of this plugin (`certificate-rect`, `certificate-text`, `certificate-svg`…). A drawing (SVG) is one block with its filled paths in the `paths` attribute: no SVG code is kept.
+- Every shape is a block of this plugin (`certificate-rect`, `certificate-text`, `certificate-svg`…). The date of emission is `certificate-date-of-emission`: with no `text` it shows the date in the site's date format, and `"text":"d/m/Y"` is the format it is shown in (the letters of Settings → General; a backslash is written twice in the file). A drawing (SVG) is one block with its filled paths in the `paths` attribute: no SVG code is kept.
 - What a file may not have is left out when it is saved or imported: other kinds of block, attributes a block does not have, pictures that are not in this site's Media Library, paths that are not made of commands and numbers. This is the same cleaning as for any template.
 
 ## Where the code lives

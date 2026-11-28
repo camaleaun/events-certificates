@@ -30,7 +30,7 @@ any value of the file; the model keeps `$slug`. `color_refs()` in `includes/desi
 The names in full are not the certificate's alone: `camaleaun/draw` 0.13/0.14 does it for every element, inside `Design` (`Names` in PHP, `names.ts` in
 TypeScript), so the Draw plugin writes them too. `width` and `height`, `viewBox`, `lineHeight` and `letterSpacing` (also in a verification's hint and
 code), `horizontal` and `vertical` in a layout, `bold` and `italic` in a run; no `id` that only counts (`rect-2`: made again by position when read); no
-default name of the type (`Text`, `Rectangle`, `SVG`…), the certificate adding its own (`signature`, `image:logo`) in the `names` option. `x`, `y` and the
+default name of the type (`Text`, `Rectangle`, `SVG`…), the certificate adding its own (`signature`, `image:logo`, `text:date-of-emission`) in the `names` option. `x`, `y` and the
 coordinates of a line stay. What stays in the plugin is the colors (`color.palette`, `color.elements`, ADR 0051) and the references to a color
 (`var:preset|color|slug`): `to_file()` / `from_file()` and `toFile()` / `fromFile()`.
 
