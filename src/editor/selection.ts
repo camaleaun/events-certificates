@@ -3,7 +3,7 @@
  * ranges and toggles (lifted to the same list, as the core's `getCommonDepthClientIds` does), select all, escape, what a click targets and what a marquee takes.
  */
 import { box, type Element } from './model';
-import { canHold, childrenOf, findEl, flatten, parentOf, type Placed } from './tree';
+import { canHold, childrenOf, findEl, flatten, isGroup, parentOf, type Placed } from './tree';
 
 type Tree = Element[];
 
@@ -132,20 +132,31 @@ export function clickTarget( tree: Tree, clicked: string, ids: string[] ): strin
 	return chain[ 0 ] ?? clicked;
 }
 
-/** What a marquee takes: the elements of one list (a group's, or the page's) that it touches, not those that are locked or hidden. `placed` has their places on the page. */
+/**
+ * What a marquee takes: what it touches, not what is locked or hidden. A group the box holds whole is taken as a group; one it only touches gives what is in it that the box touches (all of
+ * them, so several inside a group are all selected), and the group itself when the box touches its frame and nothing in it. `placed` has their places on the page; `context` is the group the
+ * box begins in (null: the page), whose elements are what is looked at.
+ */
 export function marqueeIds( placed: Placed[], rect: { x: number; y: number; w: number; h: number }, context: string | null ): string[] {
 	const list = ( context ? childrenOf( findEl( placed, context ) as Element ) : placed ) as Placed[];
-	return list
-		.filter( ( el ) => {
-			if ( el.hidden || el.locked ) {
-				return false;
+	const at = ( el: Placed ) => {
+		const b = box( el );
+		return { x: b.x + ( el.ox || 0 ), y: b.y + ( el.oy || 0 ), w: b.w, h: b.h };
+	};
+	const touches = ( b: { x: number; y: number; w: number; h: number } ) => b.x < rect.x + rect.w && b.x + b.w > rect.x && b.y < rect.y + rect.h && b.y + b.h > rect.y;
+	const holds = ( b: { x: number; y: number; w: number; h: number } ) => b.x >= rect.x && b.y >= rect.y && b.x + b.w <= rect.x + rect.w && b.y + b.h <= rect.y + rect.h;
+	const take = ( items: Placed[] ): string[] =>
+		items.flatMap( ( el ) => {
+			if ( el.hidden || el.locked || ! touches( at( el ) ) ) {
+				return [];
 			}
-			const b = box( el );
-			const x = b.x + ( el.ox || 0 );
-			const y = b.y + ( el.oy || 0 );
-			return x < rect.x + rect.w && x + b.w > rect.x && y < rect.y + rect.h && y + b.h > rect.y;
-		} )
-		.map( ( el ) => el.id );
+			if ( isGroup( el ) && ! holds( at( el ) ) ) {
+				const inside = take( ( el.children || [] ) as Placed[] );
+				return inside.length ? inside : [ el.id ];
+			}
+			return [ el.id ];
+		} );
+	return take( list );
 }
 
 /** The type of the selection when all are the same (the toolbar shows its icon), else null. */

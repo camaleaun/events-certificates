@@ -184,8 +184,8 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 			const group = context ? ( findEl( shownTree, context ) as Placed | undefined ) : undefined;
 			const startedIn = !! group && ( () => { const b = pageBox( group ); return marquee.from.x >= b.x && marquee.from.x <= b.x + b.w && marquee.from.y >= b.y && marquee.from.y <= b.y + b.h; } )();
 			const found = marqueeIds( shownTree, rect, startedIn ? ( context as string ) : null );
-			const same = ! marquee.add || ! selection.ids.length || commonParent( shownTree, selection.ids ) === ( startedIn ? context : null );
-			const ids = marquee.add && same ? inListOrder( shownTree, [ ...selection.ids, ...found ] ) : found;
+			// What is found may be in different groups (the box takes what is inside a group it only touches): they are all selected.
+			const ids = marquee.add ? inListOrder( shownTree, [ ...selection.ids, ...found ] ) : found;
 			onSelect( ids, ids[ 0 ] ?? null );
 			return;
 		}

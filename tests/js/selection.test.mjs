@@ -100,7 +100,10 @@ test( 'the marquee takes what it touches in one list, not what is locked or hidd
 		rect( 'e', 200, 0, 10, 10 ),
 		rect( 'f', 0, 0, 500, 500, { locked: true } ),
 	];
-	assert.deepEqual( plain( s.marqueeIds( placed, { x: 0, y: 0, w: 60, h: 60 }, null ) ), [ 'a', 'g' ] );
+	assert.deepEqual( plain( s.marqueeIds( placed, { x: 0, y: 0, w: 60, h: 60 }, null ) ), [ 'a', 'b' ], 'a group the box only touches: what in it is touched' );
+	assert.deepEqual( plain( s.marqueeIds( placed, { x: 0, y: 0, w: 100, h: 100 }, null ) ), [ 'a', 'b', 'c' ], 'several inside a group: all of them' );
+	assert.deepEqual( plain( s.marqueeIds( placed, { x: -10, y: -10, w: 400, h: 400 }, null ) ), [ 'a', 'g', 'e' ], 'a group the box holds whole: the group' );
+	assert.deepEqual( plain( s.marqueeIds( placed, { x: 140, y: 140, w: 5, h: 5 }, null ) ), [ 'g' ], 'its frame touched, nothing in it: the group' );
 	assert.deepEqual( plain( s.marqueeIds( placed, { x: 45, y: 45, w: 20, h: 20 }, 'g' ) ), [ 'b' ], 'inside a group: what is in it' );
 	assert.deepEqual( plain( s.marqueeIds( placed, { x: 45, y: 65, w: 20, h: 20 }, 'g' ) ), [], 'a hidden one is not taken' );
 	assert.deepEqual( plain( s.marqueeIds( placed, { x: 190, y: 0, w: 5, h: 5 }, null ) ), [], 'touching nothing' );

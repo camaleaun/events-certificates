@@ -15,7 +15,8 @@ bar over the selection had nothing but the four ways to group.
   act on the row that has the focus. The pure parts are in `src/editor/selection.ts`: `rangeIds` and `toggleIds` lift both ends to one list as the core does, `selectAllIds` (the level, then its
   group), `escapeIds` (several → the first → its group → nothing), `clickTarget` (the outermost group, or the level of what is selected) and `marqueeIds`.
 - **Gestures.** Shift+click is a range in the order of the list and Cmd/Ctrl+click adds or takes out one (as in the post editor). A box dragged on the empty page, or on a locked element (a
-  click on that still selects it), selects the elements it touches (not locked or hidden ones): of the page, or of the group it begins in. Pressing on one of several moves them all (one undo step;
+  click on that still selects it), selects the elements it touches (not locked or hidden ones): a group the box holds whole is selected as a group, one it only touches gives the elements in it that the box touches (so several inner
+  elements are all selected, from different groups too), and the box that begins inside the group of what is selected looks only at that group. Pressing on one of several moves them all (one undo step;
   not the locked ones or those placed by a row, a stack or a grid). A click on something in a group selects the outermost group and a double click goes down one level (as in Figma); the
   element a click would select is outlined under the pointer. Shift+arrow still moves by 10 (the convention of design tools), it does not extend the selection.
 - **Actions on all selected, one undo each** (`removeEls`, `duplicateEls`, `reorderEls`, `setFlag`, `nudgeEls` in `tree.ts`): Delete (what has to stay is kept, with a notice), Cmd+D and
