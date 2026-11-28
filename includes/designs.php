@@ -347,8 +347,8 @@ function block_options() {
 		'paths'    => 'attribute',
 		// The names of the types of the certificate that the package does not know: not written, as the type says them.
 		'names'    => array(
-			'signature'  => 'Signature',
-			'image:logo' => 'Community logo',
+			'signature'             => 'Signature',
+			'image:logo'            => 'Community logo',
 			'text:date-of-emission' => 'Date of emission',
 		),
 	);
