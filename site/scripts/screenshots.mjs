@@ -42,8 +42,10 @@ for ( const shot of picked ) {
 	session[ shot.scenario ] ??= await openBrowser( site, viewport );
 	const { page } = session[ shot.scenario ];
 	await page.goto( addressOf( site, shot.path ), { waitUntil: 'networkidle' } );
-	// A public page shows no admin bar.
-	await page.addStyleTag( { content: '#wpadminbar{display:none!important}html{margin-top:0!important}' } ).catch( () => {} );
+	// A public page shows no admin bar (a screen of the admin keeps it: it is part of what the person sees).
+	if ( ! shot.path.startsWith( '/wp-admin' ) ) {
+		await page.addStyleTag( { content: '#wpadminbar{display:none!important}html{margin-top:0!important}' } ).catch( () => {} );
+	}
 	await page.waitForTimeout( 1500 );
 	if ( shot.scene ) {
 		await scenes[ shot.scene ]( page );

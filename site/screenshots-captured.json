@@ -1,42 +1,42 @@
 {
 	"generator@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"participants@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"certificates@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"editor@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"editor-selection@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"export@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"settings@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"quick-admin@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"public-generator@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	},
 	"events@en": {
-		"commit": "a128542cb36cf745f7966a793cf4e3a838514b04",
+		"commit": "646f2279b8162a532327d17ac3bcb51901b91177",
 		"at": "2026-11-28"
 	}
 }
