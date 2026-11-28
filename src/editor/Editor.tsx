@@ -959,6 +959,7 @@ export default function Editor() {
 								setChoosing( null );
 							} }
 							onGroup={ group }
+							onPatch={ ( patches ) => commit( { ...design, elements: patches.reduce( ( list, { id, patch } ) => mapEl( list, id, ( el ) => ( { ...el, ...patch } as Element ) ), design.elements ) } ) }
 							selection={ selection }
 							onSelect={ ( ids, anchor ) => {
 								selectIds( ids, anchor );

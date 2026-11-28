@@ -19,7 +19,7 @@ import { findEl, flatten, innerPage, isGroup, mapEl, pageBox, parentOf, resolveT
 const HANDLES = [ 'nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w' ];
 const SNAP = 5;
 
-type Drag = { kind: 'move' | 'resize' | 'point'; id: string; handle?: string; end?: 1 | 2; start: { x: number; y: number }; origin: Element; wasSelected: boolean; moved: boolean };
+type Drag = { kind: 'move' | 'resize' | 'point'; id: string; /** The other selected elements that move along (a move of several). */ peers?: Element[]; handle?: string; end?: 1 | 2; start: { x: number; y: number }; origin: Element; wasSelected: boolean; moved: boolean };
 
 type Props = {
 	design: Design;
@@ -46,11 +46,13 @@ type Props = {
 	/** What is selected (the editor's list of ids and where a range starts), and how to change it. */
 	selection: Selection;
 	onSelect: ( ids: string[], anchor: string | null ) => void;
+	/** Changes of several elements at once (a move of several): one undo step. */
+	onPatch: ( patches: { id: string; patch: Record< string, unknown > }[] ) => void;
 };
 
 const diff = ( before: Record< string, unknown >, after: Record< string, unknown > ) => Object.fromEntries( Object.entries( after ).filter( ( [ key, value ] ) => JSON.stringify( before[ key ] ) !== JSON.stringify( value ) ) );
 
-export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: true, y: true }, svgRef, selRef, tab, editingId, overlay, onEdit, placeholder, choosing, onChoose, onGroup, selection, onSelect }: Props ) {
+export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: true, y: true }, svgRef, selRef, tab, editingId, overlay, onEdit, placeholder, choosing, onChoose, onGroup, selection, onSelect, onPatch }: Props ) {
 	const blocks = ( useSelect as any )( ( select: any ) => select( blockEditorStore ).getBlocks(), [] ) as any[];
 	// What is selected is the editor's own list (the store can only hold a run of siblings).
 	const selected = selection.ids.length === 1 ? selection.ids[ 0 ] : null;
@@ -58,13 +60,16 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	const { updateBlockAttributes } = ( useDispatch as any )( blockEditorStore ) as { updateBlockAttributes: ( id: string, patch: Record< string, unknown > ) => void };
 	const dragRef = useRef< Drag | null >( null );
 	const [ preview, setPreview ] = useState< Element | null >( null );
+	// The others that move along while several are dragged, where they would be.
+	const [ peerPreview, setPeerPreview ] = useState< Record< string, Element > | null >( null );
 	const [ guides, setGuides ] = useState< Guide[] >( [] );
 
 	const { w, h, safe, bleed } = design.page;
 	const stored = toElements( blocks );
 	const resolved = resolveTree( stored, design.page );
 	// The elements as they are drawn: with the preview of a drag in the place of the one that is dragged (it keeps where its group's corner is).
-	const shownTree = preview ? ( mapEl( resolved, preview.id, ( el ) => ( { ...preview, ox: ( el as Placed ).ox, oy: ( el as Placed ).oy } as unknown as Element ) ) as Placed[] ) : resolved;
+	const withPreview = ( tree: Placed[], el: Element | null ) => ( el ? ( mapEl( tree, el.id, ( old ) => ( { ...el, ox: ( old as Placed ).ox, oy: ( old as Placed ).oy } as unknown as Element ) ) as Placed[] ) : tree );
+	const shownTree = Object.values( peerPreview || {} ).reduce( ( tree, el ) => withPreview( tree, el ), withPreview( resolved, preview ) );
 	const current = ( findEl( shownTree, selected ) as Placed | undefined ) || null;
 	const selBox = current ? pageBox( current ) : null;
 	// The box of all the selected elements together.
@@ -102,12 +107,23 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 		let found: Guide[] = [];
 		if ( drag.kind === 'move' ) {
 			next = moved( drag.origin, dx, dy );
+			const peers = drag.peers || [];
 			if ( ! event.altKey ) {
-				const mine = flatten( [ drag.origin ] ).map( ( e ) => e.id );
+				const mine = flatten( [ drag.origin, ...peers ] ).map( ( e ) => e.id );
 				const others = flatten( resolved as Element[] ).filter( ( el ) => ! mine.includes( el.id ) && ! el.hidden && el.type !== 'line' ).map( ( el ) => pageBox( el as Placed ) );
-				const s = snap( pageBox( next as Placed ), design.page, others, SNAP / zoom );
+				// What several move as one: their box together is what snaps.
+				const boxes = [ next, ...peers.map( ( peer ) => moved( peer, dx, dy ) ) ].map( ( el ) => pageBox( el as Placed ) );
+				const x1 = Math.min( ...boxes.map( ( b ) => b.x ) );
+				const y1 = Math.min( ...boxes.map( ( b ) => b.y ) );
+				const together = { x: x1, y: y1, w: Math.max( ...boxes.map( ( b ) => b.x + b.w ) ) - x1, h: Math.max( ...boxes.map( ( b ) => b.y + b.h ) ) - y1 };
+				const s = snap( together as never, design.page, others, SNAP / zoom );
 				next = moved( next, s.dx, s.dy );
 				found = s.guides;
+			}
+			if ( peers.length ) {
+				const along = { x: ( next as { x: number } ).x - ( drag.origin as { x: number } ).x, y: ( next as { y: number } ).y - ( drag.origin as { y: number } ).y };
+				const shiftBy = drag.origin.type === 'line' ? { x: ( next as { x1: number } ).x1 - ( drag.origin as { x1: number } ).x1, y: ( next as { y1: number } ).y1 - ( drag.origin as { y1: number } ).y1 } : along;
+				setPeerPreview( Object.fromEntries( peers.map( ( peer ) => [ peer.id, moved( peer, shiftBy.x, shiftBy.y ) ] ) ) );
 			}
 		} else if ( drag.kind === 'resize' && drag.origin.type !== 'line' ) {
 			const b = resizeBox( box( drag.origin ), drag.handle || 'se', dx, dy, event.shiftKey || drag.origin.type === 'qr' || !! lockedRatio( drag.origin ), event.altKey );
@@ -134,17 +150,28 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	const onUp = () => {
 		const drag = dragRef.current;
 		dragRef.current = null;
-		if ( drag && preview && drag.moved ) {
-			// One update of the block: absolute elements take the numbers, anchored ones update their anchors (docs/decisions/0004).
-			const before = findEl( stored, drag.id ) as Element;
-			// What is in a group is placed from the group's corner, and anchored to its size.
-			const holder = parentOf( resolved, drag.id );
+		// What an element changes when it is where `at` says: absolute elements take the numbers, anchored ones update their anchors (docs/decisions/0004). What is in a group is placed from
+		// the group's corner, and anchored to its size.
+		const patchOf = ( id: string, at: Element ) => {
+			const before = findEl( stored, id ) as Element;
+			const holder = parentOf( resolved, id );
 			const space = holder ? innerPage( holder ) : design.page;
-			const after = drag.origin.type === 'line' ? preview : placed( before, box( preview ), space as never );
-			updateBlockAttributes( drag.id, diff( before as never, after as never ) );
+			return diff( before as never, ( at.type === 'line' ? at : placed( before, box( at ), space as never ) ) as never );
+		};
+		if ( drag && preview && drag.moved ) {
+			if ( drag.peers?.length ) {
+				// Several moved together: one change, one undo step.
+				onPatch( [ { id: drag.id, patch: patchOf( drag.id, preview ) }, ...Object.values( peerPreview || {} ).map( ( peer ) => ( { id: peer.id, patch: patchOf( peer.id, peer ) } ) ) ] );
+			} else {
+				updateBlockAttributes( drag.id, patchOf( drag.id, preview ) );
+			}
+		} else if ( drag && drag.peers?.length && ! drag.moved ) {
+			// Pressed on one of several and let go: that one is what is selected.
+			select( drag.id );
 		} else if ( drag && drag.wasSelected && ! drag.moved && drag.origin.type === 'text' ) {
 			onEdit( drag.origin );
 		}
+		setPeerPreview( null );
 		setPreview( null );
 		setGuides( [] );
 	};
@@ -178,7 +205,9 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 		}
 		const at = chain.findIndex( ( c ) => c.id === selected || many.includes( c.id ) );
 		const target = tab === 'content' ? el : ( findEl( shownTree, clickTarget( shownTree, el.id, selection.ids ) ) as Placed ) || chain[ 0 ];
-		const begin = ( event: React.PointerEvent ) => start( event, { kind: 'move', id: target.id, start: toPage( event ), origin: target } );
+		// Pressing on one of several selected moves them all (the ones that can move: not locked, not placed by a row, a stack or a grid).
+		const peers = many.includes( target.id ) ? ( many.filter( ( id ) => id !== target.id ).map( ( id ) => findEl( shownTree, id ) ).filter( ( peer ) => !! peer && ! peer.locked && ! flowed( peer ) ) as Element[] ) : [];
+		const begin = ( event: React.PointerEvent ) => start( event, { kind: 'move', id: target.id, start: toPage( event ), origin: target, peers } );
 		const ph = el.type === 'image' && ! el.src && el.slot !== 'logo' ? placeholder( el, () => select( target.id ), begin ) : null;
 		if ( ph ) {
 			return <g key={ el.id }>{ ph }</g>;
@@ -223,7 +252,10 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 					if ( ( event.shiftKey || event.metaKey || event.ctrlKey ) && extend( event, target.id ) ) {
 						return;
 					}
-					select( target.id );
+					// One of several that are selected stays so (to be dragged with the others; let go without moving, it is the one selected).
+					if ( ! ( many.length > 1 && many.includes( target.id ) && tab !== 'content' ) ) {
+						select( target.id );
+					}
 					if ( tab === 'content' ) {
 						onEdit( el );
 						return;
