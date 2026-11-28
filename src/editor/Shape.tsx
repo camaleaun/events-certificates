@@ -106,7 +106,8 @@ export function Shape( { el, design, mode, sample }: { el: Element; design: Desi
 			}
 			// A place with no signature defined (Settings, the event): a dashed place, like the logo's. It has no drawing of its own: it takes the
 			// one that is defined.
-			return emptyPlace( el, design, mode, opacity, 'Signature' );
+			// It says what it is, translated, whatever the layer is called (the name of a layer is for the layers, not for the place).
+			return emptyPlace( { ...el, name: '' }, design, mode, opacity, __( 'Signature', 'events-certificates' ) );
 		}
 		case 'svg': {
 			// A drawing with no paths is a place with its name (a template that came in from a site that does not let drawings travel): it
