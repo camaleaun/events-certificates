@@ -170,5 +170,6 @@ export function BlocksProvider( { elements, page, selected, onSelect, onMany, on
 
 /** The layers of a design: the block editor's List View (inside a BlocksProvider). */
 export function BlockLayers() {
-	return <ListView isExpanded showBlockMovers={ false } />;
+	// The groups start closed on every load (the group of the selected element opens by itself, as in the core's List View).
+	return <ListView isExpanded={ false } showBlockMovers={ false } />;
 }
