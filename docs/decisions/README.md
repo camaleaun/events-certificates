@@ -54,6 +54,7 @@ question, what was chosen, what was left out and why, and what follows from it.
 | [0050](0050-names-of-a-block.md) | An element is written as its block says it (width, height, viewBox, no generated id) | Accepted (2026-11-27) |
 | [0051](0051-colors-without-fixed-entries.md) | Colors without fixed entries: any color may be renamed and removed, the code's own colors only in the certificate, no Reset colors | Accepted (2026-11-27) |
 | [0052](0052-units-current-color-layers.md) | Units on every length, an empty color, layers listed back to front, close settings as the core's | Accepted (2026-11-27) |
+| [0053](0053-the-group-element.md) | The group element: Group, Row, Stack and Grid, what is in it placed from its corner, grouped from a selection | Accepted (2026-11-27) |
 
 New decisions get the next number. A decision that is replaced keeps its file,
 with its status changed to "Replaced by NNNN".

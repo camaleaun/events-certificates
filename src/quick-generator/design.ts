@@ -9,6 +9,7 @@
  * hint): the generator keeps none, as the server leaves them out on a site
  * where they would mean nothing.
  */
+import { flattenTree } from '../editor/tree';
 import { box, color, isWhite, pageBg, rectPath, resolve, runsIn, type Design, type Element, type Run, type TextEl } from '../editor/model';
 
 /** Points to millimetres. */
@@ -89,7 +90,8 @@ function metricsOf( face: Font ): { ascent: number; descent: number } {
 }
 
 /** The faces a design's texts use, among the ones the site ships (for the PDF to embed and the browser to load). */
-export function fontsUsed( design: Design, shipped: string[] ): string[] {
+export function fontsUsed( input: Design, shipped: string[] ): string[] {
+	const design = { ...input, elements: flattenTree( input.elements, input.page ) };
 	const probe = { fonts: shipped } as Backend;
 	const faces = new Set< string >( [ 'CertSerif:400', 'CertSans:400', 'CertSans:600' ] );
 	design.elements.forEach( ( raw ) => {
@@ -266,7 +268,9 @@ function rotated( pic: Pic, angle: number, w: number, h: number ): Promise< Pic 
 }
 
 /** Rasterizes the art of a design (SVG shapes, rounded or turned rectangles), once, by element id. */
-export async function prepare( design: Design ): Promise< Record< string, Pic > > {
+export async function prepare( input: Design ): Promise< Record< string, Pic > > {
+	// What is in a group is drawn on the page, one element after another.
+	const design = { ...input, elements: flattenTree( input.elements, input.page ) };
 	const art: Record< string, Pic > = {};
 	for ( const raw of design.elements ) {
 		const el = resolve( raw, design.page );
@@ -296,7 +300,8 @@ export async function prepare( design: Design ): Promise< Record< string, Pic > 
  * @param pictures Signature, logo and art.
  * @param locale   For capital letters.
  */
-export function draw( b: Backend, design: Design, value: Value, pictures: Pictures, locale: string ): void {
+export function draw( b: Backend, input: Design, value: Value, pictures: Pictures, locale: string ): void {
+	const design = { ...input, elements: flattenTree( input.elements, input.page ) };
 	const page = design.page;
 	const bg = color( design, pageBg( page, 'light' ), 'light' );
 	const fill = isFilled( bg ) ? bg : '#ffffff';

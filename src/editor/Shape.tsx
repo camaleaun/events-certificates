@@ -200,7 +200,10 @@ export function Shape( { el, design, mode, sample }: { el: Element; design: Desi
 			const style = textStyle( el, design, mode );
 			return (
 				<foreignObject x={ el.x } y={ el.y } width={ el.w } height={ Math.max( el.h, el.size * ( el.lh ?? 1.2 ) * 6 ) } opacity={ opacity } style={ { overflow: 'visible' } }>
-					<div className="evcert-text" style={ style } dangerouslySetInnerHTML={ { __html: runsHtml( runsOf( el ), sample, LOCALE, el.upper ) } } />
+					{ /* Only the lines of the text take a click, not the whole box (a tall box would hide the text under it): a click beside the text goes to what is under it. */ }
+					<div className="evcert-text" style={ { ...style, pointerEvents: 'none' } }>
+						<span style={ { pointerEvents: 'auto' } } dangerouslySetInnerHTML={ { __html: runsHtml( runsOf( el ), sample, LOCALE, el.upper ) } } />
+					</div>
 				</foreignObject>
 			);
 		}

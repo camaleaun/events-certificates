@@ -122,3 +122,11 @@ test( 'a group that changes how it places what is in it leaves them their size a
 	assert.equal( baked[ 0 ].layout, undefined );
 	assert.equal( baked[ 0 ].ox, undefined );
 } );
+
+test( 'the tree is flattened for the backends that draw one element after another, each on the page', () => {
+	const list = [ { id: 'g', type: 'group', x: 100, y: 50, w: 200, h: 100, fill: '#eee', arrange: 'row', gap: 10, children: [ rect( 'a', 0, 0, 40, 10 ), rect( 'b', 0, 0, 30, 10, { hidden: true } ), rect( 'c', 0, 0, 20, 10 ) ] }, { id: 'h', type: 'group', x: 0, y: 0, w: 10, h: 10, hidden: true, children: [ rect( 'z', 0, 0, 1, 1 ) ] }, rect( 'd', 5, 5, 1, 1 ) ];
+	const flat = plain( t.flattenTree( list, page ) );
+	assert.deepEqual( flat.map( ( e ) => [ e.id, e.type ] ), [ [ 'g', 'rect' ], [ 'a', 'rect' ], [ 'c', 'rect' ], [ 'd', 'rect' ] ], 'a group is its rectangle, then what is in it; nothing hidden' );
+	assert.deepEqual( [ flat[ 0 ].x, flat[ 0 ].fill, flat[ 0 ].children ], [ 100, '#eee', undefined ] );
+	assert.deepEqual( [ flat[ 1 ].x, flat[ 1 ].y, flat[ 2 ].x ], [ 100, 50, 150 ], 'on the page, by the flow of the row' );
+} );

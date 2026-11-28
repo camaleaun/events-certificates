@@ -245,6 +245,10 @@ test( 'a new rectangle starts with a black fill and an empty stroke', () => {
 	const rect = m.create( 'rect', { colors: {}, elements: [], page: { w: 842, h: 595, safe: 0, bleed: 0 } } );
 	assert.equal( rect.fill, '#000000' );
 	assert.equal( rect.stroke, '' );
+	assert.equal( rect.strokeWidth, undefined, 'the border width starts empty' );
+	assert.equal( m.create( 'ellipse', { colors: {}, elements: [], page: { w: 842, h: 595, safe: 0, bleed: 0 } } ).strokeWidth, undefined );
+	assert.equal( m.create( 'group', { colors: {}, elements: [], page: { w: 842, h: 595, safe: 0, bleed: 0 } } ).strokeWidth, undefined );
+	assert.equal( m.create( 'rect', { colors: {}, elements: [], page: { w: 842, h: 595, safe: 0, bleed: 0 } }, { fill: '', stroke: '#f00' } ).strokeWidth, 1, 'with a stroke remembered it shows' );
 } );
 
 test( 'a margin and a bleed keep the unit they were chosen in (mm when none)', () => {
@@ -268,11 +272,17 @@ test( 'a new rectangle or ellipse starts with the colors last set (an empty Fill
 		const el = m.create( type, design, paint );
 		assert.equal( el.fill, '' );
 		assert.equal( el.stroke, '#ff0000' );
-		assert.equal( el.strokeWidth, 1, 'the width is not remembered' );
+		assert.equal( el.strokeWidth, 1, 'a remembered stroke has the width of 1 (the width itself is not remembered)' );
 	}
 	assert.equal( m.create( 'rect', design ).fill, '#000000', 'nothing remembered: the default' );
 	assert.equal( m.create( 'rect', design ).stroke, '' );
 	assert.equal( m.create( 'line', design, paint ).stroke, m.create( 'line', design ).stroke, 'a line keeps its own' );
 	assert.equal( m.create( 'text', design, paint ).type, 'text' );
+} );
+
+test( 'a new text has no line height and no letter spacing of its own: the default is only shown', () => {
+	const text = m.create( 'text', { colors: {}, elements: [], page: { w: 842, h: 595, safe: 0, bleed: 0 } } );
+	assert.equal( text.lh, undefined );
+	assert.equal( text.ls, undefined );
 } );
 

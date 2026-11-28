@@ -137,7 +137,8 @@ $evcert-sidebar-width: 280px;
 .evcert-sidebar-tabs {
 	position: sticky;
 	top: 0;
-	z-index: 1;
+	// Over the controls that are over their own background (the toggle groups' icons), as the tabs of the core's sidebar are.
+	z-index: 10;
 	display: flex;
 	align-items: center;
 	height: 48px;

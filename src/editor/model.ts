@@ -467,13 +467,13 @@ export function create( type: Element[ 'type' ] | 'logo', design: Design, paint?
 			return { id, type: 'image', name: 'Community logo', slot: 'logo', x: right - 120, y: 20, w: 120, h: 36, src: '', fit: 'contain', alt: '' };
 		}
 		case 'text':
-			return { id, type, name: 'Text', x: cx - 120, y: cy - 10, w: 240, h: 20, runs: [ { text: 'Text' } ], font: 'CertSans', weight: 400, size: 14, color: '$text', align: 'center', lh: 1.3 };
+			return { id, type, name: 'Text', x: cx - 120, y: cy - 10, w: 240, h: 20, runs: [ { text: 'Text' } ], font: 'CertSans', weight: 400, size: 14, color: '$text', align: 'center' };
 		case 'rect':
-			return { id, type, name: 'Rectangle', x: cx - 60, y: cy - 40, w: 120, h: 80, fill: paint?.fill ?? '#000000', stroke: paint?.stroke ?? '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ] };
+			return { id, type, name: 'Rectangle', x: cx - 60, y: cy - 40, w: 120, h: 80, fill: paint?.fill ?? '#000000', stroke: paint?.stroke ?? '', ...( paint?.stroke ? { strokeWidth: 1 } : {} ), radius: [ 0, 0, 0, 0 ] };
 		case 'group':
-			return { id, type, name: 'Group', x: cx - 140, y: cy - 70, w: 280, h: 140, fill: '', stroke: '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ], children: [] };
+			return { id, type, name: 'Group', x: cx - 140, y: cy - 70, w: 280, h: 140, fill: '', stroke: '', radius: [ 0, 0, 0, 0 ], children: [] };
 		case 'ellipse':
-			return { id, type, name: 'Ellipse', x: cx - 40, y: cy - 40, w: 80, h: 80, fill: paint?.fill ?? '#000000', stroke: paint?.stroke ?? '', strokeWidth: 1 };
+			return { id, type, name: 'Ellipse', x: cx - 40, y: cy - 40, w: 80, h: 80, fill: paint?.fill ?? '#000000', stroke: paint?.stroke ?? '', ...( paint?.stroke ? { strokeWidth: 1 } : {} ) };
 		case 'line':
 			return { id, type, name: 'Line', x1: cx - 100, y1: cy, x2: cx + 100, y2: cy, stroke: '$line', strokeWidth: 1, dash: 'solid' };
 		case 'signature':

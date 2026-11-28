@@ -266,3 +266,31 @@ export function bakeChildren( resolvedChildren: Element[] ): Element[] {
 	} );
 }
 
+/**
+ * The elements as one flat list in the order of painting, each on the page (a group as its own rectangle, then what is in it with its place on the page and no
+ * anchors): for the backends that draw one element after another (the quick generator's PDF and canvas). What is in a hidden group is not drawn.
+ */
+export function flattenTree( list: Element[], page: Parameters< typeof resolve >[ 1 ] ): Element[] {
+	const out: Element[] = [];
+	const walk = ( items: Placed[] ) => {
+		for ( const el of items ) {
+			if ( el.hidden ) {
+				continue;
+			}
+			const { ox = 0, oy = 0, ...rest } = el;
+			const there = rest.type === 'line' ? ( moved( rest as Element, ox, oy ) as Element ) : ( { ...rest, x: rest.x + ox, y: rest.y + oy, layout: undefined } as Element );
+			if ( isGroup( there ) ) {
+				const { children, ...frame } = there as GroupEl;
+				out.push( { ...frame, type: 'rect' } as unknown as Element );
+				walk( ( resolveTreeOf( el ) as Placed[] ) );
+			} else {
+				out.push( there );
+			}
+		}
+	};
+	walk( resolveTree( list, page ) );
+	return out;
+}
+
+const resolveTreeOf = ( group: Placed ): Placed[] => ( isGroup( group ) ? ( group.children as Placed[] ) : [] );
+

@@ -232,7 +232,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 			{ tab === 'art' && el.type === 'text' && (
 				<ToolsPanel
 					label={ __( 'Typography', 'events-certificates' ) }
-					resetAll={ () => onChange( { size: 14, lh: 1.2, ls: 0, upper: false, align: 'left', fit: false } ) }
+					resetAll={ () => onChange( { size: 14, lh: undefined, ls: undefined, upper: false, align: 'left', fit: false } ) }
 					className="typography-block-support-panel"
 				>
 					<ToolsPanelItem label={ __( 'Font', 'events-certificates' ) } hasValue={ () => el.font !== DEFAULT_FONT } onDeselect={ () => onChange( { font: DEFAULT_FONT } ) } isShownByDefault>
@@ -251,11 +251,11 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 							onChange={ ( weight ) => onChange( { weight: Number( weight ) } ) }
 						/>
 					</ToolsPanelItem>
-					<ToolsPanelItem className="single-column" label={ __( 'Line height', 'events-certificates' ) } hasValue={ () => ( el.lh ?? 1.2 ) !== 1.2 } onDeselect={ () => onChange( { lh: 1.2 } ) } isShownByDefault>
-						<NumberControl __next40pxDefaultSize label={ __( 'Line height', 'events-certificates' ) } step={ 0.05 } min={ 0.8 } max={ 3 } value={ el.lh ?? 1.2 } onChange={ ( v ) => onChange( { lh: Number( v ) } ) } />
+					<ToolsPanelItem className="single-column" label={ __( 'Line height', 'events-certificates' ) } hasValue={ () => el.lh !== undefined } onDeselect={ () => onChange( { lh: undefined } ) } isShownByDefault>
+						<NumberControl __next40pxDefaultSize label={ __( 'Line height', 'events-certificates' ) } step={ 0.05 } min={ 0.8 } max={ 3 } value={ el.lh ?? '' } placeholder="1.2" onChange={ ( v ) => onChange( { lh: v === undefined || v === '' ? undefined : Number( v ) } ) } />
 					</ToolsPanelItem>
-					<ToolsPanelItem className="single-column" label={ __( 'Letter spacing', 'events-certificates' ) } hasValue={ () => !! el.ls } onDeselect={ () => onChange( { ls: 0 } ) } isShownByDefault>
-						<NumberControl __next40pxDefaultSize label={ __( 'Letter spacing', 'events-certificates' ) } step={ 0.05 } value={ el.ls ?? 0 } onChange={ ( v ) => onChange( { ls: Number( v ) } ) } />
+					<ToolsPanelItem className="single-column" label={ __( 'Letter spacing', 'events-certificates' ) } hasValue={ () => el.ls !== undefined } onDeselect={ () => onChange( { ls: undefined } ) } isShownByDefault>
+						<NumberControl __next40pxDefaultSize label={ __( 'Letter spacing', 'events-certificates' ) } step={ 0.05 } value={ el.ls ?? '' } placeholder="0" onChange={ ( v ) => onChange( { ls: v === undefined || v === '' ? undefined : Number( v ) } ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem label={ __( 'Alignment', 'events-certificates' ) } hasValue={ () => ( el.align || 'left' ) !== 'left' } onDeselect={ () => onChange( { align: 'left' } ) } isShownByDefault>
 						<ToggleGroupControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Alignment', 'events-certificates' ) } value={ el.align || 'left' } onChange={ ( v ) => onChange( { align: v as 'left' } ) }>
@@ -332,22 +332,23 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 						{ el.type === 'signature' && <ColorItem label={ __( 'Signature color', 'events-certificates' ) } value={ el.color || '$text' } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
 						{ /* An SVG that picks no color draws in the current color: an empty circle; Clear goes back to that. */ }
 						{ el.type === 'svg' && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.color } clearTo="" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c || undefined } as Partial< Element > ) } /> }
-						{ el.type !== 'text' && el.type !== 'svg' && el.type !== 'signature' && <ColorItem label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Stroke', 'events-certificates' ) } value={ ( el as any ).stroke } clearTo="" design={ design } mode={ mode } onChange={ ( stroke ) => onChange( { stroke } as Partial< Element > ) } /> }
+						{ el.type !== 'text' && el.type !== 'svg' && el.type !== 'signature' && <ColorItem label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Stroke', 'events-certificates' ) } value={ ( el as any ).stroke } clearTo="" design={ design } mode={ mode } // A stroke chosen with no width yet gets the width of 1 (a stroke with none would not show); clearing the width goes back to empty.
+							onChange={ ( stroke ) => onChange( { stroke, ...( stroke && ! ( el as any ).strokeWidth && el.type !== 'line' ? { strokeWidth: 1 } : {} ) } as Partial< Element > ) } /> }
 					</div>
 				</ToolsPanel>
 			) }
 
 			{ tab === 'art' && ( el.type === 'rect' || el.type === 'group' || el.type === 'ellipse' || el.type === 'path' || el.type === 'line' ) && (
-				<ToolsPanel label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Border', 'events-certificates' ) } resetAll={ () => onChange( { strokeWidth: 1 } as Partial< Element > ) } className="border-block-support-panel">
-					<ToolsPanelItem label={ __( 'Width', 'events-certificates' ) } hasValue={ () => true } onDeselect={ () => onChange( { strokeWidth: 1 } as Partial< Element > ) } isShownByDefault>
+				<ToolsPanel label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Border', 'events-certificates' ) } resetAll={ () => onChange( { strokeWidth: el.type === 'line' ? 1 : undefined } as Partial< Element > ) } className="border-block-support-panel">
+					<ToolsPanelItem label={ __( 'Width', 'events-certificates' ) } hasValue={ () => el.type === 'line' ? true : !! ( el as any ).strokeWidth } onDeselect={ () => onChange( { strokeWidth: el.type === 'line' ? 1 : undefined } as Partial< Element > ) } isShownByDefault>
 						<div className="evcert-radius">
 							<HStack className="evcert-radius__header">
 								<span className="evcert-radius__legend">{ __( 'Width', 'events-certificates' ) }</span>
 							</HStack>
 							<HStack className="evcert-radius__linked" alignment="center">
 							{ /* The width is in px (a pixel is a point here, as in the drawing package), like the core's border width. */ }
-							<UnitControl __next40pxDefaultSize label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision units={ STROKE_UNITS } min={ 0 } value={ `${ ( el as any ).strokeWidth || 0 }px` } onChange={ ( v ) => onChange( { strokeWidth: Math.max( 0, parseFloat( v || '0' ) || 0 ) } as Partial< Element > ) } />
-							<RangeControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision withInputField={ false } value={ ( el as any ).strokeWidth || 0 } min={ 0 } max={ 60 } step={ 0.25 } onChange={ ( v ) => onChange( { strokeWidth: v ?? 0 } as Partial< Element > ) } />
+							<UnitControl __next40pxDefaultSize label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision units={ STROKE_UNITS } min={ 0 } value={ ( el as any ).strokeWidth ? `${ ( el as any ).strokeWidth }px` : '' } placeholder="0" onChange={ ( v ) => onChange( { strokeWidth: Math.max( 0, parseFloat( v || '0' ) || 0 ) || ( el.type === 'line' ? 0 : undefined ) } as Partial< Element > ) } />
+							<RangeControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision withInputField={ false } value={ ( el as any ).strokeWidth || 0 } min={ 0 } max={ 60 } step={ 0.25 } onChange={ ( v ) => onChange( { strokeWidth: v || ( el.type === 'line' ? 0 : undefined ) } as Partial< Element > ) } />
 						</HStack>
 						</div>
 					</ToolsPanelItem>
