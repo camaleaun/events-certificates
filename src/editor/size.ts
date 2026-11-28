@@ -154,3 +154,20 @@ export function radiusConvert( v: Radius | undefined, to: RadiusUnit, w: number,
 	return to === '%' ? radiusFrom( round( ( pt / side ) * 100 ), '%' ) : round( pt );
 }
 
+/** The patch of a line that has its box moved or stretched: `key` is the one that changes (x, y, w or h) to `value` points. */
+export function lineBoxPatch( el: { x1: number; y1: number; x2: number; y2: number }, key: 'x' | 'y' | 'w' | 'h', value: number ): Partial< { x1: number; y1: number; x2: number; y2: number } > {
+	const x = Math.min( el.x1, el.x2 );
+	const y = Math.min( el.y1, el.y2 );
+	const v = Math.max( 0, value );
+	switch ( key ) {
+		case 'x':
+			return { x1: el.x1 + ( v - x ), x2: el.x2 + ( v - x ) };
+		case 'y':
+			return { y1: el.y1 + ( v - y ), y2: el.y2 + ( v - y ) };
+		case 'w':
+			// The left end stays where it is; the other end is the width away, on the side the line went.
+			return el.x2 >= el.x1 ? { x2: el.x1 + v } : { x1: el.x2 + v };
+		default:
+			return el.y2 >= el.y1 ? { y2: el.y1 + v } : { y1: el.y2 + v };
+	}
+}

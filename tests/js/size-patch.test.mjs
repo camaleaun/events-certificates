@@ -151,3 +151,14 @@ test( 'a corner radius is points or a percentage of the shorter side, converted 
 	assert.equal( radiusConvert( 60, '%', 100, 40 ), '50%', 'a corner larger than half the side is the largest there is' );
 } );
 
+
+test( 'the box of a line moves or stretches its two ends and keeps the way it goes', () => {
+	const patch = ( ...a ) => plain( sandbox.size.lineBoxPatch( ...a ) );
+	const line = { x1: 100, y1: 50, x2: 300, y2: 50 };
+	assert.deepEqual( patch( line, 'x', 120 ), { x1: 120, x2: 320 }, 'X moves both ends' );
+	assert.deepEqual( patch( line, 'y', 80 ), { y1: 80, y2: 80 } );
+	assert.deepEqual( patch( line, 'w', 150 ), { x2: 250 }, 'the width stretches the right end' );
+	assert.deepEqual( patch( { x1: 300, y1: 50, x2: 100, y2: 50 }, 'w', 150 ), { x1: 250 }, 'a line drawn from right to left keeps its left end' );
+	assert.deepEqual( patch( { x1: 10, y1: 90, x2: 40, y2: 20 }, 'h', 30 ), { y1: 50 }, 'and one that goes up' );
+	assert.deepEqual( patch( line, 'w', -5 ), { x2: 100 }, 'no negative width' );
+} );

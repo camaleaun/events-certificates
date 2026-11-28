@@ -1577,3 +1577,10 @@ $evcert-sidebar-width: 280px;
 	stroke-dasharray: 4 3;
 	vector-effect: non-scaling-stroke;
 }
+
+// The place and size of a line: two rows of fields with room between them.
+.evcert-line-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}

@@ -35,6 +35,7 @@ import TextByLanguage from './TextByLanguage';
 import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, type GroupEl, fieldValue, runsOf } from './model';
 import { stockName } from './base';
 import GroupPanel from './GroupPanel';
+import LineFields from './LineFields';
 import { innerPage } from './tree';
 import { ColorItem } from './ColorChoices';
 
@@ -428,6 +429,11 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 					{ el.type !== 'line' && (
 						<ToolsPanelItem label={ __( 'Position and size', 'events-certificates' ) } hasValue={ () => !! stored?.layout } onDeselect={ () => onChange( { layout: undefined, x: el.x, y: el.y, w: el.w, h: el.h } as Partial< Element > ) } isShownByDefault>
 							<Anchors el={ el } stored={ stored || el } page={ space } inGroup={ !! holder } flowed={ flowed } onChange={ onChange } withSize={ el.type !== 'svg' && el.type !== 'signature' } />
+						</ToolsPanelItem>
+					) }
+					{ el.type === 'line' && (
+						<ToolsPanelItem label={ __( 'Position and size', 'events-certificates' ) } hasValue={ () => false } isShownByDefault>
+							<LineFields el={ el } onChange={ onChange } />
 						</ToolsPanelItem>
 					) }
 					{ el.type !== 'line' && (
