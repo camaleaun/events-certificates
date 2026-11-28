@@ -1,0 +1,10 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '@libs/site';
+---
+<Base title="Page not found" description="This page does not exist.">
+	<div class="wrap" style="padding-block: 4rem">
+		<h1>Page not found</h1>
+		<p>This address does not exist (any more). Try the <a href={ href( 'docs/' ) }>documentation</a> or start from the <a href={ href() }>home page</a>.</p>
+	</div>
+</Base>

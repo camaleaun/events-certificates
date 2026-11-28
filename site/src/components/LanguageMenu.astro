@@ -1,0 +1,86 @@
+---
+/**
+ * The language menu: a dropdown (details/summary, no JavaScript needed) with the current language and the list of the others.
+ * Hidden while there is only one. A new language appears here by being added to translations.json.
+ */
+import { alternates, localeOf } from '@libs/i18n';
+
+const current = localeOf( Astro.url.pathname );
+const items = alternates( Astro.url.pathname );
+---
+{
+	items.length > 1 && (
+		<details class="lang">
+			<summary aria-label="Language">
+				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.700 3.800 5.700 3.800 9S14.500 18.300 12 21c-2.500-2.700-3.800-5.700-3.800-9S9.500 5.700 12 3Z"/></svg>
+				<span>{ current.label }</span>
+				<svg class="lang__arrow" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="m7 10 5 5 5-5H7Z"/></svg>
+			</summary>
+			<ul>
+				{ items.map( ( item ) => (
+					<li>
+						<a href={ item.href } hreflang={ item.locale.lang } lang={ item.locale.lang } data-locale={ item.locale.code } aria-current={ item.locale.code === current.code ? 'true' : undefined }>
+							{ item.locale.label }
+						</a>
+					</li>
+				) ) }
+			</ul>
+		</details>
+	)
+}
+<script>
+	// Closes the menu with Escape or a click outside; a choice is remembered by the browser-language redirect (later).
+	const menu = document.querySelector< HTMLDetailsElement >( 'details.lang' );
+	if ( menu ) {
+		document.addEventListener( 'keydown', ( event ) => event.key === 'Escape' && menu.removeAttribute( 'open' ) );
+		document.addEventListener( 'click', ( event ) => ! menu.contains( event.target as Node ) && menu.removeAttribute( 'open' ) );
+	}
+</script>
+<style lang="scss">
+	.lang {
+		position: relative;
+		margin: 0;
+	}
+	summary {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		min-height: 40px;
+		padding: 0 0.5rem;
+		cursor: pointer;
+		list-style: none;
+		color: inherit;
+		&::-webkit-details-marker {
+			display: none;
+		}
+	}
+	ul {
+		position: absolute;
+		inset-inline-end: 0;
+		z-index: 10;
+		min-width: 12rem;
+		margin: 0.25rem 0 0;
+		padding: 0.25rem;
+		list-style: none;
+		background: Canvas;
+		color: CanvasText;
+		border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+		border-radius: 4px;
+		box-shadow: 0 4px 16px rgb(0 0 0 / 15%);
+	}
+	li a {
+		display: flex;
+		align-items: center;
+		min-height: 40px;
+		padding: 0 0.75rem;
+		color: inherit;
+		text-decoration: none;
+		&:hover,
+		&[aria-current] {
+			background: color-mix(in srgb, currentColor 10%, transparent);
+		}
+		&[aria-current] {
+			font-weight: 700;
+		}
+	}
+</style>

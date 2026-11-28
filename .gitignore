@@ -17,3 +17,7 @@
 /site/node_modules/
 /site/dist/
 /site/.astro/
+/site/.translations/
+/site/src/content/i18n/
+/site/src/assets/i18n/
+/site/.lighthouse/
