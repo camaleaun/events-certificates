@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import type { PageBox } from '@camaleaun/draw';
 import { DropdownRow } from './DesignPanel';
 import type { Element } from './model';
-import { followed, resizeSideLen, sizeIn, stretched, unitOf, unitPatch, type Unit } from './size';
+import { followed, resizeSideLen, sizeIn, stretched, unitOf, unitPatch, viewBoxLength, type Unit } from './size';
 
 /** The units a size is typed in: decimals are kept (0.01, three in inches). */
 export const SIZE_UNITS = [
@@ -56,6 +56,12 @@ export default function SizeRow( { w, h, units, onUnit, placeholder, disabled, o
 				disabled={ disabled?.[ side ] }
 				value={ value === undefined ? '' : `${ value }${ units[ side ] }` }
 				onChange={ ( v ) => v && change( side, v ) }
+				// Left empty: the size is the one it has with nothing said (the parent knows which: an SVG's viewBox).
+				onBlur={ ( event: React.FocusEvent< HTMLInputElement > ) => {
+					if ( ! event.target.value && ! disabled?.[ side ] ) {
+						onChange( side, '' );
+					}
+				} }
 			/>
 		) : (
 			<NumberControl __next40pxDefaultSize label={ label } min={ 1 } step={ 0.01 } disabled={ disabled?.[ side ] } placeholder={ placeholder ? String( placeholder[ side === 'w' ? 0 : 1 ] ) : undefined } value={ value ?? '' } onChange={ ( v ) => onChange( side, v ) } />
@@ -88,7 +94,11 @@ export function ElementSize( { el, page, onChange }: { el: Element; page: PageBo
 			units={ { w: width.unit, h: height.unit } }
 			onUnit={ ( side, unit ) => onChange( unitPatch( el as never, side, unit, page ) as Partial< Element > ) }
 			disabled={ { w: follows === 'w' || fills.w, h: follows === 'h' || fills.h } }
-			onChange={ ( side, value ) => onChange( resizeSideLen( el as never, side, String( value ), page ) as Partial< Element > ) }
+			onChange={ ( side, value ) => {
+				// A side left empty is the drawing's own: the size of its viewBox (a unit of it is a point), written in the unit the side has.
+				const text = value === '' && el.type === 'svg' ? viewBoxLength( el, side, ( side === 'w' ? width : height ).unit ) || String( value ) : String( value );
+				onChange( resizeSideLen( el as never, side, text, page ) as Partial< Element > );
+			} }
 		/>
 	);
 }

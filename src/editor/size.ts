@@ -171,3 +171,13 @@ export function lineBoxPatch( el: { x1: number; y1: number; x2: number; y2: numb
 			return el.y2 >= el.y1 ? { y2: el.y1 + v } : { y1: el.y2 + v };
 	}
 }
+
+/**
+ * The size an SVG has with nothing said for a side (the field left empty): the size of its viewBox, a unit of the viewBox being a point, written in the unit the
+ * side has (a percentage is not a size of its own: points). '' when the element has no viewBox to say it.
+ */
+export function viewBoxLength( el: { vw?: number; vh?: number }, side: 'w' | 'h', unit: Unit ): string {
+	const own = side === 'w' ? el.vw : el.vh;
+	return own && own > 0 ? lengthIn( own, unit === '%' ? 'pt' : unit ) : '';
+}
+

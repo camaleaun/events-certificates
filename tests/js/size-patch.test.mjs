@@ -162,3 +162,11 @@ test( 'the box of a line moves or stretches its two ends and keeps the way it go
 	assert.deepEqual( patch( { x1: 10, y1: 90, x2: 40, y2: 20 }, 'h', 30 ), { y1: 50 }, 'and one that goes up' );
 	assert.deepEqual( patch( line, 'w', -5 ), { x2: 100 }, 'no negative width' );
 } );
+
+test( 'a side of an SVG left empty is the size of its viewBox, in the unit the side has', () => {
+	const own = ( ...a ) => sandbox.size.viewBoxLength( ...a );
+	assert.equal( own( { vw: 24, vh: 12 }, 'w', 'pt' ), '24pt' );
+	assert.equal( own( { vw: 24, vh: 12 }, 'h', 'mm' ), '4.23mm', 'a unit of the viewBox is a point, said in millimeters' );
+	assert.equal( own( { vw: 24, vh: 12 }, 'w', '%' ), '24pt', 'a percentage is not a size of its own' );
+	assert.equal( own( {}, 'w', 'pt' ), '', 'no viewBox, nothing to say' );
+} );
