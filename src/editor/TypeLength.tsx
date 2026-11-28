@@ -10,6 +10,7 @@ type Unit = { value: string; label: string; step?: number };
 export const LINE_HEIGHT_UNITS: Unit[] = [
 	// "-": no unit, the multiplier of the size the line height has always been (1.2).
 	{ value: '-', label: '-', step: 0.05 },
+	{ value: 'em', label: 'em', step: 0.05 },
 	{ value: '%', label: '%', step: 1 },
 	{ value: 'px', label: 'px', step: 0.5 },
 	{ value: 'pt', label: 'pt', step: 0.5 },
@@ -19,6 +20,7 @@ export const LINE_HEIGHT_UNITS: Unit[] = [
 ];
 export const LETTER_SPACING_UNITS: Unit[] = [
 	{ value: '%', label: '%', step: 0.5 },
+	{ value: 'em', label: 'em', step: 0.005 },
 	{ value: 'px', label: 'px', step: 0.05 },
 	{ value: 'pt', label: 'pt', step: 0.05 },
 	{ value: 'mm', label: 'mm', step: 0.01 },
@@ -68,7 +70,7 @@ export default function TypeLength( { label, value, units, defaultUnit, placehol
 			onUnitChange={ ( next ) => setChosen( next || defaultUnit ) }
 			onChange={ ( next ) => {
 				// "1.2-" is a number with no unit (the control writes the unit after the number).
-				const m = next ? /^\s*(-?\d*\.?\d+)\s*(%|px|pt|mm|cm|in|-)?\s*$/.exec( next ) : null;
+				const m = next ? /^\s*(-?\d*\.?\d+)\s*(%|em|px|pt|mm|cm|in|-)?\s*$/.exec( next ) : null;
 				if ( ! m ) {
 					onChange( undefined );
 					return;
