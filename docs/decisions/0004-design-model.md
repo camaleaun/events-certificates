@@ -22,7 +22,7 @@ because of the WordPress trademarks).
 - One source of truth for screen and PDF avoids two renderers drifting.
 - Points match print; anchors make the same design adapt to other page sizes
   and to screens (0009).
-- Text is runs (text and fields, with bold/italic), never strings with braces:
+- Text is runs (text and fields, with bold/italic) in memory (a file and the clipboard say them as text, see 0054):
   fields keep their formats (dates follow the site format by default) and the
   editor shows them as chips.
 

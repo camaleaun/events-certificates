@@ -2,12 +2,14 @@
  * Text with fields as chips (like Google Sheets' custom date format input):
  * free text between chips, chips inserted from a menu, each chip with its own
  * options (a date's format), Bold/Italic from buttons or ⌘B/⌘I. The value is a
- * list of runs, never text with braces.
+ * list of runs; copying says them as text (`Dear [name], *welcome*`) and pasting reads that
+ * text back (rich.ts, docs/decisions/0054).
  */
 import { Button, Dropdown, MenuGroup, MenuItem, Popover, SelectControl, TextControl } from '@wordpress/components';
 import { useEffect, useLayoutEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { fieldValue, type Run } from './model';
+import { BLOCKS, fieldsInRuns, runsFromText, textFromRuns } from './rich';
 
 /** Fields with an editable preview value (same list as the Certificate tab's Preview data). */
 const PREVIEW_KEYS = [ 'name', 'event', 'location', 'hours', 'role', 'details', 'signer_name', 'signer_role' ];
@@ -172,8 +174,15 @@ function fromDom( root: HTMLElement ): Run[] {
 			return;
 		}
 		if ( node.tagName === 'BR' ) {
+			if ( node.parentElement && BLOCKS.includes( node.parentElement.tagName ) && node.parentElement.childNodes.length === 1 ) {
+				return;
+			}
 			push( { text: '\n', ...( b ? { b } : {} ), ...( i ? { i } : {} ) } );
 			return;
+		}
+		// A block (what Enter makes, a pasted paragraph) after something starts a new line; its own <br> that holds the place of an empty line is not one more.
+		if ( BLOCKS.includes( node.tagName ) && ( node.previousSibling || runs.length ) && ! ( runs[ runs.length - 1 ] as { text?: string } | undefined )?.text?.endsWith( '\n' ) ) {
+			push( { text: '\n', ...( b ? { b } : {} ), ...( i ? { i } : {} ) } );
 		}
 		const weight = node.style.fontWeight;
 		const nb = b || node.tagName === 'B' || node.tagName === 'STRONG' || weight === 'bold' || Number( weight ) >= 600;
@@ -236,6 +245,54 @@ export default function FieldText( { label, runs, onChange, sample, locale, inli
 			}
 			last.current = toHtml( next, info );
 			onChange( next );
+		}
+	};
+	/** The runs of what is selected in the editable (inside bold or italic, the selection has the mark too). */
+	const selectedRuns = (): Run[] | null => {
+		const root = ref.current;
+		const selection = window.getSelection();
+		if ( ! root || ! selection || selection.isCollapsed || ! selection.rangeCount || ! root.contains( selection.anchorNode ) ) {
+			return null;
+		}
+		const range = selection.getRangeAt( 0 );
+		let holder: HTMLElement = document.createElement( 'div' );
+		holder.appendChild( range.cloneContents() );
+		for ( let node: Node | null = range.commonAncestorContainer; node && node !== root; node = node.parentNode ) {
+			if ( node instanceof HTMLElement && /^(STRONG|B|EM|I)$/.test( node.tagName ) ) {
+				const wrap = document.createElement( node.tagName );
+				wrap.appendChild( holder );
+				const outer = document.createElement( 'div' );
+				outer.appendChild( wrap );
+				holder = outer;
+			}
+		}
+		return fromDom( holder );
+	};
+	const onCopy = ( event: React.ClipboardEvent, cut = false ) => {
+		const runs = selectedRuns();
+		if ( ! runs ) {
+			return;
+		}
+		event.preventDefault();
+		event.clipboardData.setData( 'text/plain', textFromRuns( runs ) );
+		if ( cut ) {
+			document.execCommand( 'delete' );
+		}
+	};
+	const onPaste = ( event: React.ClipboardEvent ) => {
+		event.preventDefault();
+		const keys = Object.keys( info );
+		const html = event.clipboardData.getData( 'text/html' );
+		let runs: Run[];
+		if ( html ) {
+			// From another page: its marks and line breaks, and a [field] in its text.
+			const body = new DOMParser().parseFromString( html, 'text/html' ).body;
+			runs = fieldsInRuns( fromDom( body ), keys );
+		} else {
+			runs = runsFromText( event.clipboardData.getData( 'text/plain' ), keys );
+		}
+		if ( runs.length ) {
+			document.execCommand( 'insertHTML', false, toHtml( runs, info ) );
 		}
 	};
 	const editableClass = ( base: string ) => [ base, placeholder && 'is-placeholder', firstField?.b && 'is-placeholder-b', firstField?.i && 'is-placeholder-i' ].filter( Boolean ).join( ' ' );
@@ -428,10 +485,9 @@ export default function FieldText( { label, runs, onChange, sample, locale, inli
 						}
 						event.stopPropagation();
 					} }
-					onPaste={ ( event ) => {
-						event.preventDefault();
-						document.execCommand( 'insertText', false, event.clipboardData.getData( 'text/plain' ) );
-					} }
+					onCopy={ onCopy }
+					onCut={ ( event ) => onCopy( event, true ) }
+					onPaste={ onPaste }
 				/>
 			{ chipPopover }
 			</>
@@ -511,10 +567,9 @@ export default function FieldText( { label, runs, onChange, sample, locale, inli
 					}
 					event.stopPropagation();
 				} }
-				onPaste={ ( event ) => {
-					event.preventDefault();
-					document.execCommand( 'insertText', false, event.clipboardData.getData( 'text/plain' ) );
-				} }
+				onCopy={ onCopy }
+				onCut={ ( event ) => onCopy( event, true ) }
+				onPaste={ onPaste }
 			/>
 			{ chipPopover }
 		</div>
