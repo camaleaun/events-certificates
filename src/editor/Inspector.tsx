@@ -32,8 +32,10 @@ import { ElementSize } from './SizeRow';
 import { alignAxis, radiusConvert, radiusFrom, radiusNumber, radiusUnit, unitOf, type RadiusUnit } from './size';
 import { fields, tokenOnly } from './FieldText';
 import TextByLanguage from './TextByLanguage';
-import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, fieldValue, runsOf } from './model';
+import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, type GroupEl, fieldValue, runsOf } from './model';
 import { stockName } from './base';
+import GroupPanel from './GroupPanel';
+import { innerPage } from './tree';
 import { ColorItem } from './ColorChoices';
 
 type Props = {
@@ -47,6 +49,8 @@ type Props = {
 	onChange: ( patch: Partial< Element > ) => void;
 	onImage: ( picked: Picked ) => void;
 	onBox: ( b: Box ) => void;
+	/** The group the element is in (resolved): what it is anchored to is the group's size, and in a row, a stack or a grid the group places it. */
+	holder?: GroupEl | null;
 };
 
 /** The font picker's options: the installed fonts the PDF cannot read say what the PDF uses; a font that is not installed says it too. */
@@ -71,7 +75,10 @@ const RADIUS_UNITS = [
 ];
 const STROKE_UNITS = [ { value: 'px', label: 'px', step: 0.25 } ];
 
-export default function Inspector( { el, stored, design, mode, tab, locale, sample, onChange, onImage, onBox }: Props ) {
+export default function Inspector( { el, stored, design, mode, tab, locale, sample, onChange, onImage, onBox, holder }: Props ) {
+	// What is in a group is placed in the group's box (its corner is 0, 0), not on the page.
+	const space = holder ? ( innerPage( holder ) as Design[ 'page' ] ) : design.page;
+	const flowed = !! holder && !! holder.arrange;
 	const [ linked, setLinked ] = useState( true );
 	// A corner's radius typed in a unit ("25%", "12pt"). Another unit than the corner has keeps the corner (96pt of a 120 x 80 box is 120%: 50 at most) and
 	// says it in that unit; the same unit takes the number.
@@ -190,7 +197,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 			{ tab === 'art' && el.type === 'svg' && <SvgPanel el={ el } design={ design } mode={ mode } onChange={ ( patch ) => onChange( patch as Partial< Element > ) } /> }
 			{ tab === 'art' && el.type === 'signature' && (
 				<div className="evcert-inspector__section">
-					<ElementSize el={ el } page={ design.page } onChange={ onChange } />
+					<ElementSize el={ el } page={ space } onChange={ onChange } />
 				</div>
 			) }
 
@@ -303,11 +310,25 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 				</ToolsPanel>
 			) }
 
+			{ tab === 'art' && el.type === 'group' && <GroupPanel el={ el } onChange={ onChange } /> }
+
+			{ /* In a row or a stack: what is in it may share the room that is left (Fill) or keep its own size (Fit), as the core's children of a flex layout. */ }
+			{ tab === 'art' && holder && ( holder.arrange === 'row' || holder.arrange === 'stack' ) && (
+				<ToolsPanel label={ __( 'Layout', 'events-certificates' ) } resetAll={ () => onChange( { grow: undefined } ) } className="evcert-child-panel">
+					<ToolsPanelItem label={ __( 'Size', 'events-certificates' ) } hasValue={ () => !! el.grow } onDeselect={ () => onChange( { grow: undefined } ) } isShownByDefault>
+						<ToggleGroupControl __next40pxDefaultSize __nextHasNoMarginBottom isBlock label={ __( 'Size', 'events-certificates' ) } value={ el.grow ? 'fill' : 'fit' } onChange={ ( v ) => onChange( { grow: v === 'fill' ? 1 : undefined } ) }>
+							<ToggleGroupControlOption value="fit" label={ __( 'Fit', 'events-certificates' ) } />
+							<ToggleGroupControlOption value="fill" label={ __( 'Fill', 'events-certificates' ) } />
+						</ToggleGroupControl>
+					</ToolsPanelItem>
+				</ToolsPanel>
+			) }
+
 			{ tab === 'art' && el.type !== 'qr' && el.type !== 'verification' && el.type !== 'image' && (
 				<ToolsPanel label={ __( 'Color', 'events-certificates' ) } resetAll={ () => {} } className="color-block-support-panel">
 					<div className="evcert-color-items">
 						{ el.type === 'text' && <ColorItem label={ __( 'Text', 'events-certificates' ) } value={ el.color } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
-						{ ( el.type === 'rect' || el.type === 'ellipse' || el.type === 'path' ) && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.fill } clearTo="" design={ design } mode={ mode } onChange={ ( fill ) => onChange( { fill } ) } /> }
+						{ ( el.type === 'rect' || el.type === 'group' || el.type === 'ellipse' || el.type === 'path' ) && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.fill } clearTo="" design={ design } mode={ mode } onChange={ ( fill ) => onChange( { fill } ) } /> }
 						{ el.type === 'signature' && <ColorItem label={ __( 'Signature color', 'events-certificates' ) } value={ el.color || '$text' } clearTo="$text" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c } ) } /> }
 						{ /* An SVG that picks no color draws in the current color: an empty circle; Clear goes back to that. */ }
 						{ el.type === 'svg' && <ColorItem label={ __( 'Fill', 'events-certificates' ) } value={ el.color } clearTo="" design={ design } mode={ mode } onChange={ ( c ) => onChange( { color: c || undefined } as Partial< Element > ) } /> }
@@ -316,7 +337,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 				</ToolsPanel>
 			) }
 
-			{ tab === 'art' && ( el.type === 'rect' || el.type === 'ellipse' || el.type === 'path' || el.type === 'line' ) && (
+			{ tab === 'art' && ( el.type === 'rect' || el.type === 'group' || el.type === 'ellipse' || el.type === 'path' || el.type === 'line' ) && (
 				<ToolsPanel label={ el.type === 'line' ? __( 'Line', 'events-certificates' ) : __( 'Border', 'events-certificates' ) } resetAll={ () => onChange( { strokeWidth: 1 } as Partial< Element > ) } className="border-block-support-panel">
 					<ToolsPanelItem label={ __( 'Width', 'events-certificates' ) } hasValue={ () => true } onDeselect={ () => onChange( { strokeWidth: 1 } as Partial< Element > ) } isShownByDefault>
 						<div className="evcert-radius">
@@ -339,7 +360,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 							</ToggleGroupControl>
 						</ToolsPanelItem>
 					) }
-					{ el.type === 'rect' && (
+					{ ( el.type === 'rect' || el.type === 'group' ) && (
 						<ToolsPanelItem label={ __( 'Radius', 'events-certificates' ) } hasValue={ () => ( el.radius || [] ).some( Boolean ) } onDeselect={ () => onChange( { radius: [ 0, 0, 0, 0 ] } ) } isShownByDefault>
 							<div className="evcert-radius">
 								<HStack className="evcert-radius__header">
@@ -380,7 +401,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 							</div>
 						</ToolsPanelItem>
 					) }
-					{ el.type === 'rect' && (
+					{ ( el.type === 'rect' || el.type === 'group' ) && (
 						<ToolsPanelItem label={ __( 'Corner shape', 'events-certificates' ) } hasValue={ () => ( el.corner || 'round' ) !== 'round' } onDeselect={ () => onChange( { corner: 'round' } ) } isShownByDefault>
 							<SelectControl
 								__next40pxDefaultSize
@@ -405,7 +426,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 				<ToolsPanel label={ __( 'Dimensions', 'events-certificates' ) } resetAll={ () => onChange( { rotation: 0, opacity: 1 } ) } className="dimensions-block-support-panel">
 					{ el.type !== 'line' && (
 						<ToolsPanelItem label={ __( 'Position and size', 'events-certificates' ) } hasValue={ () => !! stored?.layout } onDeselect={ () => onChange( { layout: undefined, x: el.x, y: el.y, w: el.w, h: el.h } as Partial< Element > ) } isShownByDefault>
-							<Anchors el={ el } stored={ stored || el } page={ design.page } onChange={ onChange } withSize={ el.type !== 'svg' && el.type !== 'signature' } />
+							<Anchors el={ el } stored={ stored || el } page={ space } inGroup={ !! holder } flowed={ flowed } onChange={ onChange } withSize={ el.type !== 'svg' && el.type !== 'signature' } />
 						</ToolsPanelItem>
 					) }
 					{ el.type !== 'line' && (
@@ -521,10 +542,10 @@ function LengthField( { label, value, total, onChange, locked }: { label: string
 const round2 = ( n: number ) => Math.round( n * 100 ) / 100;
 
 /** Anchors per axis (start, centre, end, stretch) with open length fields, relative to the page or the safe margin. */
-function Anchors( { el, stored, page, onChange, withSize = true }: { el: Element; stored: Element; page: Design[ 'page' ]; onChange: ( patch: Partial< Element > ) => void; withSize?: boolean } ) {
+function Anchors( { el, stored, page, onChange, withSize = true, inGroup = false, flowed = false }: { el: Element; stored: Element; page: Design[ 'page' ]; onChange: ( patch: Partial< Element > ) => void; withSize?: boolean; inGroup?: boolean; flowed?: boolean } ) {
 	const labels = AXIS_LABELS();
 	const b = { x: el.x as number, y: el.y as number, w: el.w as number, h: el.h as number };
-	const layout: Layout = stored.layout || layoutFrom( { h: { mode: 'start' }, v: { mode: 'start' }, ref: 'page' }, b, page );
+	const layout: Layout = stored.layout || layoutFrom( { h: { mode: 'start' }, v: { mode: 'start' }, ref: inGroup ? 'parent' : 'page' }, b, page );
 	const ref = refBox( page, layout.ref );
 	const sameBox = ! ( page.safe > 0 );
 	const set = ( next: Layout ) => onChange( { layout: next } as Partial< Element > );

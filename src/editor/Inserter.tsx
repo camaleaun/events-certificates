@@ -18,6 +18,7 @@ export default function Inserter( { onInsert, onClose }: { onInsert: ( type: Ele
 		{ type: 'line', title: __( 'Line', 'events-certificates' ), keywords: 'separator rule divider' },
 		{ type: 'rect', title: __( 'Rectangle', 'events-certificates' ), keywords: 'square shape box frame' },
 		{ type: 'ellipse', title: __( 'Ellipse', 'events-certificates' ), keywords: 'circle shape ring' },
+		{ type: 'group', title: __( 'Group', 'events-certificates' ), keywords: 'container row stack grid layout wrapper section' },
 		{ type: 'image', title: __( 'Image', 'events-certificates' ), keywords: 'logo picture png jpg' },
 		{ type: 'svg', title: __( 'SVG', 'events-certificates' ), keywords: 'icon logo ornament vector path' },
 		{ type: 'logo' as const, title: __( 'Community logo', 'events-certificates' ), keywords: 'logo picture community brand' },

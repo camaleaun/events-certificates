@@ -100,3 +100,25 @@ test( 'a group that is a row places what is in it by the flow, and the tree says
 	assert.deepEqual( at( list, 'a' ), { x: 100, y: 50, w: 40, h: 10 } );
 	assert.deepEqual( at( list, 'b' ), { x: 150, y: 50, w: 30, h: 10 } );
 } );
+
+test( 'an element is put after another, copied with new ids, and sent up or down among its own', () => {
+	const list = [ rect( 'a', 0, 0, 1, 1 ), { id: 'g', type: 'group', x: 0, y: 0, w: 50, h: 50, children: [ rect( 'b', 0, 0, 1, 1 ), rect( 'c', 0, 0, 1, 1 ) ] }, rect( 'd', 0, 0, 1, 1 ) ];
+	assert.deepEqual( plain( t.insertAfter( list, 'a', rect( 'n', 0, 0, 1, 1 ) ).map( ( e ) => e.id ) ), [ 'a', 'n', 'g', 'd' ] );
+	assert.deepEqual( plain( t.findEl( t.insertAfter( list, 'b', rect( 'n', 0, 0, 1, 1 ) ), 'g' ).children.map( ( e ) => e.id ) ), [ 'b', 'n', 'c' ], 'in the group of the other' );
+	const copy = t.cloneEl( list[ 1 ], 'G copy' );
+	assert.notEqual( copy.id, 'g' );
+	assert.notEqual( copy.children[ 0 ].id, 'b' );
+	assert.equal( copy.children.length, 2 );
+	assert.deepEqual( plain( t.reorderEl( list, 'b', 'up' ) ).find( ( e ) => e.id === 'g' ).children.map( ( e ) => e.id ), [ 'c', 'b' ] );
+	assert.deepEqual( plain( t.reorderEl( list, 'a', 'top' ).map( ( e ) => e.id ) ), [ 'g', 'd', 'a' ] );
+	assert.deepEqual( plain( t.reorderEl( list, 'a', 'down' ).map( ( e ) => e.id ) ), [ 'a', 'g', 'd' ], 'the first cannot go further back' );
+} );
+
+test( 'a group that changes how it places what is in it leaves them their size and place', () => {
+	const group = { id: 'g', type: 'group', x: 100, y: 50, w: 200, h: 100, children: [ rect( 'a', 0, 0, 1, 1, { layout: { ref: 'parent', h: { mode: 'stretch', start: '10pt', end: '10pt' }, v: { mode: 'start', start: '5pt', size: '20pt' } } } ) ] };
+	const [ resolved ] = t.resolveTree( [ group ], page );
+	const baked = plain( t.bakeChildren( resolved.children ) );
+	assert.deepEqual( [ baked[ 0 ].x, baked[ 0 ].y, baked[ 0 ].w, baked[ 0 ].h ], [ 10, 5, 180, 20 ] );
+	assert.equal( baked[ 0 ].layout, undefined );
+	assert.equal( baked[ 0 ].ox, undefined );
+} );

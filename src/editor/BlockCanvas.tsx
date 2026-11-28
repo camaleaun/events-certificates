@@ -7,9 +7,13 @@ import { useRef, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { resizeBox, snap, type Guide } from '@camaleaun/draw';
+import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { group as groupIcon, row as rowIcon, stack as stackIcon, grid as gridIcon } from '@wordpress/icons';
 import { toElements } from './blocks';
-import { box, lockedRatio, moved, pageColor, placed, resolve, color, type Design, type Element, type Mode } from './model';
+import { box, lockedRatio, moved, pageColor, placed, type Design, type Element, type GroupEl, type Mode } from './model';
 import { Shape } from './Shape';
+import { findEl, flatten, innerPage, isGroup, mapEl, pageBox, parentOf, resolveTree, type Placed } from './tree';
 
 const HANDLES = [ 'nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w' ];
 const SNAP = 5;
@@ -31,31 +35,42 @@ type Props = {
 	editingId: string | null;
 	overlay: React.ReactNode;
 	onEdit: ( el: Element ) => void;
+	/** The group that has just been put in and has no layout chosen yet: it shows the choice (as the core's Group does) until one is made. */
+	choosing: string | null;
+	onChoose: ( id: string, arrange: GroupEl[ 'arrange' ] ) => void;
+	/** Puts the selected elements in a group (the editor knows how). */
+	onGroup: ( ids: string[] ) => void;
 	/** What the editor draws in place of a picture with nothing chosen yet (a foreignObject, or null for the usual drawing). */
 	placeholder: ( el: Element, select: () => void, startMove: ( event: React.PointerEvent ) => void ) => React.ReactNode;
 };
 
 const diff = ( before: Record< string, unknown >, after: Record< string, unknown > ) => Object.fromEntries( Object.entries( after ).filter( ( [ key, value ] ) => JSON.stringify( before[ key ] ) !== JSON.stringify( value ) ) );
 
-export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: true, y: true }, svgRef, selRef, tab, editingId, overlay, onEdit, placeholder }: Props ) {
-	const { blocks, selected } = ( useSelect as any )(
+export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: true, y: true }, svgRef, selRef, tab, editingId, overlay, onEdit, placeholder, choosing, onChoose, onGroup }: Props ) {
+	const { blocks, selected, many } = ( useSelect as any )(
 		( select: any ) => {
 			const store = select( blockEditorStore );
-			return { blocks: store.getBlocks(), selected: store.getSelectedBlockClientId() };
+			return { blocks: store.getBlocks(), selected: store.getSelectedBlockClientId(), many: ( store.getSelectedBlockClientIds() as string[] ).length > 1 ? store.getSelectedBlockClientIds() : [] };
 		},
 		[]
-	) as { blocks: any[]; selected: string | null };
-	const { updateBlockAttributes, selectBlock } = ( useDispatch as any )( blockEditorStore ) as { updateBlockAttributes: ( id: string, patch: Record< string, unknown > ) => void; selectBlock: ( id: string ) => void };
+	) as { blocks: any[]; selected: string | null; many: string[] };
+	const { updateBlockAttributes, selectBlock, multiSelect } = ( useDispatch as any )( blockEditorStore ) as { updateBlockAttributes: ( id: string, patch: Record< string, unknown > ) => void; selectBlock: ( id: string ) => void; multiSelect: ( first: string, last: string ) => void };
 	const dragRef = useRef< Drag | null >( null );
 	const [ preview, setPreview ] = useState< Element | null >( null );
 	const [ guides, setGuides ] = useState< Guide[] >( [] );
 
 	const { w, h, safe, bleed } = design.page;
 	const stored = toElements( blocks );
-	const resolved = stored.map( ( el ) => resolve( el, design.page ) );
-	const shownEls = resolved.map( ( el ) => ( preview && preview.id === el.id ? preview : el ) );
-	const current = shownEls.find( ( el ) => el.id === selected ) || null;
-	const selBox = current ? box( current ) : null;
+	const resolved = resolveTree( stored, design.page );
+	// The elements as they are drawn: with the preview of a drag in the place of the one that is dragged (it keeps where its group's corner is).
+	const shownTree = preview ? ( mapEl( resolved, preview.id, ( el ) => ( { ...preview, ox: ( el as Placed ).ox, oy: ( el as Placed ).oy } as unknown as Element ) ) as Placed[] ) : resolved;
+	const current = ( findEl( shownTree, selected ) as Placed | undefined ) || null;
+	const selBox = current ? pageBox( current ) : null;
+	// What a row, a stack or a grid places is not dragged or resized by hand: the layers and the group's own settings decide it.
+	const flowed = ( el: Element ) => {
+		const g = parentOf( shownTree, el.id );
+		return !! g && [ 'row', 'stack', 'grid' ].includes( g.arrange || '' );
+	};
 	const bg = pageColor( design, mode );
 
 	const toPage = ( event: { clientX: number; clientY: number } ) => {
@@ -82,8 +97,9 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 		if ( drag.kind === 'move' ) {
 			next = moved( drag.origin, dx, dy );
 			if ( ! event.altKey ) {
-				const others = resolved.filter( ( el ) => el.id !== drag.id && ! el.hidden && el.type !== 'line' ).map( ( el ) => box( el ) );
-				const s = snap( box( next ), design.page, others, SNAP / zoom );
+				const mine = flatten( [ drag.origin ] ).map( ( e ) => e.id );
+				const others = flatten( resolved as Element[] ).filter( ( el ) => ! mine.includes( el.id ) && ! el.hidden && el.type !== 'line' ).map( ( el ) => pageBox( el as Placed ) );
+				const s = snap( pageBox( next as Placed ), design.page, others, SNAP / zoom );
 				next = moved( next, s.dx, s.dy );
 				found = s.guides;
 			}
@@ -114,14 +130,91 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 		dragRef.current = null;
 		if ( drag && preview && drag.moved ) {
 			// One update of the block: absolute elements take the numbers, anchored ones update their anchors (docs/decisions/0004).
-			const before = stored.find( ( el ) => el.id === drag.id ) as Element;
-			const after = drag.origin.type === 'line' ? preview : placed( before, box( preview ), design.page );
+			const before = findEl( stored, drag.id ) as Element;
+			// What is in a group is placed from the group's corner, and anchored to its size.
+			const holder = parentOf( resolved, drag.id );
+			const space = holder ? innerPage( holder ) : design.page;
+			const after = drag.origin.type === 'line' ? preview : placed( before, box( preview ), space as never );
 			updateBlockAttributes( drag.id, diff( before as never, after as never ) );
 		} else if ( drag && drag.wasSelected && ! drag.moved && drag.origin.type === 'text' ) {
 			onEdit( drag.origin );
 		}
 		setPreview( null );
 		setGuides( [] );
+	};
+
+
+	const extend = ( event: React.PointerEvent, id: string ) => {
+		// Shift or Cmd/Ctrl adds to the selection: the elements of one list, from the one that is selected to this one (as the core's List View does).
+		const ids = many.length ? many : selected ? [ selected ] : [];
+		const first = ids[ 0 ];
+		if ( first && first !== id && parentOf( shownTree, first )?.id === parentOf( shownTree, id )?.id ) {
+			multiSelect( first, id );
+			event.stopPropagation();
+			return true;
+		}
+		return false;
+	};
+
+	/** An element as it is drawn; a group is its own box, and what is in it from its corner. */
+	const draw = ( el: Placed ): React.ReactNode => {
+		if ( el.hidden || ( editingId === el.id && el.type === 'text' ) ) {
+			return null;
+		}
+		const begin = ( event: React.PointerEvent ) => start( event, { kind: 'move', id: el.id, start: toPage( event ), origin: el } );
+		const ph = el.type === 'image' && ! el.src && el.slot !== 'logo' ? placeholder( el, () => select( el.id ), begin ) : null;
+		if ( ph ) {
+			return <g key={ el.id }>{ ph }</g>;
+		}
+		const shape = <Shape el={ el } design={ design } mode={ mode } sample={ sample } />;
+		const inner = isGroup( el ) ? (
+			<g transform={ `translate(${ el.x } ${ el.y })` } clipPath={ el.clip ? `url(#evcert-clip-${ el.id })` : undefined }>
+				{ el.clip && (
+					<clipPath id={ `evcert-clip-${ el.id }` }>
+						<rect width={ Math.max( 0, el.w ) } height={ Math.max( 0, el.h ) } />
+					</clipPath>
+				) }
+				{ ( el.children as Placed[] ).map( draw ) }
+				{ choosing === el.id && ! ( el.children || [] ).length && <Variations group={ el } onChoose={ ( arrange ) => onChoose( el.id, arrange ) } /> }
+			</g>
+		) : null;
+		const whole = (
+			<>
+				{ shape }
+				{ inner }
+			</>
+		);
+		return (
+			<g
+				key={ el.id }
+				className={ `evcert-el${ el.locked ? ' is-locked' : '' }` }
+				onDoubleClick={ ( event ) => {
+					event.stopPropagation();
+					onEdit( el );
+				} }
+				onPointerDown={ ( event ) => {
+					if ( tab === 'content' && el.type !== 'text' ) {
+						return;
+					}
+					event.stopPropagation();
+					if ( ( event.shiftKey || event.metaKey || event.ctrlKey ) && extend( event, el.id ) ) {
+						return;
+					}
+					select( el.id );
+					if ( tab === 'content' ) {
+						onEdit( el );
+						return;
+					}
+					if ( ! el.locked && ! flowed( el ) ) {
+						begin( event );
+					} else {
+						dragRef.current = null;
+					}
+				} }
+			>
+				{ el.rotation && el.type !== 'line' ? <g transform={ `rotate(${ el.rotation } ${ el.x + el.w / 2 } ${ el.y + el.h / 2 })` }>{ whole }</g> : whole }
+			</g>
+		);
 	};
 
 	return (
@@ -138,50 +231,7 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 			</defs>
 			<rect className="evcert-sheet" x={ 0 } y={ 0 } width={ w } height={ h } fill={ bg === 'transparent' || bg === 'none' ? 'url(#evcert-checker)' : bg } />
 			<g clipPath="url(#evcert-page)">
-				{ shownEls.map( ( el ) => {
-					if ( el.hidden ) {
-						return null;
-					}
-					if ( editingId === el.id && el.type === 'text' ) {
-						return null;
-					}
-					const begin = ( event: React.PointerEvent ) => start( event, { kind: 'move', id: el.id, start: toPage( event ), origin: el } );
-					const ph = el.type === 'image' && ! el.src && el.slot !== 'logo' ? placeholder( el, () => select( el.id ), begin ) : null;
-					if ( ph ) {
-						return <g key={ el.id }>{ ph }</g>;
-					}
-					return (
-						<g
-							key={ el.id }
-							className={ `evcert-el${ el.locked ? ' is-locked' : '' }` }
-							onDoubleClick={ () => onEdit( el ) }
-							onPointerDown={ ( event ) => {
-								if ( tab === 'content' && el.type !== 'text' ) {
-									return;
-								}
-								event.stopPropagation();
-								select( el.id );
-								if ( tab === 'content' ) {
-									onEdit( el );
-									return;
-								}
-								if ( ! el.locked ) {
-									begin( event );
-								} else {
-									dragRef.current = null;
-								}
-							} }
-						>
-							{ el.rotation && el.type !== 'line' ? (
-								<g transform={ `rotate(${ el.rotation } ${ el.x + el.w / 2 } ${ el.y + el.h / 2 })` }>
-									<Shape el={ el } design={ design } mode={ mode } sample={ sample } />
-								</g>
-							) : (
-								<Shape el={ el } design={ design } mode={ mode } sample={ sample } />
-							) }
-						</g>
-					);
-				} ) }
+				{ shownTree.map( draw ) }
 				{ overlay }
 			</g>
 			<g className="evcert-guides" pointerEvents="none">
@@ -201,6 +251,29 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 					g.kind === 'gap' ? null : g.axis === 'x' ? <line key={ i } x1={ g.at } x2={ g.at } y1={ -bleed } y2={ h + bleed } className="evcert-snap" /> : <line key={ i } y1={ g.at } y2={ g.at } x1={ -bleed } x2={ w + bleed } className="evcert-snap" />
 				) }
 			</g>
+			{ many.length > 1 && tab === 'art' && ! editingId && (
+				<g className="evcert-selection is-many">
+					{ many.map( ( id ) => {
+						const el = findEl( shownTree, id ) as Placed | undefined;
+						const b = el ? pageBox( el ) : null;
+						return b ? <rect key={ id } x={ b.x } y={ b.y } width={ Math.max( 1, b.w ) } height={ Math.max( 1, b.h ) } /> : null;
+					} ) }
+					{ ( () => {
+						const boxes = many.map( ( id ) => findEl( shownTree, id ) as Placed | undefined ).filter( Boolean ).map( ( el ) => pageBox( el as Placed ) );
+						const x = Math.min( ...boxes.map( ( b ) => b.x ) );
+						const y = Math.min( ...boxes.map( ( b ) => b.y ) );
+						return (
+							<foreignObject x={ x } y={ y - 40 / zoom } width={ 120 / zoom } height={ 36 / zoom } style={ { overflow: 'visible' } }>
+								<div className="evcert-many-bar" style={ { transform: `scale(${ 1 / zoom })`, transformOrigin: '0 0' } }>
+									<Button variant="primary" size="compact" icon={ groupIcon } onClick={ () => onGroup( many ) }>
+										{ __( 'Group', 'events-certificates' ) }
+									</Button>
+								</div>
+							</foreignObject>
+						);
+					} )() }
+				</g>
+			) }
 			{ current && selBox && tab === 'art' && ! editingId && (
 				<g className="evcert-selection">
 					<rect ref={ selRef } x={ selBox.x } y={ selBox.y } width={ Math.max( 1, selBox.w ) } height={ Math.max( 1, selBox.h ) } />
@@ -208,7 +281,7 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 						? ( [ 1, 2 ] as const ).map( ( end ) => (
 								<circle key={ end } cx={ end === 1 ? current.x1 : current.x2 } cy={ end === 1 ? current.y1 : current.y2 } r={ 5 / zoom } onPointerDown={ ( event ) => start( event, { kind: 'point', id: current.id, end, start: toPage( event ), origin: current } ) } />
 						  ) )
-						: ! current.locked &&
+						: ! current.locked && ! flowed( current ) &&
 						  HANDLES.map( ( hd ) => {
 								const hx = selBox.x + ( hd.includes( 'w' ) ? 0 : hd.includes( 'e' ) ? selBox.w : selBox.w / 2 );
 								const hy = selBox.y + ( hd.includes( 'n' ) ? 0 : hd.includes( 's' ) ? selBox.h : selBox.h / 2 );
@@ -218,5 +291,29 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 				</g>
 			) }
 		</svg>
+	);
+}
+
+/** The core's choice of a layout for a group that has just been put in: Group, Row, Stack or Grid, in that order. */
+function Variations( { group, onChoose }: { group: GroupEl; onChoose: ( arrange: GroupEl[ 'arrange' ] ) => void } ) {
+	const options: Array< { arrange: GroupEl[ 'arrange' ]; label: string; icon: JSX.Element } > = [
+		{ arrange: undefined, label: __( 'Group', 'events-certificates' ), icon: groupIcon },
+		{ arrange: 'row', label: __( 'Row', 'events-certificates' ), icon: rowIcon },
+		{ arrange: 'stack', label: __( 'Stack', 'events-certificates' ), icon: stackIcon },
+		{ arrange: 'grid', label: __( 'Grid', 'events-certificates' ), icon: gridIcon },
+	];
+	return (
+		<foreignObject x={ 0 } y={ 0 } width={ Math.max( 0, group.w ) } height={ Math.max( 0, group.h ) } onPointerDown={ ( event ) => event.stopPropagation() }>
+			<div className="evcert-variations" role="group" aria-label={ __( 'Choose a layout for the group', 'events-certificates' ) }>
+				<p className="evcert-variations__title">{ __( 'Group: choose a layout', 'events-certificates' ) }</p>
+				<div className="evcert-variations__list">
+					{ options.map( ( o ) => (
+						<Button key={ o.label } className="evcert-variations__option" icon={ o.icon } iconSize={ 24 } label={ o.label } showTooltip onClick={ () => onChoose( o.arrange ) }>
+							<span>{ o.label }</span>
+						</Button>
+					) ) }
+				</div>
+			</div>
+		</foreignObject>
 	);
 }

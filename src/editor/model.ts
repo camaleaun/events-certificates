@@ -65,6 +65,8 @@ export function nextSwatchSlug( palette: Array< { slug?: string } >, colors: Rec
 
 export type Base = {
 	id: string;
+	// In a row, a stack or a grid: shares the room that is left with the others that grow (0, or none, keeps its own size).
+	grow?: number;
 	name?: string;
 	slot?: string;
 	x: number;
@@ -108,7 +110,24 @@ export type SvgEl = Base & { type: 'svg'; title?: string; vw: number; vh: number
  * A box like a rectangle that holds other elements. What is in it (`children`) is placed from its top-left corner, and its anchors (`ref: 'parent'`) are
  * to its size; it clips them to its box unless `clip` is false. It holds no authenticity code, verification or signature.
  */
-export type GroupEl = Base & { type: 'group'; fill?: string; stroke?: string; strokeWidth?: number; radius?: Array< number | string >; corner?: CornerShape; clip?: boolean; children: Element[] };
+export type GroupEl = Base & {
+	type: 'group';
+	fill?: string;
+	stroke?: string;
+	strokeWidth?: number;
+	radius?: Array< number | string >;
+	corner?: CornerShape;
+	// Whether it cuts what goes out of its box (it shows it by default).
+	clip?: boolean;
+	// How it places what is in it, as the core's Group variations: none is the free Group (each by its own place), or a row, a stack or a grid.
+	arrange?: 'row' | 'stack' | 'grid';
+	gap?: number;
+	padding?: number;
+	justify?: 'start' | 'center' | 'end' | 'between';
+	align?: 'start' | 'center' | 'end' | 'stretch';
+	columns?: number;
+	children: Element[];
+};
 export type EllipseEl = Base & { type: 'ellipse'; fill?: string; stroke?: string; strokeWidth?: number };
 export type PathEl = Base & { type: 'path'; d: string; vw: number; vh: number; fill?: string; stroke?: string; strokeWidth?: number };
 export type LineEl = Omit< Base, 'x' | 'y' | 'w' | 'h' > & {
@@ -452,7 +471,7 @@ export function create( type: Element[ 'type' ] | 'logo', design: Design, paint?
 		case 'rect':
 			return { id, type, name: 'Rectangle', x: cx - 60, y: cy - 40, w: 120, h: 80, fill: paint?.fill ?? '#000000', stroke: paint?.stroke ?? '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ] };
 		case 'group':
-			return { id, type, name: 'Group', x: cx - 100, y: cy - 60, w: 200, h: 120, fill: '', stroke: '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ], children: [] };
+			return { id, type, name: 'Group', x: cx - 140, y: cy - 70, w: 280, h: 140, fill: '', stroke: '', strokeWidth: 1, radius: [ 0, 0, 0, 0 ], children: [] };
 		case 'ellipse':
 			return { id, type, name: 'Ellipse', x: cx - 40, y: cy - 40, w: 80, h: 80, fill: paint?.fill ?? '#000000', stroke: paint?.stroke ?? '', strokeWidth: 1 };
 		case 'line':

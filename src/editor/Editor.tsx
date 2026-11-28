@@ -33,6 +33,7 @@ import {
 	type Mode,
 	type Run,
 	type TextEl,
+	type GroupEl,
 	type View, lockedRatio, isRequired, toStored, type SvgPath, type Paint, pageColor, baseBack, fromSide, toSide, type Side } from './model';
 import DesignPanel, { setSample } from './DesignPanel';
 import ElementToolbar from './ElementToolbar';
@@ -47,6 +48,7 @@ import SvgEditor from './SvgEditor';
 import type { Picked } from './media';
 import { BlockLayers, BlocksProvider, registerBlocks } from './blocks';
 import BlockCanvas from './BlockCanvas';
+import { bakeChildren, cloneEl, findEl, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
 import { cleanForSlug } from '@wordpress/url';
 import { fromMarkup, isMarkup, toMarkup } from '@camaleaun/draw';
 import { BLOCK_OPTIONS, fromFile, toFile } from './dialect';
@@ -173,7 +175,12 @@ export default function Editor() {
 	// Preview values: the design's own, where set (an empty one means not set), over the defaults.
 	const sample = useMemo( () => ( { ...config.sample, ...Object.fromEntries( Object.entries( design.sample || {} ).filter( ( [ , v ] ) => v !== '' ) ) } ), [ design.sample ] );
 	// Anchored elements resolved to x/y/w/h for drawing, hit testing and snapping.
-	const resolvedShown = useMemo( () => ( { ...shown, elements: shown.elements.map( ( e ) => resolve( e, shown.page ) ) } ), [ shown ] );
+	// The elements placed (what is in a group from its corner: `ox`, `oy` say where that is on the page).
+	const resolvedShown = useMemo( () => ( { ...shown, elements: resolveTree( shown.elements, shown.page ) as Element[] } ), [ shown ] );
+	// The group that has just been put in and has no layout chosen yet.
+	const [ choosing, setChoosing ] = useState< string | null >( null );
+	// What is selected when more than one is (the block editor's range): they can be put in a group.
+	const [ selectedMany, setSelectedMany ] = useState< string[] >( [] );
 	const [ selected, setSelected ] = useState< string | null >( null );
 	const [ mode, setMode ] = useState< Mode >( 'light' );
 	// One mode, like the block editor: click selects and drags, double-click edits text.
@@ -200,7 +207,7 @@ export default function Editor() {
 		}
 	};
 	const stopEditing = () => {
-		const original = editing ? design.elements.find( ( e ) => e.id === editing.id ) : null;
+		const original = editing ? findEl( design.elements, editing.id ) : null;
 		if ( editing && original && JSON.stringify( runsOf( original as TextEl ) ) !== JSON.stringify( editing.runs ) ) {
 			update( editing.id, { runs: editing.runs, text: undefined } as Partial< Element > );
 		}
@@ -380,62 +387,81 @@ export default function Editor() {
 		setSide( next );
 	};
 	const replaceDesign = ( next: Design ) => dispatch( { type: 'commit', design: next } );
-	const shift = ( e: Element, dx: number, dy: number ): Element => ( e.layout ? placed( e, box( moved( resolve( e, design.page ), dx, dy ) ), design.page ) : moved( e, dx, dy ) );
+	/** An element moved by dx, dy (an anchored one by its anchors, to the size of its group when it is in one). */
+	const shift = ( e: Element, dx: number, dy: number ): Element => {
+		const holder = parentOf( resolvedShown.elements, e.id );
+		const at = findEl( resolvedShown.elements, e.id ) as Element;
+		return e.layout ? placed( e, box( moved( at, dx, dy ) ), ( holder ? innerPage( holder ) : design.page ) as never ) : moved( e, dx, dy );
+	};
 	// The Fill and the Stroke last set on a rectangle or an ellipse: the next one starts with them (only while the editor is open).
 	const paintRef = useRef< Paint >( { fill: '#000000', stroke: '' } );
 	const update = ( id: string, patch: Partial< Element > ) => {
-		const changed = design.elements.find( ( el ) => el.id === id );
+		const changed = findEl( design.elements, id );
+		// A group that changes how it places what is in it (free, row, stack, grid): they keep the size they have, and start from the place they have.
+		if ( changed && isGroup( changed ) && 'arrange' in patch && ( patch as Partial< GroupEl > ).arrange !== changed.arrange ) {
+			const now = findEl( resolvedShown.elements, id ) as GroupEl | undefined;
+			if ( now && ( now.children || [] ).length ) {
+				patch = { ...patch, children: bakeChildren( now.children ) } as Partial< Element >;
+			}
+		}
 		if ( changed && ( changed.type === 'rect' || changed.type === 'ellipse' ) ) {
 			const { fill, stroke } = patch as Partial< Paint >;
 			paintRef.current = { fill: fill ?? paintRef.current.fill, stroke: stroke ?? paintRef.current.stroke };
 		}
-		commit( { ...design, elements: design.elements.map( ( el ) => ( el.id === id ? ( { ...el, ...patch } as Element ) : el ) ) } );
+		commit( { ...design, elements: mapEl( design.elements, id, ( el ) => ( { ...el, ...patch } as Element ) ) } );
 	};
-	const current = resolvedShown.elements.find( ( el ) => el.id === selected ) || null;
-	const currentStored = design.elements.find( ( el ) => el.id === selected ) || null;
+	const current = ( findEl( resolvedShown.elements, selected ) as Placed | undefined ) || null;
+	const currentStored = findEl( design.elements, selected ) || null;
+	// The group the selected element is in (resolved): in a row, a stack or a grid its place is not the element's to say.
+	const currentHolder = current ? parentOf( resolvedShown.elements, current.id ) : null;
 
 	const remove = ( id: string ) => {
-		const el = design.elements.find( ( e ) => e.id === id );
-		if ( ! el || isRequired( el, design.elements ) ) {
+		const el = findEl( design.elements, id );
+		if ( ! el || isRequired( el, flatten( design.elements ) ) ) {
 			return;
 		}
-		commit( { ...design, elements: design.elements.filter( ( e ) => e.id !== id ) } );
+		commit( { ...design, elements: removeEl( design.elements, id ) } );
 		setSelected( null );
 	};
 	const duplicate = ( id: string ) => {
-		const el = design.elements.find( ( e ) => e.id === id );
-		if ( ! el ) {
+		const el = findEl( design.elements, id );
+		if ( ! el || flatten( design.elements ).length + flatten( [ el ] ).length > MAX_ELEMENTS ) {
 			return;
 		}
-		const copy = { ...shift( el, 10, 10 ), id: newId( el.type ), slot: undefined, name: `${ el.name || el.type } copy` } as Element;
-		commit( { ...design, elements: [ ...design.elements, copy ] } );
+		const copy = shift( cloneEl( el, `${ el.name || el.type } copy` ), 10, 10 );
+		commit( { ...design, elements: insertAfter( design.elements, id, copy ) } );
 		setSelected( copy.id );
 	};
-	const reorder = ( id: string, to: 'up' | 'down' | 'top' | 'bottom' ) => {
-		const list = [ ...design.elements ];
-		const i = list.findIndex( ( e ) => e.id === id );
-		const [ el ] = list.splice( i, 1 );
-		const j = to === 'top' ? list.length : to === 'bottom' ? 0 : to === 'up' ? Math.min( list.length, i + 1 ) : Math.max( 0, i - 1 );
-		list.splice( j, 0, el );
-		commit( { ...design, elements: list } );
-	};
-	/** Restacks an element just in front of or behind another (dragging in Layers). */
-	const move = ( id: string, target: string, place: 'front' | 'behind' ) => {
-		const list = [ ...design.elements ];
-		const [ el ] = list.splice( list.findIndex( ( e ) => e.id === id ), 1 );
-		const t = list.findIndex( ( e ) => e.id === target );
-		if ( ! el || t < 0 ) {
-			return;
-		}
-		list.splice( place === 'front' ? t + 1 : t, 0, el );
-		commit( { ...design, elements: list } );
-	};
+	const reorder = ( id: string, to: 'up' | 'down' | 'top' | 'bottom' ) => commit( { ...design, elements: reorderEl( design.elements, id, to ) } );
 	const insert = ( type: Element[ 'type' ] | 'logo' ) => {
 		const el = create( type, design, paintRef.current );
 		commit( { ...design, elements: [ ...design.elements, el ] } );
 		setSelected( el.id );
+		// A group asks which layout it is (Group, Row, Stack, Grid) before anything is put in it.
+		setChoosing( el.type === 'group' ? el.id : null );
 		setSidebar( 'element' );
 		setPanel( null );
+	};
+	/** The selected elements (one or more of one list) put in a group, as big as they are together and in their place; the group asks for its layout. */
+	const group = ( ids: string[] ) => {
+		const made = create( 'group', design ) as GroupEl;
+		const next = groupEls( design.elements, design.page, ids, made );
+		if ( ! next ) {
+			return;
+		}
+		commit( { ...design, elements: next } );
+		setSelected( made.id );
+		setChoosing( made.id );
+		setSidebar( 'element' );
+	};
+	/** A group undone: what is in it goes to its place in the list, each where it is on the page. */
+	const ungroup = ( id: string ) => {
+		const next = ungroupEl( design.elements, design.page, id );
+		if ( next === design.elements ) {
+			return;
+		}
+		commit( { ...design, elements: next } );
+		setSelected( null );
 	};
 
 	const save = async () => {
@@ -477,7 +503,7 @@ export default function Editor() {
 	};
 	/** An image picked for an element: keeps the element's width and, unless it covers, the image's ratio. */
 	const pickImage = ( id: string, picked: Picked ) => {
-		const el = design.elements.find( ( e ) => e.id === id );
+		const el = findEl( design.elements, id );
 		if ( ! el || el.type !== 'image' ) {
 			return;
 		}
@@ -486,9 +512,12 @@ export default function Editor() {
 			const b = box( resolve( el, design.page ) );
 			next = placed( next, { ...b, h: Math.round( ( b.w * picked.height ) / picked.width * 100 ) / 100 }, design.page );
 		}
-		commit( { ...design, elements: design.elements.map( ( e ) => ( e.id === id ? next : e ) ) } );
+		commit( { ...design, elements: mapEl( design.elements, id, () => next ) } );
 	};
-	const setBox = ( id: string, b: Box ) => commit( { ...design, elements: design.elements.map( ( e ) => ( e.id === id ? placed( e, b, design.page ) : e ) ) } );
+	const setBox = ( id: string, b: Box ) => {
+		const holder = parentOf( resolvedShown.elements, id );
+		commit( { ...design, elements: mapEl( design.elements, id, ( e ) => placed( e, b, ( holder ? innerPage( holder ) : design.page ) as never ) ) } );
+	};
 
 	// Keyboard: arrows nudge, Delete removes, Cmd/Ctrl+Z/Shift+Z/D/S.
 	useEffect( () => {
@@ -531,6 +560,16 @@ export default function Editor() {
 			} else if ( mod && event.key.toLowerCase() === 's' ) {
 				event.preventDefault();
 				save();
+			} else if ( mod && event.key.toLowerCase() === 'g' && ( selected || selectedMany.length ) ) {
+				event.preventDefault();
+				const el = selected ? findEl( design.elements, selected ) : null;
+				if ( event.shiftKey ) {
+					if ( el && isGroup( el ) ) {
+						ungroup( el.id );
+					}
+				} else {
+					group( selectedMany.length > 1 ? selectedMany : [ selected as string ] );
+				}
 			} else if ( mod && event.key.toLowerCase() === 'd' && selected ) {
 				event.preventDefault();
 				duplicate( selected );
@@ -538,7 +577,7 @@ export default function Editor() {
 				event.preventDefault();
 				remove( selected );
 			} else if ( event.key === 'Enter' && selected && ! editing ) {
-				const el = design.elements.find( ( e ) => e.id === selected );
+				const el = findEl( design.elements, selected );
 				if ( el && el.type === 'text' ) {
 					event.preventDefault();
 					startEditing( el );
@@ -549,11 +588,11 @@ export default function Editor() {
 			} else if ( selected && event.key.startsWith( 'Arrow' ) ) {
 				event.preventDefault();
 				const step = event.shiftKey ? 10 : 1;
-				const el = design.elements.find( ( e ) => e.id === selected );
-				if ( el && ! el.locked ) {
+				const el = findEl( design.elements, selected );
+				if ( el && ! el.locked && ! ( currentHolder && currentHolder.arrange ) ) {
 					const dx = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0;
 					const dy = event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0;
-					commit( { ...design, elements: design.elements.map( ( e ) => ( e.id === selected ? shift( e, dx, dy ) : e ) ) } );
+					commit( { ...design, elements: mapEl( design.elements, selected, ( e ) => shift( e, dx, dy ) ) } );
 				}
 			}
 		};
@@ -563,7 +602,7 @@ export default function Editor() {
 
 	const { w, h, safe, bleed } = shown.page;
 	const bg = pageColor( shown, mode );
-	const textEls = useMemo( () => shown.elements.filter( ( el ) => el.type === 'text' ), [ shown ] );
+	const textEls = useMemo( () => flatten( shown.elements ).filter( ( el ) => el.type === 'text' ), [ shown ] );
 	const statusLabel = {
 		loading: __( 'Loading…', 'events-certificates' ),
 		saved: __( 'Saved', 'events-certificates' ),
@@ -598,7 +637,7 @@ export default function Editor() {
 	const sidebarTab = current ? sidebar : sidebar === 'element' ? 'design' : sidebar;
 
 	// The command palette (the bar at the top opens it): the editor's actions, the ones that do not apply left out ('root': listed as suggestions).
-	const selectedEl = selected ? design.elements.find( ( e ) => e.id === selected ) : undefined;
+	const selectedEl = selected ? findEl( design.elements, selected ) : undefined;
 	const palette = ( name: string, label: string, icon: JSX.Element, run: () => void, disabled = false ) => ( { name: `evcert/editor-${ name }`, label, icon, category: 'command' as const, context: 'root', disabled, callback: ( { close }: { close: () => void } ) => { close(); run(); } } );
 	useCommand( palette( 'save', __( 'Save', 'events-certificates' ), check, () => { save(); }, status !== 'dirty' && status !== 'error' ) );
 	useCommand( palette( 'undo', __( 'Undo', 'events-certificates' ), undoIcon, () => dispatch( { type: 'undo' } ), ! history.past.length ) );
@@ -611,7 +650,7 @@ export default function Editor() {
 	useCommand( palette( 'mode', mode === 'light' ? __( 'Preview in dark mode', 'events-certificates' ) : __( 'Preview in light mode', 'events-certificates' ), seen, () => setMode( mode === 'light' ? 'dark' : 'light' ), ! darkEnabled() ) );
 	fitLabels().forEach( ( [ mode, label ] ) => useCommand( palette( `fit-${ mode }`, label, seen, () => fit( mode ) ) ) );
 	useCommand( palette( 'duplicate', __( 'Duplicate the selected element', 'events-certificates' ), copy, () => selected && duplicate( selected ), ! selectedEl ) );
-	useCommand( palette( 'delete', __( 'Delete the selected element', 'events-certificates' ), trash, () => selected && remove( selected ), ! selectedEl || isRequired( selectedEl, design.elements ) ) );
+	useCommand( palette( 'delete', __( 'Delete the selected element', 'events-certificates' ), trash, () => selected && remove( selected ), ! selectedEl || isRequired( selectedEl, flatten( design.elements ) ) ) );
 	useCommand( palette( 'export', __( 'Export', 'events-certificates' ), download, () => exportBlocks() ) );
 	useCommand( palette( 'import', __( 'Import…', 'events-certificates' ), upload, () => setImporting( true ) ) );
 	useCommand( palette( 'clear', __( 'Clear the design', 'events-certificates' ), trash, () => replaceDesign( blankDesign() ) ) );
@@ -690,6 +729,8 @@ export default function Editor() {
 
 			<BlocksProvider
 				elements={ design.elements }
+				page={ design.page }
+				onMany={ setSelectedMany }
 				selected={ selected }
 				onSelect={ ( id ) => {
 					setSelected( id );
@@ -771,12 +812,18 @@ export default function Editor() {
 							tab={ tab }
 							editingId={ editing ? editing.id : null }
 							onEdit={ startEditing }
+							choosing={ choosing }
+							onChoose={ ( id, arrange ) => {
+								update( id, { arrange } as Partial< Element > );
+								setChoosing( null );
+							} }
+							onGroup={ group }
 							overlay={
 								editing
-									? resolvedShown.elements
+									? ( flatten( resolvedShown.elements ) as Placed[] )
 											.filter( ( el ) => el.id === editing.id && el.type === 'text' )
 											.map( ( el ) => (
-												<foreignObject key={ el.id } x={ el.x } y={ el.y } width={ el.w } height={ Math.max( ( el as TextEl ).h, ( el as TextEl ).size * ( ( el as TextEl ).lh ?? 1.2 ) * 6 ) } style={ { overflow: 'visible' } } onPointerDown={ ( event ) => event.stopPropagation() }>
+												<foreignObject key={ el.id } x={ ( el.x || 0 ) + ( el.ox || 0 ) } y={ ( el.y || 0 ) + ( el.oy || 0 ) } width={ el.w } height={ Math.max( ( el as TextEl ).h, ( el as TextEl ).size * ( ( el as TextEl ).lh ?? 1.2 ) * 6 ) } style={ { overflow: 'visible' } } onPointerDown={ ( event ) => event.stopPropagation() }>
 													<FieldText
 														inline
 														label={ stockName( el.name || '' ) || __( 'Text', 'events-certificates' ) }
@@ -837,7 +884,7 @@ export default function Editor() {
 							<Button size="compact" icon={ closeSmall } className="evcert-sidebar-close" onClick={ () => setSidebar( null ) } label={ __( 'Close settings', 'events-certificates' ) } shortcut={ displayShortcut.primaryShift( ',' ) } aria-controls="evcert-settings" />
 						</div>
 						{ sidebarTab === 'element' && current && (
-							<Inspector el={ current } stored={ currentStored } design={ design } mode={ mode } tab={ tab } locale={ LOCALE } sample={ sample } onChange={ ( patch ) => update( current.id, patch ) } onBox={ ( b ) => setBox( current.id, b ) } onImage={ ( picked ) => pickImage( current.id, picked ) } />
+							<Inspector el={ current } stored={ currentStored } design={ design } mode={ mode } tab={ tab } locale={ LOCALE } sample={ sample } onChange={ ( patch ) => update( current.id, patch ) } onBox={ ( b ) => setBox( current.id, b ) } onImage={ ( picked ) => pickImage( current.id, picked ) } holder={ currentHolder } />
 						) }
 						{ sidebarTab === 'design' && <DesignPanel design={ stored } mode={ mode } title={ title } status={ statusLabel } sample={ sample } defaults={ config.sample } onTitle={ setTitle } roles={ roles } roleLabels={ config.roles } isDefault={ config.isDefault } onRoles={ setRoles } onChange={ replaceDesign } onMode={ setMode } /> }
 					</aside>
@@ -855,11 +902,13 @@ export default function Editor() {
 					onInsertField={ ( field ) => textCommands.current?.insertField( field ) }
 					onToggleEdit={ () => ( editing ? stopEditing() : current && startEditing( current ) ) }
 					el={ current }
-					required={ isRequired( current, design.elements ) }
+					required={ isRequired( current, flatten( design.elements ) ) }
 					onSelectParent={ () => setSidebar( 'element' ) }
 					onOrder={ ( to ) => reorder( current.id, to ) }
 					onToggle={ ( key ) => update( current.id, { [ key ]: ! current[ key ] } as Partial< Element > ) }
 					onDuplicate={ () => duplicate( current.id ) }
+					onGroup={ canHold( current ) ? () => group( [ current.id ] ) : undefined }
+					onUngroup={ isGroup( current ) ? () => ungroup( current.id ) : undefined }
 					onRemove={ () => remove( current.id ) }
 					onImage={ ( picked ) => pickImage( current.id, picked ) }
 					onEditDrawing={ () => setDrawing( current.id ) }
@@ -893,7 +942,7 @@ export default function Editor() {
 			</footer>
 
 			{ drawing && ( () => {
-				const el = design.elements.find( ( e ) => e.id === drawing );
+				const el = findEl( design.elements, drawing );
 				return el && el.type === 'svg' ? <SvgEditor el={ resolve( el, design.page ) as typeof el } design={ design } mode={ mode } onApply={ ( patch ) => update( el.id, patch as Partial< Element > ) } onClose={ () => setDrawing( null ) } /> : null;
 			} )() }
 			{ restoring && (

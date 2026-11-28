@@ -5,6 +5,7 @@
  * (title, square, image, code, grid) stood for an element, and these say what the element is.
  */
 import { Circle, Path, Rect, SVG } from '@wordpress/components';
+import { group as groupIcon } from '@wordpress/icons';
 import type { Element } from './model';
 
 const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
@@ -93,6 +94,8 @@ export function elementIcon( type: Element[ 'type' ] | 'logo', slot?: string ) {
 			path: shape,
 			image: picture,
 			svg: drawing,
+			// The icon of the core's Group block.
+			group: groupIcon,
 			signature,
 			qr,
 			verification,

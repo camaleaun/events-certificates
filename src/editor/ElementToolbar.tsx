@@ -5,7 +5,7 @@
  */
 import { DropdownMenu, MenuGroup, MenuItem, Popover, Toolbar, ToolbarButton, ToolbarDropdownMenu, ToolbarGroup, ToolbarItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { chevronDown, chevronUp, copy, formatBold, formatItalic, lock, moreVertical, pencil, plus, trash, unlock, unseen } from '@wordpress/icons';
+import { chevronDown, chevronUp, copy, formatBold, formatItalic, group as groupIcon, lock, moreVertical, pencil, plus, trash, ungroup as ungroupIcon, unlock, unseen } from '@wordpress/icons';
 import { fields } from './FieldText';
 import { ReplaceImage } from './ImageSource';
 import type { Picked } from './media';
@@ -21,6 +21,9 @@ type Props = {
 	onOrder: ( to: 'up' | 'down' | 'top' | 'bottom' ) => void;
 	onToggle: ( key: 'locked' | 'hidden' ) => void;
 	onDuplicate: () => void;
+	/** Puts the element in a group (as the core's toolbar does with a block), or takes a group apart. */
+	onGroup?: () => void;
+	onUngroup?: () => void;
 	onRemove: () => void;
 	editing?: boolean;
 	marks?: { b: boolean; i: boolean };
@@ -32,7 +35,7 @@ type Props = {
 	onEditDrawing?: () => void;
 };
 
-export default function ElementToolbar( { anchor, el, required, onSelectParent, onOrder, onToggle, onDuplicate, onRemove, editing, marks, onBold, onItalic, onInsertField, onToggleEdit, onImage, onEditDrawing }: Props ) {
+export default function ElementToolbar( { anchor, el, required, onSelectParent, onOrder, onToggle, onDuplicate, onGroup, onUngroup, onRemove, editing, marks, onBold, onItalic, onInsertField, onToggleEdit, onImage, onEditDrawing }: Props ) {
 	const info = fields();
 	if ( ! anchor ) {
 		return null;
@@ -93,6 +96,15 @@ export default function ElementToolbar( { anchor, el, required, onSelectParent, 
 					<ToolbarButton icon={ chevronUp } label={ __( 'Bring forward', 'events-certificates' ) } onClick={ () => onOrder( 'up' ) } />
 					<ToolbarButton icon={ chevronDown } label={ __( 'Send backward', 'events-certificates' ) } onClick={ () => onOrder( 'down' ) } />
 				</ToolbarGroup>
+				) }
+				{ ! editing && ( onGroup || onUngroup ) && (
+					<ToolbarGroup>
+						{ el.type === 'group' && onUngroup ? (
+							<ToolbarButton icon={ ungroupIcon } label={ __( 'Ungroup', 'events-certificates' ) } shortcut="⇧⌘G" onClick={ onUngroup } />
+						) : (
+							onGroup && <ToolbarButton icon={ groupIcon } label={ __( 'Group', 'events-certificates' ) } shortcut="⌘G" onClick={ onGroup } />
+						) }
+					</ToolbarGroup>
 				) }
 				<ToolbarGroup>
 					<ToolbarButton icon={ el.locked ? lock : unlock } isPressed={ !! el.locked } label={ el.locked ? __( 'Unlock', 'events-certificates' ) : __( 'Lock', 'events-certificates' ) } onClick={ () => onToggle( 'locked' ) } />

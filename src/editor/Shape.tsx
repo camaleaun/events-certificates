@@ -57,6 +57,8 @@ export function Shape( { el, design, mode, sample }: { el: Element; design: Desi
 	const opacity = el.opacity ?? 1;
 	switch ( el.type ) {
 		case 'rect':
+		case 'group':
+			// A group is drawn as its own rectangle (what is in it is drawn by the canvas, from its corner).
 			return (
 				<>
 					{ unfilled( design, el.fill, mode ) && <path d={ rectPath( el.x, el.y, el.w, el.h, el.radius, el.corner ) } fill="none" stroke="transparent" strokeWidth={ Math.max( el.strokeWidth || 0, EDGE ) } pointerEvents="stroke" /> }

@@ -3,7 +3,7 @@
  * elements, so the editor, the layers and the tests do the same; nothing here knows the page but through the box it is given.
  */
 import { placeChildren } from '@camaleaun/draw';
-import { box, moved, placed, resolve, type Box, type Element, type GroupEl } from './model';
+import { box, moved, newId, placed, resolve, type Box, type Element, type GroupEl } from './model';
 
 /** An element resolved to x, y, w, h, with the place of its parent's corner on the page (`ox`, `oy`: 0 for what is not in a group). */
 export type Placed = Element & { ox?: number; oy?: number };
@@ -214,3 +214,55 @@ export function ungroupEl( list: Element[], page: Page, id: string ): Element[] 
 	}
 	return removeEl( tree, id );
 }
+
+/** The list with an element put just after another, in the list the other is in (at the end of the page's list when the other is not found). */
+export function insertAfter( list: Element[], id: string, el: Element ): Element[] {
+	const at = list.findIndex( ( e ) => e.id === id );
+	if ( at >= 0 ) {
+		return [ ...list.slice( 0, at + 1 ), el, ...list.slice( at + 1 ) ];
+	}
+	let found = false;
+	const out = list.map( ( e ) => {
+		if ( found || ! isGroup( e ) ) {
+			return e;
+		}
+		const children = insertAfter( e.children || [], id, el );
+		if ( children.length !== ( e.children || [] ).length ) {
+			found = true;
+			return { ...e, children };
+		}
+		return e;
+	} );
+	return found ? out : [ ...list, el ];
+}
+
+/** An element as a copy: new ids for it and for all that is in it, and no slot (a slot is only of one element). */
+export function cloneEl( el: Element, name?: string ): Element {
+	const copy = { ...el, id: newId( el.type ), slot: undefined, ...( name ? { name } : {} ) } as Element;
+	return isGroup( copy ) ? ( { ...copy, children: ( copy.children || [] ).map( ( child ) => cloneEl( child, child.name ) ) } as Element ) : copy;
+}
+
+/** An element sent up or down one place, or to the front or the back, among the elements of its own list. */
+export function reorderEl( list: Element[], id: string, to: 'up' | 'down' | 'top' | 'bottom' ): Element[] {
+	const i = list.findIndex( ( e ) => e.id === id );
+	if ( i >= 0 ) {
+		const out = [ ...list ];
+		const [ el ] = out.splice( i, 1 );
+		const j = to === 'top' ? out.length : to === 'bottom' ? 0 : to === 'up' ? Math.min( out.length, i + 1 ) : Math.max( 0, i - 1 );
+		out.splice( j, 0, el );
+		return out;
+	}
+	return list.map( ( e ) => ( isGroup( e ) ? { ...e, children: reorderEl( e.children || [], id, to ) } : e ) );
+}
+
+/**
+ * What is in a group with the box it has now written as numbers (and no anchors): the group may change how it places them (free, row, stack, grid) and
+ * each keeps the size it had, and the place it had to start from.
+ */
+export function bakeChildren( resolvedChildren: Element[] ): Element[] {
+	return resolvedChildren.map( ( el ) => {
+		const { ox: _ox, oy: _oy, ...rest } = el as Placed;
+		return rest.type === 'line' ? ( rest as Element ) : ( { ...rest, x: rest.x, y: rest.y, w: rest.w, h: rest.h, layout: undefined } as Element );
+	} );
+}
+
