@@ -125,7 +125,7 @@ The certificate generator comes from the Meetup certificate generator by Pamela 
 
 Ideas for this version also came from [gugaalves](https://github.com/gugaalves).
 
-The look of the certificates the plugin starts with was inspired by the [WordPress Campus Connect assets (Community)](https://www.figma.com/design/hBeUoc1JJIj9Ue0tLweu83/WordPress-Campus-Connect-Assets--Community-?node-id=1-5170&p=f&t=bHclvZZWcZCE53yz-0), a design for the community on Figma.
+The look of the certificates the plugin starts with, and the idea of composing a certificate as a drawing (see [camaleaun/draw](https://github.com/camaleaun/draw)), were inspired by the [WordPress Campus Connect assets (Community)](https://www.figma.com/design/hBeUoc1JJIj9Ue0tLweu83/WordPress-Campus-Connect-Assets--Community-?node-id=1-5170&p=f&t=bHclvZZWcZCE53yz-0), a design for the community on Figma.
 
 The plugin also learns from earlier certificate projects of the WordPress community in Brazil:
 

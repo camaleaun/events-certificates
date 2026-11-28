@@ -116,6 +116,19 @@ class TemplatesTest extends Test_Case {
 	}
 
 	/**
+	 * Saving a template keeps the unit its margins were written in: a safe margin of 24pt is not turned into 8.47mm.
+	 */
+	public function test_saving_a_template_keeps_the_unit_of_its_margins() {
+		foreach ( array( '24pt', '9.5mm', '0.4in' ) as $safe ) {
+			$markup = '<!-- wp:events-certificates/certificate {"page":{"width":"297mm","height":"210mm","safe":"' . $safe . '","bleed":"' . $safe . '"}} /-->';
+			$out    = Designs\content( Designs\decode( $markup ) );
+			$this->assertStringContainsString( '"safe":"' . $safe . '"', $out, "safe $safe" );
+			$this->assertStringContainsString( '"bleed":"' . $safe . '"', $out, "bleed $safe" );
+			$this->assertStringNotContainsString( 'safeUnit', $out );
+		}
+	}
+
+	/**
 	 * A blank design keeps the Base design's page and has nothing on it: no colors and no theme (nothing is fixed).
 	 */
 	public function test_a_blank_design_has_the_page_only() {
