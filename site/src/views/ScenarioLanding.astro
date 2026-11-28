@@ -20,6 +20,11 @@ const strings = uiOf( locale );
 const loc = { code: locale, lang: '', og: '', label: '' };
 const { hero } = page.scenario;
 const first = page.highlight.find( ( item ) => item.feature.screenshot )?.id;
+// The side of each picture: they alternate, and a block with none does not count.
+const sides = page.highlight.reduce< Record< string, string > >( ( out, item ) => {
+	const shown = Object.values( out ).filter( ( side ) => side !== 'text-only' ).length;
+	return { ...out, [ item.id ]: item.feature.screenshot ? ( shown % 2 ? 'flip' : '' ) : 'text-only' };
+}, {} );
 ---
 <Base title={ page.scenario.name } description={ hero.lead } markdown={ locale === 'en' ? href( `${ id }/index.md` ) : undefined }>
 	<div class="wrap">
@@ -46,7 +51,7 @@ const first = page.highlight.find( ( item ) => item.feature.screenshot )?.id;
 		</section>
 		<section aria-label="What it does" class="highlights">
 			{ page.highlight.map( ( { id: key, feature } ) => (
-				<article class="highlight">
+				<article class={ [ 'highlight', sides[ key ] ].join( ' ' ) }>
 					<div>
 						<h2>{ feature.title }</h2>
 						<p>{ feature.text }</p>

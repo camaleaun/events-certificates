@@ -325,6 +325,11 @@ pre {
 	font-size: 0.9rem;
 }
 
+/* The landings end with air before the footer (the docs pages have their own). */
+main > .wrap:not(.docs):not(.docs-page) {
+	padding-bottom: 5rem;
+}
+
 footer.bottom {
 	padding: 2rem 0;
 	border-top: 1px solid var(--line);
@@ -387,6 +392,17 @@ footer.bottom {
 @media (min-width: 960px) {
 	.highlight {
 		grid-template-columns: 1fr 1fr;
+	}
+}
+
+/* Text then picture, picture then text: the pictures alternate sides on wide screens; a block with no picture is all text. */
+@media (min-width: 960px) {
+	.highlight.flip > :first-child {
+		order: 2;
+	}
+
+	.highlight.text-only {
+		grid-template-columns: 1fr;
 	}
 }
 

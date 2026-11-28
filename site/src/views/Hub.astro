@@ -50,8 +50,8 @@ const rows = matrix( locale, scenarioIds );
 		</section>
 		<section aria-labelledby="common" class="highlights">
 			<h2 id="common">{ hub.common.title }</h2>
-			{ hub.order.core.map( ( key ) => (
-				<article class="highlight">
+			{ hub.order.core.map( ( key, index ) => (
+				<article class={ [ 'highlight', featureOf( key, locale ).screenshot ? ( index % 2 ? 'flip' : '' ) : 'text-only' ].join( ' ' ) }>
 					<div>
 						<h3>{ featureOf( key, locale ).title }</h3>
 						<p>{ featureOf( key, locale ).text }</p>
