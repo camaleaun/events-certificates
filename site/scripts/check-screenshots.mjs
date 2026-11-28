@@ -26,6 +26,12 @@ for ( const file of walk( docs ).filter( ( f ) => f.endsWith( '.md' ) ) ) {
 for ( const match of readFileSync( resolve( here, '../src/data/catalog.ts' ), 'utf8' ).matchAll( /screenshot: '([a-z0-9-]+)'/g ) ) {
 	( shown[ match[ 1 ] ] ??= new Set() ).add( 'catalog' );
 }
+// A case's own pictures of a feature (src/data/scenarios.ts `shots`).
+for ( const block of readFileSync( resolve( here, '../src/data/scenarios.ts' ), 'utf8' ).matchAll( /shots: \{([^}]*)\}/g ) ) {
+	for ( const match of block[ 1 ].matchAll( /: '([a-z0-9-]+)'/g ) ) {
+		( shown[ match[ 1 ] ] ??= new Set() ).add( 'catalog' );
+	}
+}
 
 const problems = [];
 for ( const shot of screenshots ) {

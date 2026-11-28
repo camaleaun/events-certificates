@@ -9,6 +9,8 @@ A community runs its meetups with GatherPress. People RSVP, the host checks them
 
 ## The steps
 
+
+![The participants of a GatherPress event: who RSVP’d, and who was checked in is marked attended.](../../../assets/screenshots/gp-participants.webp)
 1. Run the event in GatherPress: RSVP and **check in** on the day.
 2. In the **Events** list use the **Certificates** action of the event's row: those who RSVP'd as attending arrive as registered, those who checked in as attended, and the organizers with their role.
 3. Open **Participants** and use **Issue certificates**.

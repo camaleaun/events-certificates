@@ -70,6 +70,7 @@ export const features: Record< string, Feature > = {
 		text: 'Who RSVP’d "attending" arrives as registered, who checked in as attended, and the organizers with their role. Sync again whenever you like; it never demotes anyone.',
 		where: only( 'gatherpress', 'both' ),
 		prominence: { default: 'highlight' },
+		screenshot: 'gp-events',
 		docs: 'scenarios/gatherpress',
 		claimNote: 'Tested with GatherPress 0.37.0.',
 	},

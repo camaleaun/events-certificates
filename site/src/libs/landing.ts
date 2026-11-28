@@ -18,7 +18,12 @@ export function landingFor( id: ScenarioId, locale = 'en' ) {
 	const pick = ( ids: string[], wanted: 'highlight' | 'secondary' ): Item[] =>
 		ids
 			.filter( ( key ) => features[ key ] && available( features[ key ], id ) && prominenceOf( features[ key ], locale ) === wanted )
-			.map( ( key ) => ( { id: key, feature: featureOf( key, locale ) } ) );
+			.map( ( key ) => {
+				const feature = featureOf( key, locale );
+				// This case's own picture of the feature, when it has one ('' = none).
+				const shot = scenario.shots?.[ key ] ?? feature.screenshot;
+				return { id: key, feature: { ...feature, screenshot: shot || undefined } };
+			} );
 	// A feature the language makes loud but the scenario lists as secondary is promoted; one it hides is dropped.
 	const every = [ ...scenario.order.highlight, ...scenario.order.secondary ];
 	return {

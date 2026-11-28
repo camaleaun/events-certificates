@@ -26,7 +26,7 @@ if ( is_array( $evcert_done ) ) {
 	echo 'EVCERT_DEMO ' . wp_json_encode( $evcert_done ) . "\n";
 	return;
 }
-if ( 'standalone' !== $evcert_scenario ) {
+if ( ! in_array( $evcert_scenario, array( 'standalone', 'gatherpress' ), true ) ) {
 	WP_CLI::error( "The demo data of '$evcert_scenario' is not written yet." );
 }
 
@@ -61,6 +61,63 @@ Designs\restore_starters( true );
 \EventsCertificate\QuickGenerator\ensure_page();
 \EventsCertificate\VerifyPage\ensure_page();
 \EventsCertificate\Mine\ensure_page();
+
+// GatherPress: the event is GatherPress's. People said yes (RSVP "attending") and some of them were checked in at the door; the plugin reads
+// that, as its "Certificates" action of the event's row does, and the people who came get their certificates.
+if ( 'gatherpress' === $evcert_scenario ) {
+	$gp = (int) wp_insert_post(
+		array(
+			'post_type'   => 'gatherpress_event',
+			'post_status' => 'publish',
+			'post_title'  => $br ? 'Blocos para iniciantes' : 'A Case for Community: Open Source Events with GatherPress',
+		)
+	);
+	( new \GatherPress\Core\Event\Event( $gp ) )->save_datetimes(
+		array(
+			'datetime_start' => '2026-10-27 18:00:00',
+			'datetime_end'   => '2026-10-27 20:00:00',
+			'timezone'       => $br ? 'America/Sao_Paulo' : 'America/New_York',
+		)
+	);
+	// GatherPress keeps an RSVP as a comment of its own type, with the status and the check-in as terms.
+	$rsvps = $br
+		? array( 'Ana Exemplo' => true, 'Bruno Amostra' => true, 'Carla Demonstração' => false, 'Diego Teste' => false )
+		: array( 'Emily Johnson' => true, 'John Smith' => true, 'Priya Patel' => false, 'Marcus Lee' => false );
+	$n     = 0;
+	foreach ( $rsvps as $name => $checked_in ) {
+		++$n;
+		$comment = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $gp,
+				'comment_type'         => 'gatherpress_rsvp',
+				'comment_approved'     => 1,
+				'comment_author'       => $name,
+				'comment_author_email' => 'person' . $n . '@example.test',
+			)
+		);
+		wp_set_object_terms( $comment, 'attending', '_gatherpress_rsvp_status' );
+		if ( $checked_in ) {
+			wp_set_object_terms( $comment, 'checked-in', '_gatherpress_rsvp_flag' );
+		}
+	}
+	$imported = \EventsCertificate\Compat\GatherPress\import( $gp );
+	$event    = (int) $imported['event'];
+	foreach ( People\query( $event )['rows'] as $person ) {
+		if ( 'attended' === $person['status'] ) {
+			People\issue( $person, (string) array_key_first( $person['roles'] ) );
+		}
+	}
+	$ids = array(
+		'scenario' => $evcert_scenario,
+		'locale'   => $evcert_locale,
+		'gp'       => $gp,
+		'event'    => $event,
+		'design'   => (int) Designs\site_design_id(),
+	);
+	update_option( 'evcert_demo', $ids, false );
+	echo 'EVCERT_DEMO ' . wp_json_encode( $ids ) . "\n";
+	return;
+}
 
 $names = $br
 	? array( 'Ana Exemplo', 'Bruno Amostra', 'Carla Demonstração', 'Diego Teste', 'Elisa Ficção', 'Fábio Modelo', 'Gabi Maquete' )

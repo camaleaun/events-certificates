@@ -13,6 +13,8 @@ export interface Scenario {
 	order: { pains: string[]; steps: string[]; highlight: string[]; secondary: string[]; limits: string[] };
 	/** Where it is not like the others, said plainly. */
 	limits: Record< string, string >;
+	/** A picture of this case in place of the feature's own (a shot of the Standalone menus would mislead here); '' shows none. */
+	shots?: Record< string, string >;
 	docs: string;
 }
 
@@ -75,6 +77,7 @@ export const scenarios: Record< ScenarioId, Scenario > = {
 			limits: [ 'events', 'generator', 'lists', 'email' ],
 		},
 		limits: { events: 'Events are GatherPress’s: this plugin keeps no events of its own here.', generator: 'No Generator screen: you issue from Participants.', lists: 'Exporting and importing lists is off; one template can still be exported.', email: 'It does not e-mail certificates.' },
+		shots: { 'meetup-import': 'gp-participants', authentication: 'gp-certificates', 'gatherpress-sync': 'gp-events', 'template-editor': 'editor' },
 		docs: 'scenarios/gatherpress',
 	},
 	wordcamp: {

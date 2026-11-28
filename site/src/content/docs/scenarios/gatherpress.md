@@ -7,10 +7,14 @@ With **GatherPress** active, your events are GatherPress events. The plugin read
 
 ## 1. Set up
 
+
+![The settings are a Certificates tab of GatherPress’s Settings.](../../../assets/screenshots/gp-settings.webp)
 The settings are a **Certificates** tab of **GatherPress › Settings** (`Events › Settings`). It is the same screen as in Standalone, with the same tabs: [Settings](../../guides/settings/).
 
 ## 2. Bring the people
 
+
+![GatherPress events: the Certificates action of an event brings its RSVPs and check-ins.](../../../assets/screenshots/gp-events.webp)
 Run your event in GatherPress: people RSVP, and you **check them in** on the day. Then, in the **Events** list, use the **Certificates** action of the event's row:
 
 - people whose RSVP is **attending** arrive as **registered**;
@@ -25,6 +29,8 @@ The **Templates** button on the **Certificates** screen opens the list and the e
 
 ## 4. Issue
 
+
+![The Certificates screen sits in the Events menu of GatherPress.](../../../assets/screenshots/gp-certificates.webp)
 In **Participants**, use **Issue certificates** (or **Issue the missing certificates** later). Each certificate has its own page and PDF, and people can ask for theirs on **Get my certificate** with the e-mail they registered.
 
 ## What is different here

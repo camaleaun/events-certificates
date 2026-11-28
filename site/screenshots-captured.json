@@ -12,7 +12,7 @@
 		"at": "2026-11-28"
 	},
 	"editor@en": {
-		"commit": "830981fe89b800678a279e16f5befefd9543d712",
+		"commit": "af3c593cd2000a329d46db04ed0a187f0a1f2c2a",
 		"at": "2026-11-28"
 	},
 	"editor-selection@en": {
@@ -37,6 +37,22 @@
 	},
 	"events@en": {
 		"commit": "830981fe89b800678a279e16f5befefd9543d712",
+		"at": "2026-11-28"
+	},
+	"gp-events@en": {
+		"commit": "af3c593cd2000a329d46db04ed0a187f0a1f2c2a",
+		"at": "2026-11-28"
+	},
+	"gp-participants@en": {
+		"commit": "af3c593cd2000a329d46db04ed0a187f0a1f2c2a",
+		"at": "2026-11-28"
+	},
+	"gp-settings@en": {
+		"commit": "af3c593cd2000a329d46db04ed0a187f0a1f2c2a",
+		"at": "2026-11-28"
+	},
+	"gp-certificates@en": {
+		"commit": "af3c593cd2000a329d46db04ed0a187f0a1f2c2a",
 		"at": "2026-11-28"
 	}
 }

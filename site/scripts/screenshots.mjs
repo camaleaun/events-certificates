@@ -43,6 +43,10 @@ for ( const shot of picked ) {
 	const { page } = session[ shot.scenario ];
 	await page.goto( addressOf( site, shot.path ), { waitUntil: 'networkidle' } );
 	// A public page shows no admin bar (a screen of the admin keeps it: it is part of what the person sees).
+	// WordPress's and other plugins' admin notices (GatherPress's welcome, its Alpha reminder) are not what the picture is about.
+	if ( shot.path.startsWith( '/wp-admin' ) ) {
+		await page.addStyleTag( { content: '#wpbody-content .notice, #wpbody-content .gatherpress-welcome, #wpbody-content [class*="welcome-panel"]{display:none!important}' } ).catch( () => {} );
+	}
 	if ( ! shot.path.startsWith( '/wp-admin' ) ) {
 		await page.addStyleTag( { content: '#wpadminbar{display:none!important}html{margin-top:0!important}' } ).catch( () => {} );
 	}
