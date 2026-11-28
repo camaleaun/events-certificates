@@ -96,6 +96,8 @@ export type TextEl = Base & {
 	font: string;
 	weight: number;
 	size: number;
+	/** The unit the size is shown in when it is not points (camaleaun/draw 0.24.4); `size` stays in points. */
+	sizeUnit?: 'px' | 'mm' | 'cm' | 'in';
 	color: string;
 	align?: 'left' | 'center' | 'right';
 	// A number (a multiplier; points) or a length with a unit (camaleaun/draw's typography.ts): lh, %, px, pt, mm, cm, in.

@@ -35,7 +35,7 @@ export const ELEMENT_KEYS = [
 	'x', 'y', 'w', 'h', 'opacity', 'rotation', 'locked', 'hidden', 'layout', 'lock', 'views', 'grow', 'slot',
 	'fill', 'stroke', 'strokeWidth', 'radius', 'corner', 'dash', 'x1', 'y1', 'x2', 'y2',
 	'clip', 'arrange', 'gap', 'padding', 'justify', 'align', 'columns',
-	'text', 'runs', 'variants', 'font', 'weight', 'size', 'color', 'lh', 'ls', 'min', 'upper', 'fit',
+	'text', 'runs', 'variants', 'font', 'weight', 'size', 'sizeUnit', 'color', 'lh', 'ls', 'min', 'upper', 'fit',
 	'd', 'vw', 'vh', 'paths', 'title', 'markup',
 	'src', 'alt', 'attachment', 'ratio',
 	'qr', 'code', 'hint', 'arrange', 'type',

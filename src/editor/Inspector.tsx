@@ -29,7 +29,7 @@ import { alignEdge, elementIcon } from './icons';
 import { naturalSize, type Picked } from './media';
 import SvgPanel from './SvgPanel';
 import { ElementSize } from './SizeRow';
-import { alignAxis, anchorAxis, radiusConvert, radiusFrom, radiusNumber, radiusUnit, unitOf, type RadiusUnit } from './size';
+import { alignAxis, anchorAxis, fontSizeUnit, radiusConvert, radiusFrom, radiusNumber, radiusUnit, unitOf, type RadiusUnit } from './size';
 import { fields, tokenOnly } from './FieldText';
 import TextByLanguage from './TextByLanguage';
 import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, type GroupEl, fieldValue, runsOf } from './model';
@@ -265,8 +265,8 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 					<ToolsPanelItem label={ __( 'Font', 'events-certificates' ) } hasValue={ () => el.font !== DEFAULT_FONT } onDeselect={ () => onChange( { font: DEFAULT_FONT } ) } isShownByDefault>
 						<SelectControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Font', 'events-certificates' ) } value={ el.font as any } options={ fontOptions( el.font ) } onChange={ ( font ) => onChange( { font } ) } />
 					</ToolsPanelItem>
-					<ToolsPanelItem label={ __( 'Size', 'events-certificates' ) } hasValue={ () => el.size !== 14 } onDeselect={ () => onChange( { size: 14 } ) } isShownByDefault>
-						<FontSize size={ el.size } onChange={ ( size ) => onChange( { size } ) } />
+					<ToolsPanelItem label={ __( 'Size', 'events-certificates' ) } hasValue={ () => el.size !== 14 || !! el.sizeUnit } onDeselect={ () => onChange( { size: 14, sizeUnit: undefined } ) } isShownByDefault>
+						<FontSize size={ el.size } unit={ fontSizeUnit( el.sizeUnit ) } onChange={ ( patch ) => onChange( patch ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem label={ __( 'Appearance', 'events-certificates' ) } hasValue={ () => el.weight !== 400 } onDeselect={ () => onChange( { weight: 400 } ) } isShownByDefault>
 						<SelectControl

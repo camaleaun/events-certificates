@@ -135,6 +135,8 @@ export const FONT_SIZES = [ 8, 10, 12, 14, 16, 18, 24, 32, 42 ];
 /** The units a font size may be typed in (the unit of the field; px is the point). */
 export const FONT_SIZE_UNITS = [ 'pt', 'px', 'mm', 'cm', 'in' ] as const;
 export type FontSizeUnit = ( typeof FONT_SIZE_UNITS )[ number ];
+/** The units a file writes beside the size: points are the default and are not written. */
+export type ShownUnit = Exclude< FontSizeUnit, 'pt' >;
 
 const round8 = ( n: number ) => Math.round( n * 1e8 ) / 1e8;
 
@@ -175,16 +177,16 @@ export function isCustomSize( pt: number, unit: string ): boolean {
  * What a change of the field makes of the element. The unit control says "the same number in the new unit" first when the unit is changed: that keeps the size (points) and
  * changes the unit it is shown in; any other text is a size. Nothing when there is nothing to change. `sizeUnit` is undefined for points (none is written).
  */
-export function fontSizeChange( text: string, pt: number, unit: string ): { size: number; sizeUnit: FontSizeUnit | undefined } | undefined {
+export function fontSizeChange( text: string, pt: number, unit: string ): { size: number; sizeUnit: ShownUnit | undefined } | undefined {
 	const typed = /^\s*\d*[.,]?\d+\s*([a-z]*)\s*$/i.exec( text )?.[ 1 ].toLowerCase();
 	if ( typed && typed !== unit && UNITS[ typed ] && FONT_SIZE_UNITS.includes( typed as FontSizeUnit ) ) {
-		return { size: pt, sizeUnit: typed === 'pt' ? undefined : ( typed as FontSizeUnit ) };
+		return { size: pt, sizeUnit: typed === 'pt' ? undefined : ( typed as ShownUnit ) };
 	}
 	const size = fontSizePt( text, unit );
 	if ( size === undefined || ( size === pt && fontSizeUnit( unit ) === unit ) ) {
 		return undefined;
 	}
-	return { size, sizeUnit: unit === 'pt' ? undefined : fontSizeUnit( unit ) };
+	return { size, sizeUnit: unit === 'pt' ? undefined : ( fontSizeUnit( unit ) as ShownUnit ) };
 }
 
 /** The range of the slider beside the field, in the unit shown: 1 to 100 points, by tenths (hundredths for the units that are big). */

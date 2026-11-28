@@ -1,60 +1,125 @@
 /**
- * The font size of a text: a size of the list (8 to 42 pt) or a custom one in pt, px, mm, cm or in, with any decimals (WordPress's own FontSizePicker rounds a custom
- * size to the step of its unit: 12.5 pt becomes 13). The arrows and the slider go by 0.1; what is typed is kept (up to three decimals) and shown with no zeros at
- * the end. The element keeps points; the unit chosen is only how the field shows and takes it (px is pt: 1/72 in).
+ * The font size of a text, built as WordPress's own FontSizePicker (a label and a small button that switches between the list of sizes and an open field with a slider),
+ * because the native one cannot do what a certificate needs: its custom field has no step, so 12.5 pt is rounded to 13, and it sends whole numbers back.
+ *
+ *   - The list is in points (8 to 42), as if no theme.json made presets.
+ *   - The open field takes pt, px, mm, cm or in, keeps what is typed up to eight decimals (as CSS does), steps by 0.1 and shows it with no zeros at the end.
+ *   - The element keeps its size in points; the unit the field was in (`sizeUnit`) is kept beside it, so the field shows it the same way again.
+ *
+ * It opens in the open field by itself when the size is not one of the list (or its unit is not points).
  */
-import { RangeControl, SelectControl, __experimentalUnitControl as UnitControl } from '@wordpress/components';
+import { BaseControl, Button, CustomSelectControl, Flex, FlexItem, __experimentalHStack as HStack, RangeControl, __experimentalSpacer as Spacer, __experimentalUnitControl as UnitControl } from '@wordpress/components';
+import { useInstanceId } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { FONT_SIZE_UNITS, fontSizePt, fontSizeText } from './size';
+import { settings } from '@wordpress/icons';
+import { FONT_SIZES, FONT_SIZE_UNITS, fontSizeChange, fontSizeSlider, fontSizeText, isCustomSize, localizedNumbers, type FontSizeUnit, type ShownUnit } from './size';
 
-/** The sizes of the list, in points. */
-export const FONT_SIZES = [ 8, 10, 12, 14, 16, 18, 24, 32, 42 ];
+type Props = {
+	size: number;
+	unit: FontSizeUnit;
+	/** The size in points and the unit it is shown in (undefined for points: none is written). */
+	onChange: ( patch: { size: number; sizeUnit: ShownUnit | undefined } ) => void;
+};
 
-export default function FontSize( { size, onChange }: { size: number; onChange: ( size: number ) => void } ) {
-	const [ unit, setUnit ] = useState< string >( 'pt' );
+export default function FontSize( { size, unit, onChange }: Props ) {
+	const id = useInstanceId( FontSize, 'evcert-font-size' );
+	const [ custom, setCustom ] = useState( () => isCustomSize( size, unit ) );
 	// The field is made again when it loses focus, so what was typed ("12.50") is shown as it was understood ("12.5").
 	const [ synced, setSynced ] = useState( 0 );
+	const slider = fontSizeSlider( unit );
+	const shown = Number.parseFloat( fontSizeText( size, unit ) );
+
+	const options = [
+		// What stands in for the "Default" of the native picker when the size is not one of the list.
+		...( FONT_SIZES.includes( size ) ? [] : [ { key: 'custom', name: __( 'Custom', 'events-certificates' ), hint: localizedNumbers( fontSizeText( size, unit ), document.documentElement.lang || 'en' ) } ] ),
+		...FONT_SIZES.map( ( s ) => ( { key: String( s ), name: `${ s } pt`, hint: String( s ) } ) ),
+	];
+	const selected = options.find( ( o ) => o.key === String( size ) ) || options[ 0 ];
+
 	return (
-		<div className="evcert-font-size">
-			<SelectControl
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
-				label={ __( 'Size', 'events-certificates' ) }
-				value={ FONT_SIZES.includes( size ) ? String( size ) : 'custom' }
-				options={ [ ...FONT_SIZES.map( ( s ) => ( { label: `${ s } pt`, value: String( s ) } ) ), { label: __( 'Custom', 'events-certificates' ), value: 'custom' } ] }
-				onChange={ ( v ) => v !== 'custom' && onChange( Number( v ) ) }
-			/>
-			<UnitControl
-				key={ `${ unit }-${ synced }` }
-				__next40pxDefaultSize
-				label={ __( 'Custom size', 'events-certificates' ) }
-				step="any"
-				spinFactor={ 0.1 }
-				units={ FONT_SIZE_UNITS.map( ( value ) => ( { value, label: value } ) ) }
-				unit={ unit }
-				value={ fontSizeText( size, unit ) }
-				onUnitChange={ ( next ) => next && setUnit( next ) }
-				onBlur={ () => setSynced( ( n ) => n + 1 ) }
-				onChange={ ( next ) => {
-					const pt = next ? fontSizePt( next, unit ) : undefined;
-					if ( pt !== undefined && pt !== size ) {
-						onChange( pt );
-					}
-				} }
-			/>
-			<RangeControl
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
-				label={ __( 'Size', 'events-certificates' ) }
-				hideLabelFromVision
-				value={ Math.min( 100, size ) }
-				min={ 1 }
-				max={ 100 }
-				step={ 0.1 }
-				withInputField={ false }
-				onChange={ ( v ) => v !== undefined && v > 0 && onChange( Math.round( v * 1000 ) / 1000 ) }
-			/>
-		</div>
+		<fieldset className="components-font-size-picker evcert-font-size" aria-labelledby={ id }>
+			<HStack className="components-font-size-picker__header evcert-font-size__header">
+				<BaseControl.VisualLabel id={ id } className="evcert-font-size__label">
+					{ __( 'Size', 'events-certificates' ) }
+				</BaseControl.VisualLabel>
+				<Button
+					className="evcert-font-size__toggle"
+					label={ custom ? __( 'Use size preset', 'events-certificates' ) : __( 'Set custom size', 'events-certificates' ) }
+					icon={ settings }
+					isPressed={ custom }
+					size="small"
+					onClick={ () => setCustom( ! custom ) }
+				/>
+			</HStack>
+			<div>
+				{ ! custom && (
+					<CustomSelectControl
+						__next40pxDefaultSize
+						className="components-font-size-picker__select"
+						label={ __( 'Size', 'events-certificates' ) }
+						hideLabelFromVision
+						showSelectedHint
+						options={ options }
+						value={ selected }
+						onChange={ ( { selectedItem } ) => {
+							// A size of the list is in points; "Custom" is the size it already is.
+							if ( selectedItem && selectedItem.key !== 'custom' ) {
+								onChange( { size: Number( selectedItem.key ), sizeUnit: undefined } );
+							}
+						} }
+					/>
+				) }
+				{ custom && (
+					<Flex className="components-font-size-picker__custom-size-control">
+						<FlexItem isBlock>
+							<UnitControl
+								key={ `${ unit }-${ synced }` }
+								__next40pxDefaultSize
+								label={ __( 'Size', 'events-certificates' ) }
+								labelPosition="top"
+								hideLabelFromVision
+								step="any"
+								spinFactor={ 0.1 }
+								min={ 0 }
+								units={ FONT_SIZE_UNITS.map( ( value ) => ( { value, label: value } ) ) }
+								unit={ unit }
+								value={ fontSizeText( size, unit ) }
+								onBlur={ () => setSynced( ( n ) => n + 1 ) }
+								onChange={ ( next ) => {
+									// The control says the same number in the new unit first when the unit is changed: that is only the unit (the size is kept).
+									const patch = next ? fontSizeChange( next, size, unit ) : undefined;
+									if ( patch ) {
+										onChange( patch );
+									}
+								} }
+							/>
+						</FlexItem>
+						<FlexItem isBlock>
+							<Spacer marginX={ 2 } marginBottom={ 0 }>
+								<RangeControl
+									__next40pxDefaultSize
+									__nextHasNoMarginBottom
+									className="components-font-size-picker__custom-input"
+									label={ __( 'Size', 'events-certificates' ) }
+									hideLabelFromVision
+									withInputField={ false }
+									{ ...slider }
+									value={ Math.min( slider.max, shown ) }
+									onChange={ ( v ) => {
+										if ( v !== undefined && v > 0 ) {
+											const patch = fontSizeChange( `${ v }${ unit }`, size, unit );
+											if ( patch ) {
+												onChange( patch );
+											}
+										}
+									} }
+								/>
+							</Spacer>
+						</FlexItem>
+					</Flex>
+				) }
+			</div>
+		</fieldset>
 	);
 }
