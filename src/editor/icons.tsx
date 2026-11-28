@@ -5,7 +5,7 @@
  * (title, square, image, code, grid) stood for an element, and these say what the element is.
  */
 import { Circle, Path, Rect, SVG } from '@wordpress/components';
-import { group as groupIcon } from '@wordpress/icons';
+import { group as groupIcon, image as imageIcon, paragraph as paragraphIcon, separator as separatorIcon, square as squareIcon } from '@wordpress/icons';
 import type { Element } from './model';
 
 const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
@@ -17,19 +17,6 @@ const icon = ( ...children: JSX.Element[] ) => (
 	</SVG>
 );
 
-/** A text: a T on its line. */
-export const text = icon( <Path key="a" d="M5.5 6.75h13M12 6.75v10.5M9.5 17.25h5" { ...stroke } /> );
-
-/** A line: a stroke between two ends. */
-export const line = icon(
-	<Path key="a" d="M6.5 17.5l11-11" { ...stroke } />,
-	<Circle key="b" cx="5.5" cy="18.5" r="1.75" { ...solid } />,
-	<Circle key="c" cx="18.5" cy="5.5" r="1.75" { ...solid } />
-);
-
-/** A rectangle. */
-export const rect = icon( <Rect key="a" x="4.75" y="6.75" width="14.5" height="10.5" rx="1.5" { ...stroke } /> );
-
 /** An ellipse. */
 export const ellipse = icon( <Path key="a" d="M4.75 12a7.25 5.25 0 1 0 14.5 0 7.25 5.25 0 1 0-14.5 0z" { ...stroke } /> );
 
@@ -38,13 +25,6 @@ export const shape = icon(
 	<Path key="a" d="M6 16.5c0-6.5 5.5-9 12-9" { ...stroke } />,
 	<Rect key="b" x="3.75" y="15" width="3" height="3" { ...solid } />,
 	<Rect key="c" x="17.25" y="6" width="3" height="3" { ...solid } />
-);
-
-/** An image: a frame, a hill and a sun. */
-export const picture = icon(
-	<Rect key="a" x="4.75" y="5.75" width="14.5" height="12.5" rx="1.5" { ...stroke } />,
-	<Path key="b" d="M5.5 16.5l3.75-4.25 2.75 2.75 2-2 4.5 4" { ...stroke } />,
-	<Circle key="c" cx="15.25" cy="9.75" r="1.25" { ...solid } />
 );
 
 /** A drawing of paths (an SVG): a shape between the brackets of code. */
@@ -87,12 +67,13 @@ export function elementIcon( type: Element[ 'type' ] | 'logo', slot?: string ) {
 	}
 	return (
 		{
-			text,
-			line,
-			rect,
+			// The icons of the core blocks that are the same thing (Paragraph, Separator, Image); the others are ours.
+			text: paragraphIcon,
+			line: separatorIcon,
+			rect: squareIcon,
 			ellipse,
 			path: shape,
-			image: picture,
+			image: imageIcon,
 			svg: drawing,
 			// The icon of the core's Group block.
 			group: groupIcon,
