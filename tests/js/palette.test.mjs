@@ -261,3 +261,18 @@ test( 'a margin and a bleed keep the unit they were chosen in (mm when none)', (
 	assert.equal( plain( inches.page ).safe, '0.5in' );
 } );
 
+test( 'a new rectangle or ellipse starts with the colors last set (an empty Fill too); other elements do not', () => {
+	const design = { colors: {}, elements: [], page: { w: 842, h: 595, safe: 0, bleed: 0 } };
+	const paint = { fill: '', stroke: '#ff0000' };
+	for ( const type of [ 'rect', 'ellipse' ] ) {
+		const el = m.create( type, design, paint );
+		assert.equal( el.fill, '' );
+		assert.equal( el.stroke, '#ff0000' );
+		assert.equal( el.strokeWidth, 1, 'the width is not remembered' );
+	}
+	assert.equal( m.create( 'rect', design ).fill, '#000000', 'nothing remembered: the default' );
+	assert.equal( m.create( 'rect', design ).stroke, '' );
+	assert.equal( m.create( 'line', design, paint ).stroke, m.create( 'line', design ).stroke, 'a line keeps its own' );
+	assert.equal( m.create( 'text', design, paint ).type, 'text' );
+} );
+

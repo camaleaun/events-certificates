@@ -33,7 +33,7 @@ import {
 	type Mode,
 	type Run,
 	type TextEl,
-	type View, lockedRatio, isRequired, toStored, type SvgPath, pageColor, baseBack, fromSide, toSide, type Side } from './model';
+	type View, lockedRatio, isRequired, toStored, type SvgPath, type Paint, pageColor, baseBack, fromSide, toSide, type Side } from './model';
 import DesignPanel, { setSample } from './DesignPanel';
 import ElementToolbar from './ElementToolbar';
 import FieldText, { type FieldTextCommands } from './FieldText';
@@ -381,8 +381,16 @@ export default function Editor() {
 	};
 	const replaceDesign = ( next: Design ) => dispatch( { type: 'commit', design: next } );
 	const shift = ( e: Element, dx: number, dy: number ): Element => ( e.layout ? placed( e, box( moved( resolve( e, design.page ), dx, dy ) ), design.page ) : moved( e, dx, dy ) );
-	const update = ( id: string, patch: Partial< Element > ) =>
+	// The Fill and the Stroke last set on a rectangle or an ellipse: the next one starts with them (only while the editor is open).
+	const paintRef = useRef< Paint >( { fill: '#000000', stroke: '' } );
+	const update = ( id: string, patch: Partial< Element > ) => {
+		const changed = design.elements.find( ( el ) => el.id === id );
+		if ( changed && ( changed.type === 'rect' || changed.type === 'ellipse' ) ) {
+			const { fill, stroke } = patch as Partial< Paint >;
+			paintRef.current = { fill: fill ?? paintRef.current.fill, stroke: stroke ?? paintRef.current.stroke };
+		}
 		commit( { ...design, elements: design.elements.map( ( el ) => ( el.id === id ? ( { ...el, ...patch } as Element ) : el ) ) } );
+	};
 	const current = resolvedShown.elements.find( ( el ) => el.id === selected ) || null;
 	const currentStored = design.elements.find( ( el ) => el.id === selected ) || null;
 
@@ -423,7 +431,7 @@ export default function Editor() {
 		commit( { ...design, elements: list } );
 	};
 	const insert = ( type: Element[ 'type' ] | 'logo' ) => {
-		const el = create( type, design );
+		const el = create( type, design, paintRef.current );
 		commit( { ...design, elements: [ ...design.elements, el ] } );
 		setSelected( el.id );
 		setSidebar( 'element' );
