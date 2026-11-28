@@ -13,9 +13,11 @@ fields one after the other. Those tabs were left as they were when the settings 
   (Certificates > Settings). With GatherPress it is the Certificates tab of GatherPress > Settings, and with CampTix the Certificates tab of Tickets > Setup. The tab shows the plugin's screen
   (`Admin\render_settings_body( true )`: its tabs as a list of links, Export and Import, its own form, group `evcert`) in place of the other plugin's form, as GatherPress's own Tools tab does; CampTix's page
   is drawn by the plugin (its title and tabs, as CampTix prints them) because CampTix wraps its tab in a form of its own and forms do not nest.
-- **A short address**: `edit.php?post_type=gatherpress_event&page=certificates` and `edit.php?post_type=tix_ticket&page=certificates`, a page of that menu with no item (it is taken out of the menu, as
-  GatherPress does with its tabs). The addresses of the tabs (`page=gatherpress_certificates`, `page=camptix_options&tix_section=certificates`) go to it, so the settings have one address.
-  `Admin\settings_slug()` (filter `evcert_settings_slug`) and `Admin\settings_url()` say where it is, and every link to the settings (the editor, the generators, the Tools forms) uses them.
+- **The address is the host's own** (amended 2026-11-28; a short page `page=certificates`, taken out of the menu, did not highlight the menu item it belongs to):
+  with GatherPress `edit.php?post_type=gatherpress_event&page=gatherpress_evcert_certificate_settings` (the tab key `evcert_certificate_settings` with GatherPress's prefix; GatherPress registers
+  the page and highlights Events > Settings), with CampTix `edit.php?post_type=tix_ticket&page=camptix_options&tix_section=evcert-certificates` (Setup's own page and section, so Tickets > Setup is
+  highlighted). `Admin\settings_slug()` (filter `evcert_settings_slug`) and `Admin\settings_url()` (filter `evcert_settings_url`) say where it is, and every link to the settings (the editor, the
+  generators, the Tools forms) uses them. For CampTix's section the plugin draws Setup's page (`draw_setup_page`); every other section stays CampTix's.
 - Settings saved so far are the same option (`evcert_settings`): nothing is migrated.
 - **Export and import of lists are off with CampTix or GatherPress, for now** (`Restrictions\defaults()`): only a single template travels, with the editor's own Export and Import. The option
   `evcert_restrictions`, the constant and the filters of ADR 0044 turn them on again.

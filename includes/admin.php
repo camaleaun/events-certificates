@@ -2,8 +2,8 @@
 /**
  * Admin: the Certificates screen and the settings fields.
  *
- * Where they appear depends on the site: with CampTix (Tickets) or GatherPress (Events) alone, the screen and the settings screen (page=certificates)
- * are submenus of their menu (includes/compat/camptix.php, gatherpress.php); otherwise the screen is a menu of its own with the settings beside it (page=evcert-options).
+ * Where they appear depends on the site: with CampTix (Tickets) or GatherPress (Events) alone, the screen is a submenu of their menu and the settings
+ * screen is a tab of their own settings (includes/compat/camptix.php, gatherpress.php); otherwise the screen is a menu of its own with the settings beside it (page=evcert-options).
  * It is the same settings screen everywhere (docs/decisions/0057).
  *
  * @package EventsCertificate

@@ -44,15 +44,15 @@ const FLAG_TAXONOMY   = '_gatherpress_rsvp_flag';
 const PARENT_SLUG = 'edit.php?post_type=gatherpress_event';
 
 /**
- * The settings: one Certificates tab in GatherPress > Settings (its key is the sub page's), with the plugin's own settings screen inside; and the short address of it, a page
- * of the Events menu with no item (edit.php?post_type=gatherpress_event&page=certificates) that shows the same tab.
+ * The settings: one Certificates tab in GatherPress > Settings, with the plugin's own settings screen inside. The key of the tab is the sub page's, and GatherPress makes the
+ * address of it with its prefix: edit.php?post_type=gatherpress_event&page=gatherpress_evcert_certificate_settings.
  */
-const SUB_PAGE = 'certificates';
+const SUB_PAGE = 'evcert_certificate_settings';
 
 /**
- * The page of the settings: the short address (the tab's own, gatherpress_certificates, goes to it).
+ * The page of the settings: GatherPress's own address of the tab.
  */
-const SETTINGS_SLUG = 'certificates';
+const SETTINGS_SLUG = 'gatherpress_evcert_certificate_settings';
 
 /**
  * Hooks, when GatherPress is active.
@@ -84,15 +84,10 @@ function register() {
 function register_screen() {
 	// The Certificates screen becomes a submenu of GatherPress's event menu.
 	add_filter( 'evcert_admin_menu_parent', __NAMESPACE__ . '\menu_parent' );
-	// The settings: the Certificates tab, its short address, and what the tab shows in place of GatherPress's form.
+	// The settings: the Certificates tab (GatherPress gives it its address and its menu highlight), and what the tab shows in place of GatherPress's form.
 	add_filter( 'evcert_settings_slug', __NAMESPACE__ . '\settings_slug' );
 	add_filter( 'gatherpress_sub_pages', __NAMESPACE__ . '\add_settings_tab' );
 	add_action( 'gatherpress_settings_section', __NAMESPACE__ . '\render_settings_tab', 9 );
-	add_action( 'admin_menu', __NAMESPACE__ . '\register_settings_page', 20 );
-	add_action( 'admin_menu', __NAMESPACE__ . '\hide_settings_page', 999 );
-	// The address of the tab goes to the short one.
-	add_action( 'admin_init', __NAMESPACE__ . '\redirect_tab_address' );
-	add_filter( 'submenu_file', __NAMESPACE__ . '\highlight_settings' );
 }
 
 /**
@@ -139,61 +134,6 @@ function render_settings_tab( $page ) {
 	}
 	remove_action( 'gatherpress_settings_section', array( \GatherPress\Core\Settings::get_instance(), 'render_settings_form' ) );
 	Admin\render_settings_body( true );
-}
-
-/**
- * The short address of the settings: a page of the Events menu (no item in it) that shows GatherPress's settings with the Certificates tab.
- */
-function register_settings_page() {
-	$title = __( 'Certificates', 'events-certificates' );
-	add_submenu_page( PARENT_SLUG, $title, $title, Admin\CAPABILITY, SETTINGS_SLUG, __NAMESPACE__ . '\render_settings_page' );
-}
-
-/**
- * The menu item that is highlighted on the settings page, which has none: Events > Settings, the screen it is a tab of (GatherPress highlights it for its own tabs; the short
- * address is the plugin's, and WordPress does not know where it belongs).
- *
- * @param string|null $submenu_file The submenu item to highlight.
- * @return string|null
- */
-function highlight_settings( $submenu_file ) {
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which page is shown.
-	return isset( $_GET['page'] ) && SETTINGS_SLUG === sanitize_key( wp_unslash( $_GET['page'] ) ) ? 'gatherpress_events_settings' : $submenu_file;
-}
-
-/**
- * Takes the short address out of the menu (the page is still there), as GatherPress does with its own tabs.
- */
-function hide_settings_page() {
-	remove_submenu_page( PARENT_SLUG, SETTINGS_SLUG );
-}
-
-/**
- * The short address: GatherPress's settings page, with the Certificates tab selected.
- */
-function render_settings_page() {
-	if ( ! class_exists( '\GatherPress\Core\Settings' ) || ! defined( 'GATHERPRESS_CORE_PATH' ) ) {
-		return;
-	}
-	\GatherPress\Core\Utility::render_template(
-		sprintf( '%s/includes/templates/admin/settings/index.php', GATHERPRESS_CORE_PATH ),
-		array(
-			'sub_pages' => \GatherPress\Core\Settings::get_instance()->get_sub_pages(),
-			'page'      => \GatherPress\Core\Utility::prefix_key( SUB_PAGE ),
-		),
-		true
-	);
-}
-
-/**
- * The tab's own address (GatherPress's, ?page=gatherpress_certificates) goes to the short one, so the settings have one address.
- */
-function redirect_tab_address() {
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only reads which page is asked for.
-	if ( isset( $_GET['page'] ) && 'gatherpress_certificates' === sanitize_key( wp_unslash( $_GET['page'] ) ) && current_user_can( Admin\CAPABILITY ) ) {
-		wp_safe_redirect( Admin\settings_url() );
-		exit;
-	}
 }
 
 /**

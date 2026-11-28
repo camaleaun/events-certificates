@@ -65,19 +65,19 @@ class IntegrationsTest extends Test_Case {
 	}
 
 	/**
-	 * The settings screen is the plugin's own wherever it is: with GatherPress or CampTix alone it is a short page, `certificates`, in their menu (Events, Tickets), not a tab of their settings.
+	 * The settings screen is the plugin's own wherever it is: with GatherPress alone it is GatherPress's own tab address (`gatherpress_evcert_certificate_settings`); with CampTix alone it is its own Setup page with the Certificates section (`tix_section=evcert-certificates`).
 	 */
 	public function test_settings_screen_address() {
 		$expected = array(
 			'none'        => admin_url( 'admin.php?page=evcert-options' ),
-			'camptix'     => admin_url( 'edit.php?post_type=tix_ticket&page=certificates' ),
-			'gatherpress' => admin_url( 'edit.php?post_type=gatherpress_event&page=certificates' ),
+			'camptix'     => admin_url( 'edit.php?post_type=tix_ticket&page=camptix_options&tix_section=evcert-certificates' ),
+			'gatherpress' => admin_url( 'edit.php?post_type=gatherpress_event&page=gatherpress_evcert_certificate_settings' ),
 			'both'        => admin_url( 'admin.php?page=evcert-options' ),
 		);
 		$slug     = array(
 			'none'        => 'evcert-options',
-			'camptix'     => 'certificates',
-			'gatherpress' => 'certificates',
+			'camptix'     => 'camptix_options',
+			'gatherpress' => 'gatherpress_evcert_certificate_settings',
 			'both'        => 'evcert-options',
 		);
 

@@ -3,8 +3,9 @@
  * CampTix (WordCamps): Certificates goes where organizers already look.
  *
  * - Tickets > Certificates: the screen, right after Attendees.
- * - Tickets > Setup > Certificates: the settings, one tab of Setup, with the plugin's own settings screen in it (its tabs and its own form), at the short
- *   address edit.php?post_type=tix_ticket&page=certificates (a page with no menu item that draws Setup's tabs).
+ * - Tickets > Setup > Certificates: the settings, one tab of Setup at Setup's own address (edit.php?post_type=tix_ticket&page=camptix_options&tix_section=evcert-certificates),
+ *   with the plugin's own settings screen in it (its sub-tabs and its own form). CampTix wraps its tabs in a form and forms do not nest, so for that section the Setup page
+ *   is drawn by the plugin: CampTix's title and tabs, then the settings.
  *
  * Only the plugin's own filters and CampTix's public hooks are used, so
  * CampTix could replace this integration with its own:
@@ -26,14 +27,14 @@ defined( 'ABSPATH' ) || exit;
 const MENU = 'edit.php?post_type=tix_ticket';
 
 /**
- * The settings page: the short address, a page of the Tickets menu with no item in it (edit.php?post_type=tix_ticket&page=certificates).
+ * The settings page: Setup's own (Tickets > Setup), so the menu item, the address and the highlight are CampTix's.
  */
-const SETTINGS_SLUG = 'certificates';
+const SETTINGS_SLUG = 'camptix_options';
 
 /**
- * Setup tab key (?tix_section=): its address goes to the short one.
+ * Setup tab key (?tix_section=).
  */
-const SECTION = 'certificates';
+const SECTION = 'evcert-certificates';
 
 /**
  * Hooks, when CampTix is active.
@@ -54,14 +55,12 @@ function register() {
 		return;
 	}
 	add_filter( 'evcert_admin_menu_parent', __NAMESPACE__ . '\menu_parent' );
-	// The settings: a Certificates tab of Setup that shows the plugin's own settings screen, at a short address (a page with no menu item).
+	// The settings: a Certificates tab of Setup (its own address with tix_section) that shows the plugin's own settings screen.
 	add_filter( 'evcert_settings_slug', __NAMESPACE__ . '\settings_slug' );
+	add_filter( 'evcert_settings_url', __NAMESPACE__ . '\settings_address' );
 	add_filter( 'camptix_setup_sections', __NAMESPACE__ . '\add_setup_tab' );
-	add_action( 'admin_menu', __NAMESPACE__ . '\register_settings_page', 20 );
-	add_action( 'admin_menu', __NAMESPACE__ . '\hide_settings_page', 999 );
+	add_action( 'admin_menu', __NAMESPACE__ . '\draw_setup_page', 999 );
 	add_action( 'admin_menu', __NAMESPACE__ . '\move_after_attendees', 99 );
-	add_action( 'admin_init', __NAMESPACE__ . '\redirect_setup_tab' );
-	add_filter( 'submenu_file', __NAMESPACE__ . '\highlight_setup' );
 }
 
 /**
@@ -83,30 +82,41 @@ function settings_slug() {
 }
 
 /**
- * The settings page, with no menu item.
- */
-function register_settings_page() {
-	$title = __( 'Certificates', 'events-certificates' );
-	add_submenu_page( MENU, $title, $title, Admin\CAPABILITY, SETTINGS_SLUG, __NAMESPACE__ . '\render_settings_page' );
-}
-
-/**
- * The menu item that is highlighted on the settings page, which has none: Tickets > Setup, the screen it is a tab of (the address of the page is short, and WordPress
- * does not know where it belongs).
+ * The address of the settings: Setup's with the plugin's section.
  *
- * @param string|null $submenu_file The submenu item to highlight.
- * @return string|null
+ * @param string $url Setup's address.
+ * @return string
  */
-function highlight_setup( $submenu_file ) {
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which page is shown.
-	return isset( $_GET['page'] ) && SETTINGS_SLUG === sanitize_key( wp_unslash( $_GET['page'] ) ) ? 'camptix_options' : $submenu_file;
+function settings_address( $url ) {
+	return add_query_arg( 'tix_section', SECTION, $url );
 }
 
 /**
- * Takes the settings page out of the menu (it is still there): its way in is the Setup tab.
+ * Setup is drawn by the plugin when the section asked for is its own: CampTix's page prints every section inside one form, and the plugin's settings have a form of their
+ * own (forms do not nest). Every other section stays CampTix's.
  */
-function hide_settings_page() {
-	remove_submenu_page( MENU, SETTINGS_SLUG );
+function draw_setup_page() {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- only reads which page is asked for.
+	$page    = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+	$section = isset( $_GET['tix_section'] ) ? sanitize_key( wp_unslash( $_GET['tix_section'] ) ) : '';
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	if ( SETTINGS_SLUG !== $page || SECTION !== $section ) {
+		return;
+	}
+	$hook = get_plugin_page_hookname( SETTINGS_SLUG, MENU );
+	global $wp_filter;
+	if ( empty( $wp_filter[ $hook ] ) ) {
+		return;
+	}
+	// CampTix's callback is a method of its setup object: it is found by the method, wherever the object is kept.
+	foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+		foreach ( $callbacks as $id => $callback ) {
+			if ( is_array( $callback['function'] ) && isset( $callback['function'][1] ) && 'menu_setup' === $callback['function'][1] ) {
+				remove_action( $hook, $callback['function'], $priority );
+			}
+		}
+	}
+	add_action( $hook, __NAMESPACE__ . '\render_settings_page' );
 }
 
 /**
@@ -135,7 +145,7 @@ function setup_tabs() {
 }
 
 /**
- * The settings page: Setup's title and tabs, and the plugin's own settings screen in the Certificates tab.
+ * Setup's page for the Certificates section: CampTix's title and tabs, and the plugin's own settings screen.
  */
 function render_settings_page() {
 	if ( ! current_user_can( Admin\CAPABILITY ) ) {
@@ -149,20 +159,6 @@ function render_settings_page() {
 		<?php Admin\render_settings_body( true ); ?>
 	</div>
 	<?php
-}
-
-/**
- * The Setup tab's own address (?page=camptix_options&tix_section=certificates) goes to the short one, so the settings have one address.
- */
-function redirect_setup_tab() {
-	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- only reads which page is asked for.
-	$page    = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-	$section = isset( $_GET['tix_section'] ) ? sanitize_key( wp_unslash( $_GET['tix_section'] ) ) : '';
-	// phpcs:enable WordPress.Security.NonceVerification.Recommended
-	if ( 'camptix_options' === $page && SECTION === $section && current_user_can( Admin\CAPABILITY ) ) {
-		wp_safe_redirect( Admin\settings_url() );
-		exit;
-	}
 }
 
 /**

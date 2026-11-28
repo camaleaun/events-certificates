@@ -1002,9 +1002,12 @@ function settings_slug() {
 function settings_url() {
 	$slug   = settings_slug();
 	$parent = menu_parent();
-	if ( SLUG_SETTINGS !== $slug && '' !== $parent && false !== strpos( $parent, '.php' ) ) {
-		return add_query_arg( 'page', $slug, admin_url( $parent ) );
-	}
+	$url    = SLUG_SETTINGS !== $slug && '' !== $parent && false !== strpos( $parent, '.php' ) ? add_query_arg( 'page', $slug, admin_url( $parent ) ) : page_url_of( $slug );
 
-	return page_url_of( $slug );
+	/**
+	 * Filters the address of the settings screen (an integration whose settings page has more than a slug adds its own argument: CampTix's `tix_section`).
+	 *
+	 * @param string $url Address.
+	 */
+	return (string) apply_filters( 'evcert_settings_url', $url );
 }

@@ -298,23 +298,50 @@ class SettingsScreenTest extends Test_Case {
 
 		if ( class_exists( '\GatherPress\Core\Settings' ) ) {
 			ob_start();
-			\EventsCertificate\Compat\GatherPress\render_settings_tab( 'gatherpress_certificates' );
+			\EventsCertificate\Compat\GatherPress\render_settings_tab( 'gatherpress_evcert_certificate_settings' );
 			$this->assertStringContainsString( $this->body( true ), (string) ob_get_clean(), 'GatherPress.' );
 		}
 	}
 
 	/**
-	 * The short address of the settings (page=certificates) is a page with no menu item: the menu item of the settings it belongs to is the one that is highlighted
-	 * (Tickets > Setup with CampTix; Events > Settings with GatherPress), and any other page is left as WordPress says.
+	 * With GatherPress the settings are one of its own tabs: its key makes the address (page=gatherpress_evcert_certificate_settings), and GatherPress registers and highlights it.
 	 */
-	public function test_the_hidden_settings_page_highlights_the_settings_it_belongs_to() {
-		$saved        = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$_GET['page'] = 'certificates';
-		$this->assertSame( 'camptix_options', \EventsCertificate\Compat\CampTix\highlight_setup( 'certificates' ), 'CampTix: Setup.' );
-		$this->assertSame( 'gatherpress_events_settings', \EventsCertificate\Compat\GatherPress\highlight_settings( 'certificates' ), 'GatherPress: Settings.' );
-		$_GET['page'] = 'camptix_options';
-		$this->assertSame( 'camptix_options', \EventsCertificate\Compat\CampTix\highlight_setup( 'camptix_options' ) );
-		$this->assertSame( 'edit.php?post_type=x', \EventsCertificate\Compat\GatherPress\highlight_settings( 'edit.php?post_type=x' ), 'Another page is left alone.' );
+	public function test_the_gatherpress_settings_address_is_its_own_tab() {
+		$this->assertSame( 'gatherpress_evcert_certificate_settings', \EventsCertificate\Compat\GatherPress\settings_slug() );
+	}
+
+	/**
+	 * With CampTix the settings are Setup's own address with the plugin's section (tix_section=evcert-certificates): the same slug as Setup's, one more query argument.
+	 */
+	public function test_the_camptix_settings_address_is_setups_own() {
+		$this->assertSame( 'camptix_options', \EventsCertificate\Compat\CampTix\settings_slug() );
+		$this->assertSame( admin_url( 'edit.php?post_type=tix_ticket&page=camptix_options&tix_section=evcert-certificates' ), \EventsCertificate\Compat\CampTix\settings_address( admin_url( 'edit.php?post_type=tix_ticket&page=camptix_options' ) ) );
+	}
+
+	/**
+	 * On the Certificates section Setup is drawn once, by the plugin: CampTix's own callback (a method of its setup object) is taken off the page's hook; on any other section it stays.
+	 */
+	public function test_setup_is_drawn_once_on_the_certificates_section() {
+		$setup = new class() {
+			public function menu_setup() {}
+		};
+		$hook  = get_plugin_page_hookname( 'camptix_options', 'edit.php?post_type=tix_ticket' );
+		$saved = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		add_action( $hook, array( $setup, 'menu_setup' ) );
+		$_GET = array(
+			'page'        => 'camptix_options',
+			'tix_section' => 'general',
+		);
+		\EventsCertificate\Compat\CampTix\draw_setup_page();
+		$this->assertNotFalse( has_action( $hook, array( $setup, 'menu_setup' ) ), 'Another section stays CampTix\'s.' );
+
+		$_GET['tix_section'] = 'evcert-certificates';
+		\EventsCertificate\Compat\CampTix\draw_setup_page();
+		$this->assertFalse( has_action( $hook, array( $setup, 'menu_setup' ) ), 'CampTix\'s own page is not drawn as well.' );
+		$this->assertNotFalse( has_action( $hook, 'EventsCertificate\\Compat\\CampTix\\render_settings_page' ) );
+
+		remove_all_actions( $hook );
 		$_GET = $saved; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
