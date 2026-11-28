@@ -411,12 +411,14 @@ class RenderTest extends Test_Case {
 			'elements' => array( $group ),
 		);
 		$html   = Render\artwork( $design, array(), array() );
-		// The container is at the group's place, shows what goes out of it by default, and its child is at 10, 5 with the width of the group less the two margins.
-		$this->assertMatchesRegularExpression( '/left:100\.00pt;top:50\.00pt;width:200\.00pt;height:80\.00pt;[^"]*overflow:visible;/', $html );
-		$this->assertMatchesRegularExpression( '/left:10\.00pt;top:5\.00pt;width:180\.00pt;height:20\.00pt/', $html );
+		// It shows what goes out of it by default, so there is no container: its child is on the page at the corner of the group plus 10, 5, with the width of the group less the two margins.
+		$this->assertStringNotContainsString( 'overflow:visible', $html );
+		$this->assertMatchesRegularExpression( '/left:110\.00pt;top:55\.00pt;width:180\.00pt;height:20\.00pt/', $html );
 		$group['clip']      = true;
 		$design['elements'] = array( $group );
-		$this->assertMatchesRegularExpression( '/left:100\.00pt;top:50\.00pt;width:200\.00pt;height:80\.00pt;[^"]*overflow:hidden;/', Render\artwork( $design, array(), array() ), 'A group that clips cuts what goes out of it.' );
+		$clipped            = Render\artwork( $design, array(), array() );
+		$this->assertMatchesRegularExpression( '/left:100\.00pt;top:50\.00pt;width:200\.00pt;height:80\.00pt;[^"]*overflow:hidden;/', $clipped, 'A group that clips cuts what goes out of it.' );
+		$this->assertMatchesRegularExpression( '/left:10\.00pt;top:5\.00pt;width:180\.00pt;height:20\.00pt/', $clipped, 'and places what is in it from its corner.' );
 		// Out of a group the same anchors are the page's.
 		$loose = Render\resolve( $group['children'][0], $design['page'] );
 		$this->assertEqualsWithDelta( 780.0, $loose['w'], 0.001 );
@@ -497,9 +499,137 @@ class RenderTest extends Test_Case {
 			),
 		);
 		$html   = Render\artwork( $design, array(), array() );
-		$this->assertMatchesRegularExpression( '/left:5\.00pt;top:5\.00pt;width:40\.00pt;height:10\.00pt/', $html );
-		$this->assertMatchesRegularExpression( '/left:55\.00pt;top:5\.00pt;width:30\.00pt;height:10\.00pt/', $html );
+		$this->assertMatchesRegularExpression( '/left:105\.00pt;top:55\.00pt;width:40\.00pt;height:10\.00pt/', $html );
+		$this->assertMatchesRegularExpression( '/left:155\.00pt;top:55\.00pt;width:30\.00pt;height:10\.00pt/', $html );
 		$design['elements'][0]['arrange'] = 'stack';
-		$this->assertMatchesRegularExpression( '/left:5\.00pt;top:25\.00pt;width:30\.00pt;height:10\.00pt/', Render\artwork( $design, array(), array() ) );
+		$this->assertMatchesRegularExpression( '/left:105\.00pt;top:75\.00pt;width:30\.00pt;height:10\.00pt/', Render\artwork( $design, array(), array() ) );
+	}
+
+	/**
+	 * A design with a group is kept as blocks and read back the same: the group, what is in it (down the levels) and the places, with no id twice.
+	 */
+	public function test_a_group_survives_being_kept_and_read() {
+		$design = array(
+			'page'     => array(
+				'w'    => 842,
+				'h'    => 595,
+				'safe' => 0,
+				'bg'   => '$background',
+			),
+			'colors'   => array(),
+			'elements' => array(
+				array(
+					'id'       => 'box',
+					'type'     => 'group',
+					'x'        => 100,
+					'y'        => 50,
+					'w'        => 300,
+					'h'        => 120,
+					'arrange'  => 'row',
+					'gap'      => 10,
+					'padding'  => 8,
+					'justify'  => 'between',
+					'clip'     => true,
+					'children' => array(
+						array(
+							'id'   => 'box-rect-1',
+							'type' => 'rect',
+							'w'    => 40,
+							'h'    => 20,
+							'fill' => '#112233',
+							'grow' => 1,
+						),
+						array(
+							'id'       => 'box-group-2',
+							'type'     => 'group',
+							'x'        => 0,
+							'y'        => 0,
+							'w'        => 60,
+							'h'        => 60,
+							'children' => array(
+								array(
+									'id'   => 'box-group-2-rect-1',
+									'type' => 'rect',
+									'x'    => 5,
+									'y'    => 5,
+									'w'    => 10,
+									'h'    => 10,
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+		$markup = \EventsCertificate\Designs\content( $design );
+		$this->assertStringContainsString( '<!-- wp:events-certificates/certificate-group ', $markup );
+		$this->assertStringNotContainsString( '"children"', $markup );
+		$back = \EventsCertificate\Designs\decode( $markup );
+		$box  = $back['elements'][0];
+		$this->assertSame( 'group', $box['type'] );
+		$this->assertSame( 'row', $box['arrange'] );
+		$this->assertTrue( $box['clip'] );
+		$this->assertSame( 2, count( $box['children'] ) );
+		$this->assertSame( 'group', $box['children'][1]['type'] );
+		$this->assertEquals( 10, $box['children'][1]['children'][0]['w'] );
+		$ids  = array();
+		$walk = static function ( $items ) use ( &$walk, &$ids ) {
+			foreach ( $items as $el ) {
+				$ids[] = $el['id'];
+				$walk( $el['children'] ?? array() );
+			}
+		};
+		$walk( $back['elements'] );
+		$this->assertSame( count( $ids ), count( array_unique( $ids ) ), implode( ',', $ids ) );
+		// And it draws, the same after the trip as before.
+		$this->assertSame( Render\artwork( $design, array(), array() ), Render\artwork( $back, array(), array() ) );
+	}
+
+	/**
+	 * The PDF of a design with a group is made (the group draws as a rectangle and a container, which the PDF reads).
+	 */
+	public function test_a_design_with_a_group_has_a_pdf() {
+		$design = array(
+			'page'     => array(
+				'w'    => 842,
+				'h'    => 595,
+				'safe' => 0,
+				'bg'   => '$background',
+			),
+			'colors'   => array(),
+			'elements' => array(
+				array(
+					'id'       => 'box',
+					'type'     => 'group',
+					'x'        => 100,
+					'y'        => 50,
+					'w'        => 300,
+					'h'        => 120,
+					'fill'     => '#eeeeee',
+					'arrange'  => 'stack',
+					'gap'      => 6,
+					'clip'     => true,
+					'children' => array(
+						array(
+							'id'   => 'a',
+							'type' => 'rect',
+							'w'    => 100,
+							'h'    => 20,
+							'fill' => '#ff0000',
+						),
+						array(
+							'id'   => 'b',
+							'type' => 'rect',
+							'w'    => 100,
+							'h'    => 20,
+							'fill' => '#0000ff',
+						),
+					),
+				),
+			),
+		);
+		$pdf    = Render\pdf( array( 'id' => 0 ), $design );
+		$this->assertIsString( $pdf );
+		$this->assertSame( '%PDF', substr( $pdf, 0, 4 ) );
 	}
 }

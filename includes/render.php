@@ -1925,26 +1925,51 @@ function element_html( array $el, array $design, array $values, array $options )
 			return $img( svg_src( $svg ), sprintf( 'position:absolute;left:%.2Fpt;top:%.2Fpt;width:%.2Fpt;height:%.2Fpt;%s%s', $el['x'] - $sw / 2, $el['y'] - $sw / 2, $el['w'] + $sw, $el['h'] + $sw, $rotate, $alpha ) );
 
 		case 'group':
-			// A group is a rectangle with other elements in it: its own box drawn as a rectangle, then a container at the same place holding what is in
-			// it, placed from the corner of the group and shown even where it goes out of the box, unless the group clips (clip).
+			// A group is a rectangle with other elements in it: its own box drawn as a rectangle, then what is in it, placed from the corner of the group.
 			$frame         = $el;
 			$frame['type'] = 'rect';
 			unset( $frame['children'] );
-			$back  = element_html( $frame, $design, $values, $options );
-			$own   = array(
+			$back = element_html( $frame, $design, $values, $options );
+			$own  = array(
 				'w'    => (float) $el['w'],
 				'h'    => (float) $el['h'],
 				'safe' => 0,
 			);
-			$inner = '';
 			// In a row, a stack or a grid the flow places what is in it (camaleaun/draw's Flow); in a free group each is placed by its own anchors, to the size of the group.
 			$flowed = in_array( $el['arrange'] ?? '', array( 'row', 'stack', 'grid' ), true );
+			$kids   = array();
 			foreach ( \EventsCertificate\Vendor\Camaleaun\Draw\Svg::place_children( $el ) as $child ) {
 				if ( empty( $child['hidden'] ) ) {
-					$inner .= element_html( $flowed ? $child : resolve( $child, $own, $own ), $design, $values, $options );
+					$kids[] = $flowed ? $child : resolve( $child, $own, $own );
 				}
 			}
-			return $back . sprintf( '<div style="%soverflow:%s;">%s</div>', esc_attr( $box . $alpha ), ! empty( $el['clip'] ) ? 'hidden' : 'visible', $inner );
+			if ( ! empty( $el['clip'] ) ) {
+				// A group that clips is a container at the same place that cuts what goes out of it; what is in it is placed from its corner.
+				$inner = '';
+				foreach ( $kids as $child ) {
+					$inner .= element_html( $child, $design, $values, $options );
+				}
+
+				return $back . sprintf( '<div style="%soverflow:hidden;">%s</div>', esc_attr( $box . $alpha ), $inner );
+			}
+			// One that does not clip puts them on the page after its own rectangle, each moved to where the group is: a container that shows what goes out of it makes the PDF send
+			// what is in it to the next page.
+			$out = $back;
+			foreach ( $kids as $child ) {
+				foreach ( array( 'x', 'x1', 'x2' ) as $key ) {
+					if ( isset( $child[ $key ] ) ) {
+						$child[ $key ] += (float) $el['x'];
+					}
+				}
+				foreach ( array( 'y', 'y1', 'y2' ) as $key ) {
+					if ( isset( $child[ $key ] ) ) {
+						$child[ $key ] += (float) $el['y'];
+					}
+				}
+				$out .= element_html( $child, $design, $values, $options );
+			}
+
+			return $out;
 
 		case 'line':
 			$sw   = max( 0.25, (float) ( $el['strokeWidth'] ?? 1 ) );
