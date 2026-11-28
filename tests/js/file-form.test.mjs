@@ -20,7 +20,7 @@ const toFile = ( d ) => plain( sandbox.dialect.toFile( d ) );
 const fromFile = ( d ) => plain( sandbox.dialect.fromFile( d ) );
 
 test( 'a reference to a color is written as a preset, and read back', () => {
-	const design = { page: { width: '297mm', height: '210mm', backgroundColor: '$background' }, elements: [ { type: 'rect', fill: '$primary', stroke: '#112233', runs: [ { text: '$100' }, { color: '$text' } ] } ] };
+	const design = { page: { width: '297mm', height: '210mm', backgroundColor: '$background' }, colors: { background: { name: 'Background', light: '#ffffff' } }, elements: [ { type: 'rect', fill: '$primary', stroke: '#112233', runs: [ { text: '$100' }, { color: '$text' } ] } ] };
 	const file = toFile( design );
 	assert.equal( file.page.backgroundColor, 'var:preset|color|background' );
 	assert.equal( file.elements[ 0 ].fill, 'var:preset|color|primary' );
@@ -55,8 +55,10 @@ test( 'the colors are written like a theme.json: color.palette for the Theme and
 	assert.deepEqual( back.palette, design.palette );
 	assert.deepEqual( Object.keys( back ), [ 'page', 'colors', 'palette', 'elements' ] );
 	// A design with no theme says none by writing no palette; one with an empty theme writes an empty palette.
-	assert.equal( 'palette' in toFile( { page: {}, colors: {}, elements: [] } ).color, false );
-	assert.deepEqual( toFile( { page: {}, colors: {}, palette: [], elements: [] } ).color, { palette: [], elements: [] } );
+	assert.equal( 'color' in toFile( { page: {}, colors: {}, elements: [] } ), false, 'no colors and no theme: no color at all' );
+	assert.equal( 'palette' in toFile( { page: {}, colors: { a: { light: '#fff' } }, elements: [] } ).color, false );
+	// An empty theme is written when there are colors (without it the theme would be made from them); with no colors an empty theme says nothing.
+	assert.deepEqual( toFile( { page: {}, colors: { a: { light: '#fff' } }, palette: [], elements: [] } ).color, { palette: [], elements: [ { slug: 'a', color: '#fff' } ] } );
 } );
 
 test( 'a color is written as CSS says it, and may point at the Theme', () => {
@@ -96,4 +98,27 @@ test( 'the date of emission is a block of its own: no slot, no name, no text whi
 	const back = plain( sandbox.dialect.fromFile( sandbox.dialect.fromMarkup( markup, sandbox.dialect.BLOCK_OPTIONS ) ) );
 	assert.deepEqual( back.elements.map( ( e ) => [ e.type, e.slot ] ), [ [ 'text', 'date-of-emission' ], [ 'text', 'date-of-emission' ] ] );
 	assert.equal( back.elements[ 1 ].runs[ 0 ].text, 'j \\d\\e F \\d\\e Y' );
+} );
+
+test( 'an empty template is written as nothing but its page: no colors, no background that points at no color', () => {
+	const blank = { page: { width: '297mm', height: '210mm', backgroundColor: '$background' }, colors: {}, palette: [], elements: [] };
+	const file = toFile( blank );
+	assert.deepEqual( Object.keys( file ), [ 'page', 'elements' ], 'no color key' );
+	assert.deepEqual( file.page, { width: '297mm', height: '210mm' } );
+	assert.equal( sandbox.dialect.toMarkup( sandbox.dialect.toFile( blank ) ).trim(), '<!-- wp:events-certificates/certificate {"page":{"width":"297mm","height":"210mm"}} /-->' );
+	// A background that points at a color the design has is kept.
+	const colored = toFile( { ...blank, colors: { background: { name: 'Background', light: '#ffffff' } } } );
+	assert.equal( colored.page.backgroundColor, 'var:preset|color|background' );
+	assert.deepEqual( colored.color, { palette: [], elements: [ { slug: 'background', color: '#ffffff', name: 'Background' } ] } );
+	// Another color for the page is kept too.
+	assert.equal( toFile( { ...blank, page: { ...blank.page, backgroundColor: '#fafafa' } } ).page.backgroundColor, '#fafafa' );
+} );
+
+test( 'a file with no colors is read as a design with no colors and no theme (not the base\'s)', () => {
+	const back = fromFile( { page: { width: '297mm', height: '210mm' }, elements: [] } );
+	assert.deepEqual( back.colors, {} );
+	assert.deepEqual( back.palette, [] );
+	assert.equal( back.page.backgroundColor, undefined, 'the page says nothing: it is read as the default background' );
+	// Written and read again, it is the same.
+	assert.deepEqual( toFile( fromFile( { page: { width: '297mm', height: '210mm' }, elements: [] } ) ), { page: { width: '297mm', height: '210mm' }, elements: [] } );
 } );

@@ -57,21 +57,31 @@ function colorsToFile( design: Loose ): Loose {
 	// A color with a Dark value is written as CSS says it, light-dark(Light, Dark); either may point at a color of the Theme (var:preset|color|slug).
 	const elements = Object.entries( colors ).map( ( [ slug, c ] ) => ( { slug, color: c.dark ? `light-dark(${ c.light || '' },${ c.dark })` : c.light || '', ...( c.name ? { name: c.name } : {} ) } ) );
 	const file: Loose = {};
-	if ( Array.isArray( design.palette ) ) {
+	// An empty theme is written when there are colors (a design with no `palette` gets a theme made from its colors); with no colors it says nothing.
+	if ( Array.isArray( design.palette ) && ( design.palette.length || elements.length ) ) {
 		file.palette = ( design.palette as Array< { slug?: string; color?: string; name?: string } > ).map( ( s ) => ( { ...( s.slug ? { slug: s.slug } : {} ), ...( s.color ? { color: s.color } : {} ), ...( s.name ? { name: s.name } : {} ) } ) );
 	}
-	file.elements = elements;
+	if ( elements.length ) {
+		file.elements = elements;
+	}
+	// No colors and no theme: there is no `color` at all, and a background that points at no color is the default one (not written).
+	const hasColors = Object.keys( file ).length > 0;
 	const out: Loose = {};
 	for ( const [ key, value ] of Object.entries( design ) ) {
 		if ( key === 'colors' || key === 'palette' ) {
 			continue;
 		}
 		out[ key ] = value;
-		if ( key === 'page' ) {
+		if ( key === 'page' && hasColors ) {
 			out.color = file;
 		}
 	}
-	return 'color' in out ? out : { ...out, color: file };
+	const page = out.page as Loose | undefined;
+	if ( page && page.backgroundColor === 'var:preset|color|background' && ! ( 'background' in colors ) ) {
+		const { backgroundColor: _default, ...rest } = page;
+		out.page = rest;
+	}
+	return hasColors && ! ( 'color' in out ) ? { ...out, color: file } : out;
 }
 
 /** `light-dark(Light, Dark)` as its two values (a pointer to a color of the Theme is read back as "$slug"); any other value is the Light one. */
@@ -99,8 +109,9 @@ function lightDark( value: string ): [ string, string ] {
 /** The reverse of colorsToFile(): `colors` (a map with Light and Dark) and `palette`. */
 function colorsFromFile( design: Loose ): Loose {
 	const file = design.color as { palette?: unknown[]; elements?: Array< { slug?: string; name?: string; color?: string; dark?: string } > } | undefined;
+	// A file with no colors is a design with no colors and no theme (not the base's, which an import would otherwise keep).
 	if ( ! file || typeof file !== 'object' ) {
-		return design;
+		return { ...design, colors: {}, palette: [] };
 	}
 	const colors: Loose = {};
 	for ( const entry of file.elements || [] ) {

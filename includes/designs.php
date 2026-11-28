@@ -407,7 +407,8 @@ function colors_to_file( array $design ) {
 		$elements[] = $entry;
 	}
 	$file = array();
-	if ( isset( $design['palette'] ) && is_array( $design['palette'] ) ) {
+	// An empty theme is written when there are colors (a design with no `palette` gets a theme made from its colors); with no colors it says nothing.
+	if ( isset( $design['palette'] ) && is_array( $design['palette'] ) && ( $design['palette'] || $elements ) ) {
 		$palette = array();
 		foreach ( array_values( $design['palette'] ) as $swatch ) {
 			if ( is_array( $swatch ) ) {
@@ -425,19 +426,26 @@ function colors_to_file( array $design ) {
 		}
 		$file['palette'] = $palette;
 	}
-	$file['elements'] = $elements;
-	$out              = array();
+	if ( $elements ) {
+		$file['elements'] = $elements;
+	}
+	$out = array();
 	foreach ( $design as $key => $value ) {
 		if ( 'colors' === $key || 'palette' === $key ) {
 			continue;
 		}
 		$out[ $key ] = $value;
-		if ( 'page' === $key ) {
+		// No colors and no theme: there is no `color` at all.
+		if ( 'page' === $key && $file ) {
 			$out['color'] = $file;
 		}
 	}
-	if ( ! isset( $out['color'] ) ) {
+	if ( $file && ! isset( $out['color'] ) ) {
 		$out['color'] = $file;
+	}
+	// A background that points at no color of the design is the default one: not written.
+	if ( isset( $out['page']['backgroundColor'] ) && 'var:preset|color|background' === $out['page']['backgroundColor'] && ! isset( $design['colors']['background'] ) ) {
+		unset( $out['page']['backgroundColor'] );
 	}
 
 	return $out;
@@ -483,8 +491,15 @@ function light_dark( $value ) {
  * @return array<string, mixed>
  */
 function colors_from_file( array $design ) {
+	// A file with no colors is a design with no colors and no theme.
 	if ( ! isset( $design['color'] ) || ! is_array( $design['color'] ) ) {
-		return $design;
+		return array_merge(
+			$design,
+			array(
+				'colors'  => array(),
+				'palette' => array(),
+			)
+		);
 	}
 	$file   = $design['color'];
 	$colors = array();

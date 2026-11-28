@@ -247,7 +247,8 @@ function enqueue() {
 					'hours_one'             => _n( '%s hour', '%s hours', 1, 'events-certificates' ),
 					/* translators: %s: number of hours, e.g. "1 hour" or "8 hours". */
 					'hours_other'           => _n( '%s hour', '%s hours', 8, 'events-certificates' ),
-					'role'                  => __( 'Speaker', 'events-certificates' ),
+					// What the preview of a certificate says of the person's role until it is changed (Certificate tab, Preview data): the most common one.
+					'role'                  => __( 'Attendee', 'events-certificates' ),
 					'details'               => __( 'Building accessible blocks', 'events-certificates' ),
 					'document'              => 'CPF •••.•••.789-••',
 					'day'                   => __( 'Conference', 'events-certificates' ),

@@ -135,6 +135,8 @@ class TemplatesTest extends Test_Case {
 		$this->assertSame( array(), $design['colors'], 'No colors: the + of the Colors section brings the first ones back.' );
 		$this->assertSame( array(), $design['palette'], 'No theme either, and not the default one made again when it is read.' );
 		$this->assertNotEmpty( Designs\base()['elements'], 'The Base design is untouched.' );
+		// The file says nothing but the page: no colors, no theme and no background that points at no color.
+		$this->assertSame( '<!-- wp:events-certificates/certificate {"page":{"width":"297mm","height":"210mm"}} /-->', trim( (string) get_post( $id )->post_content ) );
 	}
 
 	/**
