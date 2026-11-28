@@ -294,3 +294,21 @@ export function flattenTree( list: Element[], page: Parameters< typeof resolve >
 
 const resolveTreeOf = ( group: Placed ): Placed[] => ( isGroup( group ) ? ( group.children as Placed[] ) : [] );
 
+/**
+ * The group a new element goes in when `selected` is selected: the group itself, or the group the selected element is in; null when it goes on the page (nothing
+ * selected, or an element of the page's own list), when it may not be held by a group (see canHold), or when the tree would be too deep or too big.
+ */
+export function holderFor( list: Element[], selected: string | null | undefined, el: Element ): GroupEl | null {
+	const target = selected ? findEl( list, selected ) : undefined;
+	const holder = target ? ( isGroup( target ) ? target : parentOf( list, target.id ) ) : null;
+	if ( ! holder || ! canHold( el ) || depthOf( list, holder.id ) + 1 + groupsDeep( el ) > MAX_DEPTH || flatten( list ).length + 1 > MAX_ELEMENTS ) {
+		return null;
+	}
+	return holder;
+}
+
+/** The list with an element put at the end of a group's own (the front of what is in it). */
+export function insertInto( list: Element[], holderId: string, el: Element ): Element[] {
+	return mapEl( list, holderId, ( g ) => ( { ...g, children: [ ...( ( g as GroupEl ).children || [] ), el ] } as Element ) );
+}
+

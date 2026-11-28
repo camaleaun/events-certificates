@@ -48,7 +48,7 @@ import SvgEditor from './SvgEditor';
 import type { Picked } from './media';
 import { BlockLayers, BlocksProvider, registerBlocks } from './blocks';
 import BlockCanvas from './BlockCanvas';
-import { bakeChildren, cloneEl, findEl, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
+import { bakeChildren, cloneEl, findEl, holderFor, insertInto, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
 import { cleanForSlug } from '@wordpress/url';
 import { fromMarkup, isMarkup, toMarkup } from '@camaleaun/draw';
 import { BLOCK_OPTIONS, fromFile, toFile } from './dialect';
@@ -434,8 +434,14 @@ export default function Editor() {
 	};
 	const reorder = ( id: string, to: 'up' | 'down' | 'top' | 'bottom' ) => commit( { ...design, elements: reorderEl( design.elements, id, to ) } );
 	const insert = ( type: Element[ 'type' ] | 'logo' ) => {
-		const el = create( type, design, paintRef.current );
-		commit( { ...design, elements: [ ...design.elements, el ] } );
+		let el = create( type, design, paintRef.current );
+		// With a group selected (or an element that is in one) the new element goes in that group, at the end of its own list (the front of what is in it), at its center.
+		const holder = holderFor( design.elements, selected, el );
+		const box = holder ? ( findEl( resolvedShown.elements, holder.id ) as GroupEl | undefined ) : undefined;
+		if ( holder && box ) {
+			el = create( type, { ...design, page: { ...design.page, w: box.w, h: box.h, safe: 0 } }, paintRef.current );
+		}
+		commit( { ...design, elements: holder && box ? insertInto( design.elements, holder.id, el ) : [ ...design.elements, el ] } );
 		setSelected( el.id );
 		// A group asks which layout it is (Group, Row, Stack, Grid) before anything is put in it.
 		setChoosing( el.type === 'group' ? el.id : null );

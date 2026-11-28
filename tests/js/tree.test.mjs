@@ -130,3 +130,19 @@ test( 'the tree is flattened for the backends that draw one element after anothe
 	assert.deepEqual( [ flat[ 0 ].x, flat[ 0 ].fill, flat[ 0 ].children ], [ 100, '#eee', undefined ] );
 	assert.deepEqual( [ flat[ 1 ].x, flat[ 1 ].y, flat[ 2 ].x ], [ 100, 50, 150 ], 'on the page, by the flow of the row' );
 } );
+
+test( 'a new element goes in the selected group, or in the group of the selected element, at the end of its own list', () => {
+	const list = [ rect( 'a', 0, 0, 1, 1 ), { id: 'g', type: 'group', x: 0, y: 0, w: 100, h: 100, children: [ rect( 'b', 0, 0, 1, 1 ) ] } ];
+	const el = rect( 'n', 0, 0, 1, 1 );
+	assert.equal( t.holderFor( list, 'g', el ).id, 'g', 'a selected group holds it' );
+	assert.equal( t.holderFor( list, 'b', el ).id, 'g', 'the group of the selected element holds it' );
+	assert.equal( t.holderFor( list, 'a', el ), null, 'an element of the page: the page' );
+	assert.equal( t.holderFor( list, null, el ), null );
+	assert.equal( t.holderFor( list, 'g', { id: 'q', type: 'qr' } ), null, 'what has its place on the certificate stays on it' );
+	const deep = [ { id: 'g1', type: 'group', x: 0, y: 0, w: 9, h: 9, children: [ { id: 'g2', type: 'group', x: 0, y: 0, w: 9, h: 9, children: [ { id: 'g3', type: 'group', x: 0, y: 0, w: 9, h: 9, children: [] } ] } ] } ];
+	assert.equal( t.holderFor( deep, 'g3', { id: 'x', type: 'group', x: 0, y: 0, w: 1, h: 1, children: [] } ), null, 'not a fourth level of groups' );
+	assert.notEqual( t.holderFor( deep, 'g3', el ), null, 'but an element is not a group');
+	const made = t.insertInto( list, 'g', el );
+	assert.deepEqual( plain( t.findEl( made, 'g' ).children.map( ( e ) => e.id ) ), [ 'b', 'n' ] );
+	assert.deepEqual( plain( made.map( ( e ) => e.id ) ), [ 'a', 'g' ] );
+} );
