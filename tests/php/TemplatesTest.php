@@ -129,6 +129,33 @@ class TemplatesTest extends Test_Case {
 	}
 
 	/**
+	 * Saving a template keeps the unit a font size was shown in (the size stays in points); points write none, and what is not a unit of ours is dropped.
+	 */
+	public function test_saving_keeps_the_unit_of_a_font_size() {
+		$text = static function ( $more ) {
+			return '<!-- wp:events-certificates/certificate {"page":{"width":"297mm","height":"210mm"}} --><!-- wp:events-certificates/certificate-text {"id":"t","x":10,"y":10,"width":100,"height":20,"size":12.47246' . $more . '} /--><!-- /wp:events-certificates/certificate -->';
+		};
+		foreach ( array( 'mm', 'px', 'cm', 'in' ) as $unit ) {
+			$out = Designs\content( Designs\decode( $text( ',"sizeUnit":"' . $unit . '"' ) ) );
+			$this->assertStringContainsString( '"sizeUnit":"' . $unit . '"', $out, $unit );
+			$this->assertStringContainsString( '"size":12.47246', $out );
+		}
+		foreach ( array( 'pt', 'em' ) as $not ) {
+			$this->assertStringNotContainsString( 'sizeUnit', Designs\content( Designs\decode( $text( ',"sizeUnit":"' . $not . '"' ) ) ), $not );
+		}
+	}
+
+	/**
+	 * A text by language is kept when a template is saved: no panel edits it for now, and the certificates print it.
+	 */
+	public function test_saving_keeps_the_text_by_language() {
+		$markup = '<!-- wp:events-certificates/certificate {"page":{"width":"297mm","height":"210mm"}} --><!-- wp:events-certificates/certificate-text {"id":"t","x":10,"y":10,"width":100,"height":20,"runs":[{"text":"Hello"}],"variants":{"pt_BR":[{"text":"Ola"}]}} /--><!-- /wp:events-certificates/certificate -->';
+		$out    = Designs\content( Designs\decode( $markup ) );
+		$this->assertStringContainsString( '"pt_BR"', $out );
+		$this->assertStringContainsString( 'Ola', $out );
+	}
+
+	/**
 	 * A blank design keeps the Base design's page and has nothing on it: no colors and no theme (nothing is fixed).
 	 */
 	public function test_a_blank_design_has_the_page_only() {
