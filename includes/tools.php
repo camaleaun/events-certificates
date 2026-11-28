@@ -302,7 +302,7 @@ function handle() {
 		add_query_arg(
 			'tab',
 			'tools',
-			Admin\page_url_of( Admin\SLUG_SETTINGS )
+			Admin\settings_url()
 		)
 	);
 	exit;

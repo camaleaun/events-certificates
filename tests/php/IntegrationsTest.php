@@ -56,12 +56,33 @@ class IntegrationsTest extends Test_Case {
 	public function test_settings_group() {
 		$expected = array(
 			'none'        => Admin\GROUP,
-			'camptix'     => 'camptix_options',
-			'gatherpress' => 'gatherpress_settings',
+			'camptix'     => Admin\GROUP,
+			'gatherpress' => Admin\GROUP,
 			'both'        => Admin\GROUP,
 		);
 
 		$this->assertSame( $expected[ Environment\integration() ], apply_filters( 'evcert_settings_group', Admin\GROUP ) );
+	}
+
+	/**
+	 * The settings screen is the plugin's own wherever it is: with GatherPress or CampTix alone it is a short page, `certificates`, in their menu (Events, Tickets), not a tab of their settings.
+	 */
+	public function test_settings_screen_address() {
+		$expected = array(
+			'none'        => admin_url( 'admin.php?page=evcert-options' ),
+			'camptix'     => admin_url( 'edit.php?post_type=tix_ticket&page=certificates' ),
+			'gatherpress' => admin_url( 'edit.php?post_type=gatherpress_event&page=certificates' ),
+			'both'        => admin_url( 'admin.php?page=evcert-options' ),
+		);
+		$slug     = array(
+			'none'        => 'evcert-options',
+			'camptix'     => 'certificates',
+			'gatherpress' => 'certificates',
+			'both'        => 'evcert-options',
+		);
+
+		$this->assertSame( $slug[ Environment\integration() ], Admin\settings_slug() );
+		$this->assertSame( $expected[ Environment\integration() ], Admin\settings_url() );
 	}
 
 	/**

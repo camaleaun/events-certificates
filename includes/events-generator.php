@@ -108,7 +108,7 @@ function enqueue_commands() {
 	$urls     = array(
 		'events'       => EventsAdmin\url(),
 		'certificates' => admin_url( 'admin.php?page=' . \EventsCertificate\Admin\SLUG ),
-		'settings'     => admin_url( 'admin.php?page=' . \EventsCertificate\Admin\SLUG_SETTINGS ),
+		'settings'     => \EventsCertificate\Admin\settings_url(),
 	);
 	$events   = array();
 	$can_one  = false;

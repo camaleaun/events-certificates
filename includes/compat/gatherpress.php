@@ -44,10 +44,14 @@ const FLAG_TAXONOMY   = '_gatherpress_rsvp_flag';
 const PARENT_SLUG = 'edit.php?post_type=gatherpress_event';
 
 /**
- * The settings tab's sub-page key in GatherPress > Settings. Its settings
- * page slug is Utility::prefix_key( SUB_PAGE ) (gatherpress_certificates).
+ * The settings screen's slug: a page of the Events menu (edit.php?post_type=gatherpress_event&page=certificates), the plugin's own screen with its tabs.
  */
-const SUB_PAGE = 'certificates';
+const SETTINGS_SLUG = 'certificates';
+
+/**
+ * The page GatherPress's settings had a tab on before the screen was the plugin's own: its address now goes to the new one.
+ */
+const OLD_SETTINGS_PAGE = 'gatherpress_certificates';
 
 /**
  * Hooks, when GatherPress is active.
@@ -73,20 +77,17 @@ function register() {
 }
 
 /**
- * The menu and settings takeover, when GatherPress is the single compatible
- * plugin: Certificates becomes a submenu of GatherPress's event menu and its
- * settings move to a tab of GatherPress > Settings.
+ * The menu and settings, when GatherPress is the single compatible plugin: Certificates is a submenu of GatherPress's event menu, and so are its settings (the plugin's own
+ * screen, saved by its own form), not a tab of GatherPress > Settings.
  */
 function register_screen() {
 	// The Certificates screen becomes a submenu of GatherPress's event menu.
 	add_filter( 'evcert_admin_menu_parent', __NAMESPACE__ . '\menu_parent' );
-	// Settings are saved by GatherPress's settings form (its option group).
-	add_filter( 'evcert_settings_group', __NAMESPACE__ . '\settings_group' );
-	// Settings: a Certificates tab in GatherPress > Settings, its sections and
-	// fields rendered and saved by GatherPress's own settings form.
-	add_filter( 'gatherpress_sub_pages', __NAMESPACE__ . '\add_settings_tab' );
-	add_action( 'admin_init', __NAMESPACE__ . '\add_tab_fields' );
-	remove_action( 'evcert_certificates_screen', 'EventsCertificate\Admin\render_settings_form' );
+	// The settings screen: its short address, and a submenu next to Certificates.
+	add_filter( 'evcert_settings_slug', __NAMESPACE__ . '\settings_slug' );
+	add_action( 'admin_menu', __NAMESPACE__ . '\register_settings_menu', 20 );
+	// The address of the tab this screen replaces goes to it.
+	add_action( 'admin_init', __NAMESPACE__ . '\redirect_old_settings' );
 }
 
 /**
@@ -99,39 +100,31 @@ function menu_parent() {
 }
 
 /**
- * The settings are saved by GatherPress's settings form (options group
- * gatherpress_settings), alongside GatherPress's own settings.
+ * The settings screen's slug.
  *
- * @return string Settings group.
+ * @return string Slug.
  */
-function settings_group() {
-	return 'gatherpress_settings';
+function settings_slug() {
+	return SETTINGS_SLUG;
 }
 
 /**
- * Adds a Certificates tab to GatherPress > Settings.
- *
- * @param array<string, array<string, mixed>> $sub_pages GatherPress settings sub-pages.
- * @return array<string, array<string, mixed>>
+ * A settings submenu of the Events menu, after Certificates: the plugin's own settings screen (Features, Issuing, Verification, Declaration, Data, Tools).
  */
-function add_settings_tab( $sub_pages ) {
-	$sub_pages[ SUB_PAGE ] = array(
-		'name'     => __( 'Certificates', 'events-certificates' ),
-		'priority' => 60,
-	);
-
-	return $sub_pages;
+function register_settings_menu() {
+	$title = __( 'Certificate settings', 'events-certificates' );
+	add_submenu_page( PARENT_SLUG, $title, $title, Admin\CAPABILITY, SETTINGS_SLUG, 'EventsCertificate\Admin\render_settings_page' );
 }
 
 /**
- * Registers the Certificates settings fields on the GatherPress settings page
- * (the tab's prefixed slug), so GatherPress's settings form renders and saves them.
+ * The old address of the settings (a tab of GatherPress > Settings) goes to the settings screen.
  */
-function add_tab_fields() {
-	if ( ! class_exists( '\GatherPress\Core\Utility' ) ) {
-		return;
+function redirect_old_settings() {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only reads which page is asked for.
+	if ( isset( $_GET['page'] ) && OLD_SETTINGS_PAGE === sanitize_key( wp_unslash( $_GET['page'] ) ) && current_user_can( Admin\CAPABILITY ) ) {
+		wp_safe_redirect( Admin\settings_url() );
+		exit;
 	}
-	Admin\add_settings_fields( \GatherPress\Core\Utility::prefix_key( SUB_PAGE ) );
 }
 
 /**

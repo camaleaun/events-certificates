@@ -242,7 +242,7 @@ function enqueue() {
 				'urls'           => array(
 					'events'       => EventsAdmin\url(),
 					'certificates' => admin_url( 'admin.php?page=' . Admin\SLUG ),
-					'settings'     => admin_url( 'admin.php?page=' . Admin\SLUG_SETTINGS ),
+					'settings'     => Admin\settings_url(),
 				),
 			)
 		) . ';',

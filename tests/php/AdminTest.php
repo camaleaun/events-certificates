@@ -68,25 +68,12 @@ class AdminTest extends Test_Case {
 			array( 'Coupons', 'read', 'edit.php?post_type=tix_coupon' ),
 			array( 'Setup', 'read', 'camptix_options' ),
 			array( 'Certificates', 'read', Admin\SLUG ),
+			array( 'Certificate settings', 'read', CampTix\SETTINGS_SLUG ),
 		);
 		CampTix\move_after_attendees();
 		$slugs   = wp_list_pluck( $submenu[ CampTix\MENU ], 2 );
 		$submenu = $backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$this->assertSame( array( CampTix\MENU, 'post-new.php?post_type=tix_ticket', 'edit.php?post_type=tix_attendee', Admin\SLUG, 'edit.php?post_type=tix_coupon', 'camptix_options' ), array_values( $slugs ) );
-	}
-
-	public function test_setup_tab_is_added() {
-		$tabs = CampTix\add_setup_tab(
-			array(
-				'general'         => 'General',
-				'payment'         => 'Payment',
-				'email-templates' => 'E-mail Templates',
-				'beta'            => 'Beta',
-			)
-		);
-		$this->assertSame( array( 'general', 'payment', 'email-templates', CampTix\SECTION, 'beta' ), array_keys( $tabs ) );
-
-		$this->assertSame( array( 'general', CampTix\SECTION ), array_keys( CampTix\add_setup_tab( array( 'general' => 'General' ) ) ) );
+		$this->assertSame( array( CampTix\MENU, 'post-new.php?post_type=tix_ticket', 'edit.php?post_type=tix_attendee', Admin\SLUG, CampTix\SETTINGS_SLUG, 'edit.php?post_type=tix_coupon', 'camptix_options' ), array_values( $slugs ) );
 	}
 }

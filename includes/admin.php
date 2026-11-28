@@ -2,10 +2,9 @@
 /**
  * Admin: the Certificates screen and the settings fields.
  *
- * Where they appear depends on the site: with CampTix, the screen is a
- * submenu of Tickets and the settings a tab of Tickets > Setup
- * (includes/compat/camptix.php); otherwise the screen is a menu of its own
- * and the settings live on it.
+ * Where they appear depends on the site: with CampTix (Tickets) or GatherPress (Events) alone, the screen and the settings screen (page=certificates)
+ * are submenus of their menu (includes/compat/camptix.php, gatherpress.php); otherwise the screen is a menu of its own with the settings beside it (page=evcert-options).
+ * It is the same settings screen everywhere (docs/decisions/0057).
  *
  * @package EventsCertificate
  */
@@ -1334,7 +1333,7 @@ function render_settings_page() {
 		<?php settings_errors(); ?>
 		<nav class="nav-tab-wrapper" aria-label="<?php esc_attr_e( 'Settings sections', 'events-certificates' ); ?>">
 			<?php foreach ( $tabs as $id => $tab ) : ?>
-				<a class="nav-tab<?php echo $id === $current ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'tab', $id, page_url_of( SLUG_SETTINGS ) ) ); ?>"<?php echo $id === $current ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $tab[0] ); ?></a>
+				<a class="nav-tab<?php echo $id === $current ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'tab', $id, settings_url() ) ); ?>"<?php echo $id === $current ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $tab[0] ); ?></a>
 			<?php endforeach; ?>
 		</nav>
 		<?php if ( 'tools' === $current ) : ?>
@@ -1376,4 +1375,33 @@ function render_settings_page() {
  */
 function page_url_of( $slug ) {
 	return add_query_arg( 'page', $slug, admin_url( 'admin.php' ) );
+}
+
+/**
+ * The slug of the settings screen: its own (evcert-options), or the one an integration gives it (GatherPress: certificates, a page of its Events menu).
+ *
+ * @return string
+ */
+function settings_slug() {
+	/**
+	 * Filters the slug of the settings screen.
+	 *
+	 * @param string $slug Slug.
+	 */
+	return (string) apply_filters( 'evcert_settings_slug', SLUG_SETTINGS );
+}
+
+/**
+ * The address of the settings screen, wherever it is: a page of the plugin's own menu, or of the menu of the integration that hosts it.
+ *
+ * @return string
+ */
+function settings_url() {
+	$slug   = settings_slug();
+	$parent = menu_parent();
+	if ( SLUG_SETTINGS !== $slug && '' !== $parent && false !== strpos( $parent, '.php' ) ) {
+		return add_query_arg( 'page', $slug, admin_url( $parent ) );
+	}
+
+	return page_url_of( $slug );
 }

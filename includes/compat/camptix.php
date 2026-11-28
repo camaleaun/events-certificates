@@ -3,8 +3,7 @@
  * CampTix (WordCamps): Certificates goes where organizers already look.
  *
  * - Tickets > Certificates: the screen, right after Attendees.
- * - Tickets > Setup > Certificates: the settings, as a Setup tab, saved by
- *   CampTix's own form (settings group camptix_options).
+ * - Tickets > Certificate settings: the plugin's own settings screen (page=certificates), with its tabs and its own form.
  *
  * Only the plugin's own filters and CampTix's public hooks are used, so
  * CampTix could replace this integration with its own:
@@ -26,9 +25,14 @@ defined( 'ABSPATH' ) || exit;
 const MENU = 'edit.php?post_type=tix_ticket';
 
 /**
- * Setup tab key (?tix_section=).
+ * The settings screen's slug: a page of the Tickets menu (edit.php?post_type=tix_ticket&page=certificates).
  */
-const SECTION = 'certificates';
+const SETTINGS_SLUG = 'certificates';
+
+/**
+ * Where the settings were before: a tab of Tickets > Setup (?page=camptix_options&tix_section=certificates). Its address goes to the settings screen.
+ */
+const OLD_SECTION = 'certificates';
 
 /**
  * Hooks, when CampTix is active.
@@ -49,11 +53,11 @@ function register() {
 		return;
 	}
 	add_filter( 'evcert_admin_menu_parent', __NAMESPACE__ . '\menu_parent' );
-	add_filter( 'evcert_settings_group', __NAMESPACE__ . '\settings_group' );
+	// The settings: the plugin's own screen (its short address, a submenu next to Certificates), not a tab of CampTix's Setup.
+	add_filter( 'evcert_settings_slug', __NAMESPACE__ . '\settings_slug' );
+	add_action( 'admin_menu', __NAMESPACE__ . '\register_settings_menu', 20 );
 	add_action( 'admin_menu', __NAMESPACE__ . '\move_after_attendees', 99 );
-	add_filter( 'camptix_setup_sections', __NAMESPACE__ . '\add_setup_tab' );
-	add_action( 'camptix_menu_setup_controls', __NAMESPACE__ . '\setup_controls' );
-	remove_action( 'evcert_certificates_screen', 'EventsCertificate\Admin\render_settings_form' );
+	add_action( 'admin_init', __NAMESPACE__ . '\redirect_old_settings' );
 }
 
 /**
@@ -66,12 +70,34 @@ function menu_parent() {
 }
 
 /**
- * The settings are saved by CampTix's Setup form.
+ * The settings screen's slug.
  *
  * @return string
  */
-function settings_group() {
-	return 'camptix_options';
+function settings_slug() {
+	return SETTINGS_SLUG;
+}
+
+/**
+ * A settings submenu of Tickets, next to Certificates: the plugin's own settings screen (Features, Issuing, Verification, Declaration, Data, Tools).
+ */
+function register_settings_menu() {
+	$title = __( 'Certificate settings', 'events-certificates' );
+	add_submenu_page( MENU, $title, $title, Admin\CAPABILITY, SETTINGS_SLUG, 'EventsCertificate\Admin\render_settings_page' );
+}
+
+/**
+ * The old address of the settings (a tab of Tickets > Setup) goes to the settings screen.
+ */
+function redirect_old_settings() {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- only reads which page is asked for.
+	$page    = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+	$section = isset( $_GET['tix_section'] ) ? sanitize_key( wp_unslash( $_GET['tix_section'] ) ) : '';
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	if ( 'camptix_options' === $page && OLD_SECTION === $section && current_user_can( Admin\CAPABILITY ) ) {
+		wp_safe_redirect( Admin\settings_url() );
+		exit;
+	}
 }
 
 /**
@@ -86,15 +112,18 @@ function move_after_attendees() {
 		return;
 	}
 	$items = array_values( $submenu[ MENU ] );
-	$ours  = null;
-	foreach ( $items as $index => $item ) {
-		if ( Admin\SLUG === $item[2] ) {
-			$ours = $item;
-			unset( $items[ $index ] );
-			break;
+	// Certificates, then its settings, kept in that order.
+	$ours = array();
+	foreach ( array( Admin\SLUG, SETTINGS_SLUG ) as $slug ) {
+		foreach ( $items as $index => $item ) {
+			if ( $slug === $item[2] ) {
+				$ours[] = $item;
+				unset( $items[ $index ] );
+				break;
+			}
 		}
 	}
-	if ( null === $ours ) {
+	if ( ! $ours ) {
 		return;
 	}
 	$items    = array_values( $items );
@@ -105,35 +134,6 @@ function move_after_attendees() {
 			break;
 		}
 	}
-	array_splice( $items, $position, 0, array( $ours ) );
+	array_splice( $items, $position, 0, $ours );
 	$submenu[ MENU ] = $items; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering the submenu is the point.
-}
-
-/**
- * Adds the Certificates tab to Tickets > Setup, before Beta.
- *
- * @param array<string, string> $sections Tabs.
- * @return array<string, string>
- */
-function add_setup_tab( $sections ) {
-	$tab = array( SECTION => __( 'Certificates', 'events-certificates' ) );
-
-	// Before Beta, which CampTix keeps last; at the end when there is no Beta tab.
-	$position = array_search( 'beta', array_keys( $sections ), true );
-	if ( false === $position ) {
-		return $sections + $tab;
-	}
-
-	return array_slice( $sections, 0, $position, true ) + $tab + array_slice( $sections, $position, null, true );
-}
-
-/**
- * Adds the settings fields when the Certificates tab is shown.
- *
- * @param string $section Current tab.
- */
-function setup_controls( $section ) {
-	if ( SECTION === $section ) {
-		Admin\add_settings_fields( 'camptix_options' );
-	}
 }

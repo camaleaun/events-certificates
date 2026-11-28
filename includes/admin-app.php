@@ -215,7 +215,7 @@ function enqueue() {
 					'certificates' => \EventsCertificate\Admin\page_url(),
 					'events'       => \EventsCertificate\EventsAdmin\url(),
 					'quick'        => admin_url( 'admin.php?page=' . \EventsCertificate\Generator\SLUG ),
-					'settings'     => admin_url( 'admin.php?page=' . Admin\SLUG_SETTINGS ),
+					'settings'     => Admin\settings_url(),
 				),
 				// The template's conditions: role names, and whether it is the default (applies to everyone else).
 				'roles'       => \EventsCertificate\Designs\role_labels(),

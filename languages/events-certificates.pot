@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T06:23:35+00:00\n"
+"POT-Creation-Date: 2026-11-28T10:50:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: events-certificates\n"
@@ -395,7 +395,7 @@ msgid "Only a valid certificate can be revoked: this one was already replaced or
 msgstr ""
 
 #: includes/abilities.php:1601
-#: includes/admin.php:342
+#: includes/admin.php:341
 msgid "The signature was not saved: paste the code of an SVG file with filled paths."
 msgstr ""
 
@@ -404,13 +404,13 @@ msgid "Give the \"gatherpress_event_id\"."
 msgstr ""
 
 #: includes/admin-app.php:119
-#: includes/admin.php:1230
+#: includes/admin.php:1229
 msgid "Edit certificate"
 msgstr ""
 
 #: includes/admin-app.php:230
 #: includes/admin-app.php:263
-#: includes/admin.php:777
+#: includes/admin.php:776
 msgid "City, Country"
 msgstr ""
 
@@ -486,50 +486,48 @@ msgstr ""
 msgid "Event Coordinator"
 msgstr ""
 
-#: includes/admin.php:95
-#: includes/admin.php:1331
+#: includes/admin.php:94
+#: includes/admin.php:1330
 #: includes/bundle-admin.php:150
 #: includes/generator.php:488
 #: build-blocks/blocks.js:165
 #: build-blocks/blocks.js:181
 #: build/routes/editor/content.js:5220
-#: build/routes/editor/content.js:7688
-#: build/routes/editor/content.js:7853
+#: build/routes/editor/content.js:7703
+#: build/routes/editor/content.js:7868
 msgid "Settings"
 msgstr ""
 
-#: includes/admin.php:103
-#: includes/admin.php:1137
+#: includes/admin.php:102
+#: includes/admin.php:1136
 #: includes/bundle-admin.php:149
 #: includes/class-all-people-list-table.php:45
 #: includes/class-events-list-table.php:57
 #: includes/class-people-list-table.php:59
 #: includes/class-templates-list-table.php:56
-#: includes/compat/camptix.php:119
-#: includes/compat/gatherpress.php:119
-#: includes/compat/gatherpress.php:411
+#: includes/compat/gatherpress.php:404
 #: includes/events-generator.php:312
 #: includes/generator.php:482
 #: includes/templates.php:300
 msgid "Certificates"
 msgstr ""
 
-#: includes/admin.php:183
+#: includes/admin.php:182
 msgid "Certificates per page"
 msgstr ""
 
-#: includes/admin.php:210
+#: includes/admin.php:209
 msgid "Sorry, you are not allowed to change certificates."
 msgstr ""
 
-#: includes/admin.php:389
-#: includes/admin.php:1314
+#: includes/admin.php:388
+#: includes/admin.php:1313
 msgid "Features"
 msgstr ""
 
-#: includes/admin.php:395
-#: includes/admin.php:478
-#: includes/admin.php:1316
+#: includes/admin.php:394
+#: includes/admin.php:477
+#: includes/admin.php:1315
 #: build-blocks/event-pictures.js:407
 #: build-blocks/screen.js:980
 #: build-blocks/settings-signature.js:355
@@ -540,83 +538,83 @@ msgstr ""
 #: build/routes/editor/content.js:4213
 #: build/routes/editor/content.js:5205
 #: build/routes/editor/content.js:5362
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "Verification"
 msgstr ""
 
-#: includes/admin.php:404
+#: includes/admin.php:403
 msgid "Declaration page"
 msgstr ""
 
-#: includes/admin.php:413
+#: includes/admin.php:412
 msgid "Attendees get their own"
 msgstr ""
 
-#: includes/admin.php:424
-#: includes/admin.php:1315
+#: includes/admin.php:423
+#: includes/admin.php:1314
 msgid "Issuing"
 msgstr ""
 
-#: includes/admin.php:430
+#: includes/admin.php:429
 #: includes/events-admin.php:1270
 #: includes/events-admin.php:1273
 msgid "Signed by"
 msgstr ""
 
-#: includes/admin.php:439
+#: includes/admin.php:438
 msgid "Certificate signature"
 msgstr ""
 
-#: includes/admin.php:446
+#: includes/admin.php:445
 msgid "Event location"
 msgstr ""
 
-#: includes/admin.php:454
+#: includes/admin.php:453
 msgid "Languages"
 msgstr ""
 
-#: includes/admin.php:462
-#: includes/admin.php:1041
+#: includes/admin.php:461
+#: includes/admin.php:1040
 #: build/routes/editor/content.js:3470
 msgid "Date of issue"
 msgstr ""
 
-#: includes/admin.php:469
-#: includes/admin.php:1063
+#: includes/admin.php:468
+#: includes/admin.php:1062
 msgid "Certificate colors"
 msgstr ""
 
-#: includes/admin.php:484
+#: includes/admin.php:483
 #: includes/tools.php:52
 msgid "Check page"
 msgstr ""
 
-#: includes/admin.php:495
+#: includes/admin.php:494
 msgid "Certificate address"
 msgstr ""
 
-#: includes/admin.php:506
+#: includes/admin.php:505
 msgid "Public site"
 msgstr ""
 
-#: includes/admin.php:520
+#: includes/admin.php:519
 msgid "Identification document"
 msgstr ""
 
-#: includes/admin.php:526
+#: includes/admin.php:525
 #: includes/documents.php:237
 msgid "Document"
 msgstr ""
 
-#: includes/admin.php:537
+#: includes/admin.php:536
 msgid "Not from that country"
 msgstr ""
 
-#: includes/admin.php:545
+#: includes/admin.php:544
 msgid "Event days"
 msgstr ""
 
-#: includes/admin.php:554
+#: includes/admin.php:553
 #: includes/mine.php:116
 #: includes/mine.php:459
 #: includes/mine.php:576
@@ -624,205 +622,205 @@ msgstr ""
 msgid "Get my certificate"
 msgstr ""
 
-#: includes/admin.php:560
+#: includes/admin.php:559
 msgid "Authentication"
 msgstr ""
 
-#: includes/admin.php:570
-#: includes/admin.php:1318
+#: includes/admin.php:569
+#: includes/admin.php:1317
 msgid "Data"
 msgstr ""
 
-#: includes/admin.php:576
+#: includes/admin.php:575
 msgid "Uninstall"
 msgstr ""
 
-#: includes/admin.php:588
+#: includes/admin.php:587
 msgid "Turn on what your event needs. Each one is off by default: they are customs of some countries, not needed everywhere."
 msgstr ""
 
-#: includes/admin.php:596
+#: includes/admin.php:595
 msgid "Verification is off: certificates carry no QR code, code or verification address. Turn it on above, in Features, if you want anyone to be able to check them."
 msgstr ""
 
-#: includes/admin.php:600
+#: includes/admin.php:599
 msgid "Certificates issued on this site carry a QR code and a code anyone can check on its verification page."
 msgstr ""
 
-#: includes/admin.php:605
+#: includes/admin.php:604
 msgid "it runs on WordPress Playground"
 msgstr ""
 
-#: includes/admin.php:606
+#: includes/admin.php:605
 msgid "its environment type is “local”"
 msgstr ""
 
-#: includes/admin.php:607
+#: includes/admin.php:606
 msgid "its address only works on this computer or network"
 msgstr ""
 
-#: includes/admin.php:608
+#: includes/admin.php:607
 msgid "its address is a private IP"
 msgstr ""
 
 #. translators: %s: reasons, e.g. "its address only works on this computer or network".
-#: includes/admin.php:618
+#: includes/admin.php:617
 #, php-format
 msgid "This site doesn’t look public (%s), so certificates show a placeholder where the QR code and the verification address go: nobody else could open them."
 msgstr ""
 
-#: includes/admin.php:632
+#: includes/admin.php:631
 msgid "Print a code and a QR code on the certificates"
 msgstr ""
 
-#: includes/admin.php:633
+#: includes/admin.php:632
 msgid "Anyone can then check a certificate at its address (needs a public site). Details in the Verification section below."
 msgstr ""
 
-#: includes/admin.php:645
+#: includes/admin.php:644
 msgid "Treat this site as public"
 msgstr ""
 
-#: includes/admin.php:646
+#: includes/admin.php:645
 msgid "For a staging site with a public address. Only turn it on when anyone can open this site’s pages."
 msgstr ""
 
-#: includes/admin.php:659
+#: includes/admin.php:658
 msgid "No days yet: they come from the schedule (Sessions) once it has dates."
 msgstr ""
 
-#: includes/admin.php:686
+#: includes/admin.php:685
 msgid "Kind"
 msgstr ""
 
-#: includes/admin.php:688
+#: includes/admin.php:687
 msgid "Talks"
 msgstr ""
 
-#: includes/admin.php:689
+#: includes/admin.php:688
 msgid "Tables"
 msgstr ""
 
-#: includes/admin.php:703
+#: includes/admin.php:702
 msgid "tables, one per line"
 msgstr ""
 
-#: includes/admin.php:721
+#: includes/admin.php:720
 msgid "— None (the plugin’s own page) —"
 msgstr ""
 
-#: includes/admin.php:739
+#: includes/admin.php:738
 msgid "The page with the Check a certificate block. Certificates live under its address."
 msgstr ""
 
 #. translators: Stands for a certificate code in an example address, as in https://example.com/certificate/<code>/.
-#: includes/admin.php:753
-#: includes/admin.php:765
+#: includes/admin.php:752
+#: includes/admin.php:764
 msgctxt "certificate code placeholder"
 msgid "code"
 msgstr ""
 
-#: includes/admin.php:754
+#: includes/admin.php:753
 msgid "Set by the check page’s address (change it in the page)."
 msgstr ""
 
-#: includes/admin.php:763
+#: includes/admin.php:762
 msgid "The address printed on certificates and in their QR code. Change it before issuing: printed certificates keep the old one."
 msgstr ""
 
-#: includes/admin.php:778
+#: includes/admin.php:777
 msgid "Shown where the design uses the Location field. On WordCamp.org it comes from the WordCamp’s location."
 msgstr ""
 
-#: includes/admin.php:787
+#: includes/admin.php:786
 msgid "When marked as present at the event"
 msgstr ""
 
-#: includes/admin.php:788
+#: includes/admin.php:787
 msgid "With any confirmed ticket"
 msgstr ""
 
-#: includes/admin.php:789
+#: includes/admin.php:788
 msgid "No: only organizers issue certificates"
 msgstr ""
 
-#: includes/admin.php:796
+#: includes/admin.php:795
 msgid "From the link in their ticket e-mail, attendees check how their name goes on the certificate and get it with its code."
 msgstr ""
 
-#: includes/admin.php:808
+#: includes/admin.php:807
 msgid "Choose a language…"
 msgstr ""
 
-#: includes/admin.php:814
+#: includes/admin.php:813
 msgid "Add"
 msgstr ""
 
-#: includes/admin.php:816
+#: includes/admin.php:815
 msgid "site language"
 msgstr ""
 
 #. translators: %s: language name.
-#: includes/admin.php:824
+#: includes/admin.php:823
 #, php-format
 msgid "Remove %s"
 msgstr ""
 
-#: includes/admin.php:828
+#: includes/admin.php:827
 msgid "The languages a certificate can be shown in, and the ones you can write its texts in. With none added, every installed language is used."
 msgstr ""
 
 #. translators: %s: link to the page.
-#: includes/admin.php:841
+#: includes/admin.php:840
 #, php-format
 msgid "Attendees type the e-mail they registered with in %s and get their certificate, if they were marked as present. You can also use the Get my certificate block or the [evcert_mine] shortcode on any page."
 msgstr ""
 
-#: includes/admin.php:844
+#: includes/admin.php:843
 msgid "Attendees type the e-mail they registered with and get their certificate, if they were marked as present. Add the Get my certificate block or the [evcert_mine] shortcode to a page."
 msgstr ""
 
-#: includes/admin.php:853
+#: includes/admin.php:852
 msgid "No authentication: the e-mail is enough"
 msgstr ""
 
-#: includes/admin.php:854
+#: includes/admin.php:853
 msgid "Simple: the e-mail shows a simplified view; the certificate asks for a code"
 msgstr ""
 
-#: includes/admin.php:855
+#: includes/admin.php:854
 msgid "4-digit code sent by e-mail"
 msgstr ""
 
-#: includes/admin.php:856
+#: includes/admin.php:855
 msgid "6-digit code sent by e-mail"
 msgstr ""
 
-#: includes/admin.php:857
+#: includes/admin.php:856
 msgid "Link only: a one-use link sent by e-mail"
 msgstr ""
 
-#: includes/admin.php:868
+#: includes/admin.php:867
 msgid "Send the link too (for the 4 and 6-digit codes)"
 msgstr ""
 
-#: includes/admin.php:870
+#: includes/admin.php:869
 msgid "A code is good for 15 minutes and 5 tries; a link works once, for an hour. Except with “No authentication” and “Simple”, the page never says whether an e-mail is on the list."
 msgstr ""
 
-#: includes/admin.php:879
+#: includes/admin.php:878
 msgid "Optional. Asked on the declaration page, a custom of some countries, such as Brazil. Choose the country whose document you ask for, or none. Needs the declaration page turned on above."
 msgstr ""
 
-#: includes/admin.php:891
+#: includes/admin.php:890
 msgid "Offer attendees a declaration page"
 msgstr ""
 
-#: includes/admin.php:892
+#: includes/admin.php:891
 msgid "A second page of the certificate where they declare the days and talks they attended, with an identification document if you ask for one. A custom of some countries, such as Brazil."
 msgstr ""
 
-#: includes/admin.php:907
+#: includes/admin.php:906
 msgid "None: no document is asked"
 msgstr ""
 
@@ -830,7 +828,7 @@ msgstr ""
 #. translators: 1: template name (Basic, Meetup WordPress), 2: yes or no.
 #. translators: 1: a field's name, 2: its value.
 #. translators: 1: what the color is for (Text, Fill…), 2: the color's name.
-#: includes/admin.php:914
+#: includes/admin.php:913
 #: includes/compat/camptix-days.php:202
 #: includes/tools.php:95
 #: includes/verify.php:666
@@ -841,20 +839,20 @@ msgstr ""
 msgid "%1$s: %2$s"
 msgstr ""
 
-#: includes/admin.php:918
+#: includes/admin.php:917
 msgid "The attendee types that document on the declaration page, checked by the country’s own rule."
 msgstr ""
 
-#: includes/admin.php:929
+#: includes/admin.php:928
 msgid "Let attendees say they are not from that country"
 msgstr ""
 
-#: includes/admin.php:930
+#: includes/admin.php:929
 msgid "A box “Not from the event’s country” (in Portuguese, “Sou estrangeiro”): they give a passport instead, or nothing at all."
 msgstr ""
 
-#: includes/admin.php:944
-#: includes/admin.php:1241
+#: includes/admin.php:943
+#: includes/admin.php:1240
 #: includes/class-all-people-list-table.php:42
 #: includes/class-list-table.php:93
 #: includes/class-people-list-table.php:57
@@ -875,52 +873,52 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: includes/admin.php:946
+#: includes/admin.php:945
 msgid "Role, e.g. Meetup organizer"
 msgstr ""
 
-#: includes/admin.php:947
+#: includes/admin.php:946
 msgid "Role of who signs"
 msgstr ""
 
-#: includes/admin.php:1038
+#: includes/admin.php:1037
 msgid "The day each certificate was issued"
 msgstr ""
 
-#: includes/admin.php:1038
+#: includes/admin.php:1037
 msgid "Each certificate has its own date."
 msgstr ""
 
-#: includes/admin.php:1039
+#: includes/admin.php:1038
 msgid "The event’s last day"
 msgstr ""
 
-#: includes/admin.php:1039
+#: includes/admin.php:1038
 msgid "Every certificate of the event has the same date."
 msgstr ""
 
-#: includes/admin.php:1060
+#: includes/admin.php:1059
 msgid "Light only"
 msgstr ""
 
-#: includes/admin.php:1061
+#: includes/admin.php:1060
 msgid "Light and dark"
 msgstr ""
 
-#: includes/admin.php:1073
+#: includes/admin.php:1072
 msgid "The PDF is always light. With \"Light and dark\", the page that checks a certificate offers both, and the template editor shows the dark colors."
 msgstr ""
 
-#: includes/admin.php:1084
+#: includes/admin.php:1083
 msgid "Delete all certificates when the plugin is deleted"
 msgstr ""
 
-#: includes/admin.php:1085
+#: includes/admin.php:1084
 msgid "Printed certificates would no longer be verifiable. Leave it off unless you are sure."
 msgstr ""
 
 #. translators: %s: number of certificates.
-#: includes/admin.php:1150
+#: includes/admin.php:1149
 #, php-format
 msgid "%s certificate revoked."
 msgid_plural "%s certificates revoked."
@@ -928,7 +926,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of certificates.
-#: includes/admin.php:1162
+#: includes/admin.php:1161
 #, php-format
 msgid "%s certificate moved to the Trash."
 msgid_plural "%s certificates moved to the Trash."
@@ -936,7 +934,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of certificates.
-#: includes/admin.php:1164
+#: includes/admin.php:1163
 #, php-format
 msgid "%s certificate restored."
 msgid_plural "%s certificates restored."
@@ -944,7 +942,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of certificates.
-#: includes/admin.php:1166
+#: includes/admin.php:1165
 #, php-format
 msgid "%s certificate deleted permanently."
 msgid_plural "%s certificates deleted permanently."
@@ -952,49 +950,49 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of certificates.
-#: includes/admin.php:1176
+#: includes/admin.php:1175
 #, php-format
 msgid "%s certificate stays in the Trash: a newer one was issued to the same person in the same role."
 msgid_plural "%s certificates stay in the Trash: a newer one was issued to the same person in the same role."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/admin.php:1182
+#: includes/admin.php:1181
 msgid "Certificate reissued."
 msgstr ""
 
-#: includes/admin.php:1182
+#: includes/admin.php:1181
 msgid "Certificate saved."
 msgstr ""
 
-#: includes/admin.php:1183
+#: includes/admin.php:1182
 msgid "View the new certificate"
 msgstr ""
 
-#: includes/admin.php:1183
+#: includes/admin.php:1182
 #: includes/compat/camptix-front.php:500
 msgid "View the certificate"
 msgstr ""
 
-#: includes/admin.php:1199
+#: includes/admin.php:1198
 msgid "Search certificates"
 msgstr ""
 
-#: includes/admin.php:1230
+#: includes/admin.php:1229
 #: includes/class-list-table.php:353
 #: includes/compat/camptix-front.php:531
 msgid "Correct and reissue"
 msgstr ""
 
-#: includes/admin.php:1234
+#: includes/admin.php:1233
 msgid "The corrected certificate gets a new code. This one is marked as replaced and points to the new one."
 msgstr ""
 
-#: includes/admin.php:1234
+#: includes/admin.php:1233
 msgid "The changes are made to this certificate."
 msgstr ""
 
-#: includes/admin.php:1245
+#: includes/admin.php:1244
 #: includes/class-list-table.php:95
 #: includes/events-admin.php:1280
 #: includes/events-admin.php:1281
@@ -1005,56 +1003,56 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
-#: includes/admin.php:1248
+#: includes/admin.php:1247
 msgid "A correction keeps the role. To give someone another role, revoke this certificate and issue the other one."
 msgstr ""
 
-#: includes/admin.php:1248
+#: includes/admin.php:1247
 msgid "The role stays. To give someone another role, issue the other certificate from the participants."
 msgstr ""
 
-#: includes/admin.php:1252
+#: includes/admin.php:1251
 #: includes/csv.php:52
 #: build/routes/editor/content.js:3261
 msgid "Workload (hours)"
 msgstr ""
 
-#: includes/admin.php:1256
+#: includes/admin.php:1255
 msgid "Reissue"
 msgstr ""
 
-#: includes/admin.php:1256
+#: includes/admin.php:1255
 #: includes/events-admin.php:1114
 #: includes/events-admin.php:1121
 #: includes/events-admin.php:1467
-#: build/routes/editor/content.js:7625
-#: build/routes/editor/content.js:7701
+#: build/routes/editor/content.js:7640
+#: build/routes/editor/content.js:7716
 msgid "Save"
 msgstr ""
 
-#: includes/admin.php:1257
+#: includes/admin.php:1256
 msgid "Back to the certificates"
 msgstr ""
 
-#: includes/admin.php:1270
-#: includes/compat/gatherpress.php:421
-#: includes/compat/gatherpress.php:433
+#: includes/admin.php:1269
+#: includes/compat/gatherpress.php:414
+#: includes/compat/gatherpress.php:426
 #: includes/compat/wcpt.php:181
 #: includes/events-admin.php:334
 msgid "Sorry, you are not allowed to manage certificates."
 msgstr ""
 
-#: includes/admin.php:1317
-#: build/routes/editor/content.js:7685
+#: includes/admin.php:1316
+#: build/routes/editor/content.js:7700
 msgid "Declaration"
 msgstr ""
 
-#: includes/admin.php:1325
+#: includes/admin.php:1324
 #: includes/tools.php:322
 msgid "Tools"
 msgstr ""
 
-#: includes/admin.php:1335
+#: includes/admin.php:1334
 msgid "Settings sections"
 msgstr ""
 
@@ -1062,8 +1060,8 @@ msgstr ""
 #: includes/bundle-admin.php:132
 #: includes/bundle-admin.php:217
 #: includes/restrictions.php:34
-#: build/routes/editor/content.js:7642
-#: build/routes/editor/content.js:7708
+#: build/routes/editor/content.js:7657
+#: build/routes/editor/content.js:7723
 msgid "Export"
 msgstr ""
 
@@ -1618,9 +1616,9 @@ msgstr ""
 #: includes/class-people-list-table.php:320
 #: includes/class-templates-list-table.php:67
 #: includes/class-templates-list-table.php:194
-#: build/routes/editor/content.js:7645
-#: build/routes/editor/content.js:7716
-#: build/routes/editor/content.js:7969
+#: build/routes/editor/content.js:7660
+#: build/routes/editor/content.js:7731
+#: build/routes/editor/content.js:7984
 msgid "Restore"
 msgstr ""
 
@@ -2019,7 +2017,7 @@ msgstr ""
 #: build-signer/index.js:699
 #: build/routes/editor/content.js:4161
 #: build/routes/editor/content.js:4584
-#: build/routes/editor/content.js:6452
+#: build/routes/editor/content.js:6468
 msgid "Duplicate"
 msgstr ""
 
@@ -2210,7 +2208,7 @@ msgstr ""
 #: build-signer/index.js:850
 #: build/routes/editor/content.js:4387
 #: build/routes/editor/content.js:5934
-#: build/routes/editor/content.js:7970
+#: build/routes/editor/content.js:7985
 msgid "Cancel"
 msgstr ""
 
@@ -2225,9 +2223,9 @@ msgstr ""
 #: build/routes/editor/content.js:3308
 #: build/routes/editor/content.js:3313
 #: build/routes/editor/content.js:3500
-#: build/routes/editor/content.js:7677
-#: build/routes/editor/content.js:7855
-#: build/routes/editor/content.js:7937
+#: build/routes/editor/content.js:7692
+#: build/routes/editor/content.js:7870
+#: build/routes/editor/content.js:7952
 msgid "Certificate"
 msgstr ""
 
@@ -2330,19 +2328,24 @@ msgstr ""
 msgid "Save the correction"
 msgstr ""
 
-#: includes/compat/gatherpress.php:326
+#: includes/compat/camptix.php:85
+#: includes/compat/gatherpress.php:115
+msgid "Certificate settings"
+msgstr ""
+
+#: includes/compat/gatherpress.php:319
 msgid "That GatherPress event no longer exists."
 msgstr ""
 
-#: includes/compat/gatherpress.php:358
+#: includes/compat/gatherpress.php:351
 msgid "From GatherPress: RSVPs \"attending\" come in as registered, check-ins as attended."
 msgstr ""
 
-#: includes/compat/gatherpress.php:359
+#: includes/compat/gatherpress.php:352
 msgid "Sync with GatherPress"
 msgstr ""
 
-#: includes/compat/gatherpress.php:436
+#: includes/compat/gatherpress.php:429
 msgid "That event is not linked to GatherPress."
 msgstr ""
 
@@ -2857,7 +2860,7 @@ msgstr ""
 #: build/routes/editor/content.js:2531
 #: build/routes/editor/content.js:4212
 #: build/routes/editor/content.js:5203
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "Signature"
 msgstr ""
 
@@ -3833,7 +3836,7 @@ msgstr ""
 #: build/routes/editor/content.js:3502
 #: build/routes/editor/content.js:4211
 #: build/routes/editor/content.js:5195
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "Date of emission"
 msgstr ""
 
@@ -4262,7 +4265,7 @@ msgstr ""
 
 #: includes/tutorial-step-image.php:72
 #: build/routes/editor/content.js:4153
-#: build/routes/editor/content.js:6444
+#: build/routes/editor/content.js:6460
 msgid "Copy"
 msgstr ""
 
@@ -5062,8 +5065,8 @@ msgstr ""
 #: build/routes/editor/content.js:4203
 #: build/routes/editor/content.js:5195
 #: build/routes/editor/content.js:5388
-#: build/routes/editor/content.js:7022
-#: build/routes/editor/content.js:7817
+#: build/routes/editor/content.js:7037
+#: build/routes/editor/content.js:7832
 msgid "Text"
 msgstr ""
 
@@ -5074,7 +5077,7 @@ msgstr ""
 #: build/routes/editor/content.js:2538
 #: build/routes/editor/content.js:4205
 #: build/routes/editor/content.js:5197
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "Rectangle"
 msgstr ""
 
@@ -5085,7 +5088,7 @@ msgstr ""
 #: build/routes/editor/content.js:2539
 #: build/routes/editor/content.js:4206
 #: build/routes/editor/content.js:5198
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "Ellipse"
 msgstr ""
 
@@ -5098,7 +5101,7 @@ msgstr ""
 #: build/routes/editor/content.js:5196
 #: build/routes/editor/content.js:5395
 #: build/routes/editor/content.js:5404
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "Line"
 msgstr ""
 
@@ -5110,7 +5113,7 @@ msgstr ""
 #: build/routes/editor/content.js:4039
 #: build/routes/editor/content.js:4208
 #: build/routes/editor/content.js:5201
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "Image"
 msgstr ""
 
@@ -5124,7 +5127,7 @@ msgstr ""
 #: build/routes/editor/content.js:2542
 #: build/routes/editor/content.js:4209
 #: build/routes/editor/content.js:5202
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "SVG"
 msgstr ""
 
@@ -5137,9 +5140,9 @@ msgstr ""
 #: build/routes/editor/content.js:4207
 #: build/routes/editor/content.js:4672
 #: build/routes/editor/content.js:5199
-#: build/routes/editor/content.js:6228
-#: build/routes/editor/content.js:6468
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:6236
+#: build/routes/editor/content.js:6484
+#: build/routes/editor/content.js:7037
 msgid "Group"
 msgstr ""
 
@@ -5260,7 +5263,7 @@ msgstr ""
 #: build-blocks/settings-signature.js:424
 #: build-signer/index.js:406
 #: build/routes/editor/content.js:2960
-#: build/routes/editor/content.js:7721
+#: build/routes/editor/content.js:7736
 msgid "Clear"
 msgstr ""
 
@@ -5443,7 +5446,7 @@ msgstr ""
 #: build-signer/index.js:704
 #: build/routes/editor/content.js:4186
 #: build/routes/editor/content.js:4589
-#: build/routes/editor/content.js:6489
+#: build/routes/editor/content.js:6505
 msgid "Delete"
 msgstr ""
 
@@ -5533,8 +5536,8 @@ msgstr ""
 #: build-blocks/screen.js:1599
 #: build-blocks/settings-signature.js:926
 #: build/routes/editor/content.js:4220
-#: build/routes/editor/content.js:7669
-#: build/routes/editor/content.js:7743
+#: build/routes/editor/content.js:7684
+#: build/routes/editor/content.js:7758
 msgid "Close"
 msgstr ""
 
@@ -5607,19 +5610,19 @@ msgstr ""
 
 #: build-blocks/events-generator.js:127
 #: build-blocks/screen.js:2592
-#: build/routes/editor/content.js:7653
+#: build/routes/editor/content.js:7668
 msgid "Go to Events"
 msgstr ""
 
 #: build-blocks/events-generator.js:128
 #: build-blocks/screen.js:2593
-#: build/routes/editor/content.js:7652
+#: build/routes/editor/content.js:7667
 msgid "Go to Certificates"
 msgstr ""
 
 #: build-blocks/events-generator.js:129
 #: build-blocks/screen.js:2594
-#: build/routes/editor/content.js:7655
+#: build/routes/editor/content.js:7670
 msgid "Go to Settings"
 msgstr ""
 
@@ -5920,14 +5923,14 @@ msgstr ""
 #: build/routes/editor/content.js:3350
 #: build/routes/editor/content.js:3366
 #: build/routes/editor/content.js:5699
-#: build/routes/editor/content.js:7955
+#: build/routes/editor/content.js:7970
 msgid "Landscape"
 msgstr ""
 
 #: build/routes/editor/content.js:3350
 #: build/routes/editor/content.js:3367
 #: build/routes/editor/content.js:5700
-#: build/routes/editor/content.js:7955
+#: build/routes/editor/content.js:7970
 msgid "Portrait"
 msgstr ""
 
@@ -6122,56 +6125,56 @@ msgid "Edit text"
 msgstr ""
 
 #: build/routes/editor/content.js:4143
-#: build/routes/editor/content.js:6435
+#: build/routes/editor/content.js:6451
 msgid "Bring forward"
 msgstr ""
 
 #: build/routes/editor/content.js:4144
-#: build/routes/editor/content.js:6436
+#: build/routes/editor/content.js:6452
 msgid "Send backward"
 msgstr ""
 
 #: build/routes/editor/content.js:4146
-#: build/routes/editor/content.js:6228
+#: build/routes/editor/content.js:6236
 msgid "Ungroup"
 msgstr ""
 
 #: build/routes/editor/content.js:4147
-#: build/routes/editor/content.js:6229
-#: build/routes/editor/content.js:6472
+#: build/routes/editor/content.js:6237
+#: build/routes/editor/content.js:6488
 msgid "Unlock"
 msgstr ""
 
 #: build/routes/editor/content.js:4147
-#: build/routes/editor/content.js:6229
-#: build/routes/editor/content.js:6472
+#: build/routes/editor/content.js:6237
+#: build/routes/editor/content.js:6488
 msgid "Lock"
 msgstr ""
 
 #: build/routes/editor/content.js:4148
-#: build/routes/editor/content.js:6439
-#: build/routes/editor/content.js:7704
+#: build/routes/editor/content.js:6455
+#: build/routes/editor/content.js:7719
 msgid "Options"
 msgstr ""
 
 #: build/routes/editor/content.js:4157
-#: build/routes/editor/content.js:6448
+#: build/routes/editor/content.js:6464
 msgid "Cut"
 msgstr ""
 
 #: build/routes/editor/content.js:4165
-#: build/routes/editor/content.js:6458
+#: build/routes/editor/content.js:6474
 msgid "Bring to front"
 msgstr ""
 
 #: build/routes/editor/content.js:4169
-#: build/routes/editor/content.js:6462
+#: build/routes/editor/content.js:6478
 msgid "Send to back"
 msgstr ""
 
 #: build/routes/editor/content.js:4173
-#: build/routes/editor/content.js:6230
-#: build/routes/editor/content.js:6476
+#: build/routes/editor/content.js:6238
+#: build/routes/editor/content.js:6492
 msgid "Hide"
 msgstr ""
 
@@ -6369,7 +6372,7 @@ msgid "%1$s (not installed: %2$s is used)"
 msgstr ""
 
 #: build/routes/editor/content.js:5200
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "Shape"
 msgstr ""
 
@@ -6755,17 +6758,17 @@ msgid "Page (print)"
 msgstr ""
 
 #: build/routes/editor/content.js:5691
-#: build/routes/editor/content.js:7954
+#: build/routes/editor/content.js:7969
 msgid "Desktop"
 msgstr ""
 
 #: build/routes/editor/content.js:5692
-#: build/routes/editor/content.js:7954
+#: build/routes/editor/content.js:7969
 msgid "Tablet"
 msgstr ""
 
 #: build/routes/editor/content.js:5693
-#: build/routes/editor/content.js:7954
+#: build/routes/editor/content.js:7969
 msgid "Mobile"
 msgstr ""
 
@@ -6777,231 +6780,231 @@ msgstr ""
 msgid "Moving, resizing or hiding here changes this screen only. Text and style are shared."
 msgstr ""
 
-#: build/routes/editor/content.js:6230
-#: build/routes/editor/content.js:6476
+#: build/routes/editor/content.js:6238
+#: build/routes/editor/content.js:6492
 msgid "Show"
 msgstr ""
 
-#: build/routes/editor/content.js:6417
+#: build/routes/editor/content.js:6433
 msgid "Multiple elements selected"
 msgstr ""
 
-#: build/routes/editor/content.js:6418
+#: build/routes/editor/content.js:6434
 msgid "Selection tools"
 msgstr ""
 
-#: build/routes/editor/content.js:6484
+#: build/routes/editor/content.js:6500
 msgid "Required: they can be moved, not deleted."
 msgstr ""
 
-#: build/routes/editor/content.js:6635
+#: build/routes/editor/content.js:6651
 msgid "Drawing"
 msgstr ""
 
-#: build/routes/editor/content.js:6655
+#: build/routes/editor/content.js:6671
 msgid "Picture"
 msgstr ""
 
-#: build/routes/editor/content.js:6987
+#: build/routes/editor/content.js:7002
 msgid "Choose a layout for the group"
 msgstr ""
 
-#: build/routes/editor/content.js:6988
+#: build/routes/editor/content.js:7003
 msgid "Group: choose a layout"
 msgstr ""
 
-#: build/routes/editor/content.js:7022
+#: build/routes/editor/content.js:7037
 msgid "QR code"
 msgstr ""
 
-#: build/routes/editor/content.js:7049
+#: build/routes/editor/content.js:7064
 msgid "Fit horizontal"
 msgstr ""
 
-#: build/routes/editor/content.js:7050
+#: build/routes/editor/content.js:7065
 msgid "Fit vertical"
 msgstr ""
 
-#: build/routes/editor/content.js:7051
+#: build/routes/editor/content.js:7066
 msgid "Fit view"
 msgstr ""
 
-#: build/routes/editor/content.js:7055
+#: build/routes/editor/content.js:7070
 msgid "Zoom out"
 msgstr ""
 
-#: build/routes/editor/content.js:7060
+#: build/routes/editor/content.js:7075
 msgid "Zoom"
 msgstr ""
 
-#: build/routes/editor/content.js:7098
+#: build/routes/editor/content.js:7113
 msgid "Zoom in"
 msgstr ""
 
-#: build/routes/editor/content.js:7318
+#: build/routes/editor/content.js:7333
 msgid "Kept: it has to be on every certificate."
 msgid_plural "Kept: they have to be on every certificate."
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/routes/editor/content.js:7378
+#: build/routes/editor/content.js:7393
 msgid "There is no room for more elements."
 msgstr ""
 
-#: build/routes/editor/content.js:7467
+#: build/routes/editor/content.js:7482
 msgid "Design imported. Save to keep it."
 msgstr ""
 
-#: build/routes/editor/content.js:7599
+#: build/routes/editor/content.js:7614
 msgid "Loading…"
 msgstr ""
 
-#: build/routes/editor/content.js:7600
+#: build/routes/editor/content.js:7615
 msgid "Saved"
 msgstr ""
 
-#: build/routes/editor/content.js:7601
+#: build/routes/editor/content.js:7616
 msgid "Unsaved changes"
 msgstr ""
 
-#: build/routes/editor/content.js:7602
-#: build/routes/editor/content.js:7701
+#: build/routes/editor/content.js:7617
+#: build/routes/editor/content.js:7716
 msgid "Saving…"
 msgstr ""
 
-#: build/routes/editor/content.js:7603
+#: build/routes/editor/content.js:7618
 msgid "Couldn’t save"
 msgstr ""
 
-#: build/routes/editor/content.js:7615
+#: build/routes/editor/content.js:7630
 msgid "Couldn’t open the preview."
 msgstr ""
 
-#: build/routes/editor/content.js:7628
-#: build/routes/editor/content.js:7672
+#: build/routes/editor/content.js:7643
+#: build/routes/editor/content.js:7687
 msgid "Undo"
 msgstr ""
 
-#: build/routes/editor/content.js:7629
-#: build/routes/editor/content.js:7673
+#: build/routes/editor/content.js:7644
+#: build/routes/editor/content.js:7688
 msgid "Redo"
 msgstr ""
 
-#: build/routes/editor/content.js:7630
+#: build/routes/editor/content.js:7645
 msgid "Add an element"
 msgstr ""
 
-#: build/routes/editor/content.js:7631
+#: build/routes/editor/content.js:7646
 msgid "Hide layers"
 msgstr ""
 
-#: build/routes/editor/content.js:7631
+#: build/routes/editor/content.js:7646
 msgid "Show layers"
 msgstr ""
 
-#: build/routes/editor/content.js:7632
+#: build/routes/editor/content.js:7647
 msgid "Hide settings"
 msgstr ""
 
-#: build/routes/editor/content.js:7632
+#: build/routes/editor/content.js:7647
 msgid "Show settings"
 msgstr ""
 
-#: build/routes/editor/content.js:7633
+#: build/routes/editor/content.js:7648
 msgid "Show the certificate"
 msgstr ""
 
-#: build/routes/editor/content.js:7633
+#: build/routes/editor/content.js:7648
 msgid "Show the declaration"
 msgstr ""
 
-#: build/routes/editor/content.js:7634
-#: build/routes/editor/content.js:7686
+#: build/routes/editor/content.js:7649
+#: build/routes/editor/content.js:7701
 msgid "Preview in new tab"
 msgstr ""
 
-#: build/routes/editor/content.js:7635
-#: build/routes/editor/content.js:7687
+#: build/routes/editor/content.js:7650
+#: build/routes/editor/content.js:7702
 msgid "Preview in dark mode"
 msgstr ""
 
-#: build/routes/editor/content.js:7635
-#: build/routes/editor/content.js:7687
+#: build/routes/editor/content.js:7650
+#: build/routes/editor/content.js:7702
 msgid "Preview in light mode"
 msgstr ""
 
-#: build/routes/editor/content.js:7637
+#: build/routes/editor/content.js:7652
 msgid "Duplicate the selection"
 msgstr ""
 
-#: build/routes/editor/content.js:7638
+#: build/routes/editor/content.js:7653
 msgid "Delete the selection"
 msgstr ""
 
-#: build/routes/editor/content.js:7643
-#: build/routes/editor/content.js:7712
+#: build/routes/editor/content.js:7658
+#: build/routes/editor/content.js:7727
 msgid "Import…"
 msgstr ""
 
-#: build/routes/editor/content.js:7644
+#: build/routes/editor/content.js:7659
 msgid "Clear the design"
 msgstr ""
 
-#: build/routes/editor/content.js:7651
+#: build/routes/editor/content.js:7666
 msgid "Go to Templates"
 msgstr ""
 
-#: build/routes/editor/content.js:7654
+#: build/routes/editor/content.js:7669
 msgid "Go to Quick generator"
 msgstr ""
 
-#: build/routes/editor/content.js:7659
+#: build/routes/editor/content.js:7674
 msgid "Back to Certificates"
 msgstr ""
 
-#: build/routes/editor/content.js:7669
+#: build/routes/editor/content.js:7684
 msgid "Add element"
 msgstr ""
 
-#: build/routes/editor/content.js:7674
-#: build/routes/editor/content.js:7742
+#: build/routes/editor/content.js:7689
+#: build/routes/editor/content.js:7757
 msgid "Layers"
 msgstr ""
 
-#: build/routes/editor/content.js:7680
+#: build/routes/editor/content.js:7695
 msgid "Certificate design"
 msgstr ""
 
-#: build/routes/editor/content.js:7699
+#: build/routes/editor/content.js:7714
 msgid "Couldn’t save. Try again."
 msgstr ""
 
-#: build/routes/editor/content.js:7704
+#: build/routes/editor/content.js:7719
 msgid "Design"
 msgstr ""
 
-#: build/routes/editor/content.js:7865
+#: build/routes/editor/content.js:7880
 msgid "Element"
 msgstr ""
 
-#: build/routes/editor/content.js:7868
+#: build/routes/editor/content.js:7883
 msgid "Close settings"
 msgstr ""
 
 #. translators: %d: how many elements are selected.
-#: build/routes/editor/content.js:7876
+#: build/routes/editor/content.js:7891
 #, js-format
 msgid "%d element selected"
 msgid_plural "%d elements selected"
 msgstr[0] ""
 msgstr[1] ""
 
-#: build/routes/editor/content.js:7936
+#: build/routes/editor/content.js:7951
 msgid "Selection"
 msgstr ""
 
 #. translators: %d: how many elements are selected.
-#: build/routes/editor/content.js:7946
+#: build/routes/editor/content.js:7961
 #, js-format
 msgid "%d element"
 msgid_plural "%d elements"
@@ -7009,16 +7012,16 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: screen (Desktop, Tablet, Mobile), 2: orientation, 3: width, 4: height.
-#: build/routes/editor/content.js:7953
+#: build/routes/editor/content.js:7968
 #, js-format
 msgid "%1$s · %2$s · %3$s × %4$s"
 msgstr ""
 
-#: build/routes/editor/content.js:7978
+#: build/routes/editor/content.js:7993
 msgid "This replaces everything in this template (the page, the elements and the colors) with the Basic design, the one a new site starts from."
 msgstr ""
 
-#: build/routes/editor/content.js:7979
+#: build/routes/editor/content.js:7994
 msgid "Nothing is saved until you click Save, and Undo brings your design back."
 msgstr ""
 
