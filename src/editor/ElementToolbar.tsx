@@ -5,11 +5,11 @@
  */
 import { DropdownMenu, MenuGroup, MenuItem, Popover, Toolbar, ToolbarButton, ToolbarDropdownMenu, ToolbarGroup, ToolbarItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { chevronDown, chevronUp, copy, formatBold, formatItalic, group as groupIcon, lock, moreVertical, pencil, plus, trash, ungroup as ungroupIcon, unlock, unseen } from '@wordpress/icons';
+import { chevronDown, chevronUp, copy, copySmall, formatBold, formatItalic, group as groupIcon, lock, moreVertical, pencil, plus, trash, ungroup as ungroupIcon, unlock, unseen } from '@wordpress/icons';
 import { fields } from './FieldText';
 import { ReplaceImage } from './ImageSource';
 import type { Picked } from './media';
-import { elementIcon } from './icons';
+import { cut, elementIcon } from './icons';
 import type { Element } from './model';
 import { stockName } from './base';
 
@@ -21,6 +21,8 @@ type Props = {
 	onOrder: ( to: 'up' | 'down' | 'top' | 'bottom' ) => void;
 	onToggle: ( key: 'locked' | 'hidden' ) => void;
 	onDuplicate: () => void;
+	onCopy?: () => void;
+	onCut?: () => void;
 	/** Puts the element in a group (as the core's toolbar does with a block), or takes a group apart. */
 	onGroup?: () => void;
 	onUngroup?: () => void;
@@ -35,7 +37,7 @@ type Props = {
 	onEditDrawing?: () => void;
 };
 
-export default function ElementToolbar( { anchor, el, required, onSelectParent, onOrder, onToggle, onDuplicate, onGroup, onUngroup, onRemove, editing, marks, onBold, onItalic, onInsertField, onToggleEdit, onImage, onEditDrawing }: Props ) {
+export default function ElementToolbar( { anchor, el, required, onSelectParent, onOrder, onToggle, onDuplicate, onCopy, onCut, onGroup, onUngroup, onRemove, editing, marks, onBold, onItalic, onInsertField, onToggleEdit, onImage, onEditDrawing }: Props ) {
 	const info = fields();
 	if ( ! anchor ) {
 		return null;
@@ -116,6 +118,16 @@ export default function ElementToolbar( { anchor, el, required, onSelectParent, 
 						{ ( { onClose } ) => (
 							<>
 								<MenuGroup>
+									{ onCopy && (
+										<MenuItem icon={ copySmall } shortcut="⌘C" onClick={ () => { onCopy(); onClose(); } }>
+											{ __( 'Copy', 'events-certificates' ) }
+										</MenuItem>
+									) }
+									{ onCut && (
+										<MenuItem icon={ cut } shortcut="⌘X" disabled={ required } onClick={ () => { onCut(); onClose(); } }>
+											{ __( 'Cut', 'events-certificates' ) }
+										</MenuItem>
+									) }
 									<MenuItem icon={ copy } shortcut="⌘D" onClick={ () => { onDuplicate(); onClose(); } }>
 										{ __( 'Duplicate', 'events-certificates' ) }
 									</MenuItem>

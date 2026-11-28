@@ -48,7 +48,12 @@ import Inspector from './Inspector';
 import PreviewDropdown from './PreviewDropdown';
 import SvgEditor from './SvgEditor';
 import type { Picked } from './media';
-import { BlockLayers, BlocksProvider, registerBlocks, type Selection } from './blocks';
+import { parse, serialize } from '@wordpress/blocks';
+import { BlockLayers, BlocksProvider, registerBlocks, toBlocks, toElements, type Selection } from './blocks';
+import { adoptColors, CLIPBOARD_TYPE, copyPayload, pasteEls, plainTextOf, type ClipboardPayload } from './clipboard';
+import { runsFromText } from './rich';
+import { FIELD_KEYS } from './fieldKeys';
+import { BLOCK_NAMES } from './dialect';
 import { canGroupIds, escapeIds, selectAllIds, selectionType } from './selection';
 import SelectionToolbar from './SelectionToolbar';
 import BlockCanvas from './BlockCanvas';
@@ -439,6 +444,70 @@ export default function Editor() {
 		selectIds( out.kept );
 	};
 	const remove = ( id: string ) => removeMany( [ id ] );
+	/** The last paste: the same copy pasted again is moved a little more each time, so the copies do not hide each other. */
+	const pasted = useRef< { key: string; n: number } >( { key: '', n: 0 } );
+	/** Copy or cut: what is selected goes on the clipboard as elements (to paste here or in another template), as the blocks of the layers (text/html) and as the words of its texts. */
+	const toClipboard = ( data: DataTransfer, cut: boolean ): boolean => {
+		const payload = copyPayload( design.elements, design.page, selection.ids, design );
+		if ( ! payload.elements.length ) {
+			return false;
+		}
+		data.setData( CLIPBOARD_TYPE, JSON.stringify( { ...payload, cut } as ClipboardPayload ) );
+		data.setData( 'text/html', serialize( toBlocks( payload.elements ) as never ) );
+		data.setData( 'text/plain', plainTextOf( payload.elements ) );
+		pasted.current = { key: '', n: 0 };
+		if ( cut ) {
+			removeMany( selection.ids );
+		}
+		return true;
+	};
+	/** What a paste brings: our own elements, the blocks of a certificate (as the layers copy them), or plain text, which is a new text. */
+	const fromClipboard = ( data: DataTransfer ): { els: Element[]; key: string; cut: boolean } | null => {
+		const own = data.getData( CLIPBOARD_TYPE );
+		if ( own ) {
+			try {
+				const payload = JSON.parse( own ) as ClipboardPayload;
+				if ( payload.version === 1 && Array.isArray( payload.elements ) && payload.elements.length ) {
+					return { els: adoptColors( payload.elements, payload.source || { colors: {}, palette: [] }, design ), key: payload.elements.map( ( el ) => el.id ).join( ',' ), cut: !! payload.cut };
+				}
+			} catch ( e ) {
+				// Not ours: read what else it holds.
+			}
+		}
+		const html = data.getData( 'text/html' );
+		if ( html.includes( '<!-- wp:events-certificates/' ) ) {
+			const known = Object.values( BLOCK_NAMES );
+			const blocks = ( parse( html ) as { name: string }[] ).filter( ( b ) => known.includes( b.name ) );
+			if ( blocks.length ) {
+				return { els: toElements( blocks as never ), key: '', cut: false };
+			}
+		}
+		const text = data.getData( 'text/plain' );
+		if ( text.trim() ) {
+			const el = create( 'text', design, paintRef.current ) as TextEl;
+			return { els: [ { ...el, runs: runsFromText( text, FIELD_KEYS ) as Run[] } as Element ], key: '', cut: false };
+		}
+		return null;
+	};
+	const pasteFromClipboard = ( data: DataTransfer ): boolean => {
+		const got = fromClipboard( data );
+		if ( ! got ) {
+			return false;
+		}
+		const same = got.key !== '' && pasted.current.key === got.key;
+		const n = same ? pasted.current.n + 1 : got.cut ? 0 : 1;
+		pasted.current = { key: got.key, n };
+		const out = pasteEls( design.elements, design.page, got.els, { selected: selection.ids, offset: n * 10, max: MAX_ELEMENTS } );
+		if ( ! out ) {
+			setNotice( __( 'There is no room for more elements.', 'events-certificates' ) );
+			return true;
+		}
+		if ( out.ids.length ) {
+			commit( { ...design, elements: out.list } );
+			selectIds( out.ids );
+		}
+		return true;
+	};
 	/** Several elements copied at once, each after the last that was selected of its list; the copies are selected. */
 	const duplicateMany = ( ids: string[] ) => {
 		const out = duplicateEls( design.elements, ids, shift, MAX_ELEMENTS );
@@ -553,6 +622,32 @@ export default function Editor() {
 		const holder = parentOf( resolvedShown.elements, id );
 		commit( { ...design, elements: mapEl( design.elements, id, ( e ) => placed( e, b, ( holder ? innerPage( holder ) : design.page ) as never ) ) } );
 	};
+
+	// Copy, cut and paste of the selection (in a text field the text editor has its own: ADR 0054; in the layers the core's do the same with the same blocks).
+	useEffect( () => {
+		const mine = ( event: ClipboardEvent ) => {
+			const target = event.target as HTMLElement | null;
+			return ! event.defaultPrevented && !! target && ! target.closest?.( 'input, textarea, [contenteditable="true"], .block-editor-list-view' );
+		};
+		const onCopy = ( event: ClipboardEvent ) => {
+			if ( mine( event ) && selection.ids.length && event.clipboardData && toClipboard( event.clipboardData, event.type === 'cut' ) ) {
+				event.preventDefault();
+			}
+		};
+		const onPaste = ( event: ClipboardEvent ) => {
+			if ( mine( event ) && event.clipboardData && pasteFromClipboard( event.clipboardData ) ) {
+				event.preventDefault();
+			}
+		};
+		document.addEventListener( 'copy', onCopy );
+		document.addEventListener( 'cut', onCopy );
+		document.addEventListener( 'paste', onPaste );
+		return () => {
+			document.removeEventListener( 'copy', onCopy );
+			document.removeEventListener( 'cut', onCopy );
+			document.removeEventListener( 'paste', onPaste );
+		};
+	} );
 
 	// Keyboard: arrows nudge, Delete removes, Cmd/Ctrl+Z/Shift+Z/D/S.
 	useEffect( () => {
@@ -983,6 +1078,8 @@ export default function Editor() {
 					onToggle={ ( key ) => toggleMany( selectedMany, key ) }
 					onDuplicate={ () => duplicateMany( selectedMany ) }
 					onRemove={ () => removeMany( selectedMany ) }
+					onCopy={ () => document.execCommand( 'copy' ) }
+					onCut={ () => document.execCommand( 'cut' ) }
 				/>
 			) }
 			{ current && selectedMany.length < 2 && ( tab === 'art' || editing ) && ! drawing && (
@@ -1000,6 +1097,8 @@ export default function Editor() {
 					onOrder={ ( to ) => reorder( current.id, to ) }
 					onToggle={ ( key ) => update( current.id, { [ key ]: ! current[ key ] } as Partial< Element > ) }
 					onDuplicate={ () => duplicate( current.id ) }
+					onCopy={ () => document.execCommand( 'copy' ) }
+					onCut={ () => document.execCommand( 'cut' ) }
 					onGroup={ canHold( current ) ? () => group( [ current.id ] ) : undefined }
 					onUngroup={ isGroup( current ) ? () => ungroup( current.id ) : undefined }
 					onRemove={ () => remove( current.id ) }
