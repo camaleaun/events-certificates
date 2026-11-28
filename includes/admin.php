@@ -380,7 +380,7 @@ function add_settings_fields( $page ) {
 	wp_enqueue_style( 'evcert-settings', $style['url'], array(), $style['version'] );
 	wp_enqueue_script( 'evcert-settings', $script['url'], array(), $script['version'], true );
 
-	// Self-issuing and the declaration come from CampTix (WordCamp.org): only shown with it.
+	// Self-issuing and the declaration's form come from CampTix (WordCamp.org): only shown with it.
 	$camptix = \EventsCertificate\Environment\has_camptix();
 
 	// 1. The switches: what the event needs, everything off until turned on (decision 0029).
@@ -398,6 +398,15 @@ function add_settings_fields( $page ) {
 		'evcert_features',
 		array( 'label_for' => 'evcert_verification' )
 	);
+	// The declaration page is a switch on every site: it also turns on the template editor's Declaration tab (the second page's design).
+	add_settings_field(
+		'evcert_declaration',
+		__( 'Declaration page', 'events-certificates' ),
+		__NAMESPACE__ . '\render_declaration_field',
+		$page,
+		'evcert_features',
+		array( 'label_for' => 'evcert_declaration' )
+	);
 	if ( $camptix ) {
 		add_settings_field(
 			'evcert_self_issue',
@@ -406,14 +415,6 @@ function add_settings_fields( $page ) {
 			$page,
 			'evcert_features',
 			array( 'label_for' => 'evcert_self_issue' )
-		);
-		add_settings_field(
-			'evcert_declaration',
-			__( 'Declaration page', 'events-certificates' ),
-			__NAMESPACE__ . '\render_declaration_field',
-			$page,
-			'evcert_features',
-			array( 'label_for' => 'evcert_declaration' )
 		);
 	}
 

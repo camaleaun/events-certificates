@@ -191,6 +191,8 @@ function enqueue() {
 				'design'      => $design,
 				// Whether the dark colors are offered (Settings > Certificate colors: "Light and dark"): the preview and the Dark tab of the colors.
 				'darkMode'    => \EventsCertificate\Settings\dark_enabled(),
+				// Whether the declaration page is on (Settings > Features): the template editor offers the Declaration tab only then.
+				'declaration' => (bool) \EventsCertificate\Settings\value( 'declaration' ),
 				// The Basic design (filterable, Designs\basic()): where "Restore the Basic design" and an import start from.
 				'base'        => \EventsCertificate\Designs\basic(),
 				// Unfinished features, off unless turned on in wp-config.php.

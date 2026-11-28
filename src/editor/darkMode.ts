@@ -7,3 +7,9 @@ export function darkEnabled(): boolean {
 	const config = typeof window !== 'undefined' ? ( window as unknown as { evcertEditor?: { darkMode?: boolean } } ).evcertEditor : undefined;
 	return config?.darkMode !== false;
 }
+
+/** Whether the declaration page is on (Settings > Features > Declaration page): the editor offers the design of its second page only then. */
+export function declarationEnabled(): boolean {
+	const config = typeof window !== 'undefined' ? ( window as unknown as { evcertEditor?: { declaration?: boolean } } ).evcertEditor : undefined;
+	return config?.declaration === true;
+}

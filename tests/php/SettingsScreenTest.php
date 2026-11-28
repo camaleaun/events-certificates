@@ -9,6 +9,7 @@ namespace EventsCertificate\Tests;
 
 use EventsCertificate\Admin;
 use EventsCertificate\Environment;
+use EventsCertificate\Settings;
 
 /**
  * Sections, rows that depend on a feature, and the better fields.
@@ -62,14 +63,16 @@ class SettingsScreenTest extends Test_Case {
 	}
 
 	/**
-	 * The switches are in the features section: verification always, self-issuing and the declaration with CampTix.
+	 * The switches are in the features section: verification and the declaration page always (the declaration also turns on the editor's Declaration tab),
+	 * self-issuing with CampTix.
 	 */
 	public function test_the_switches_are_the_first_section() {
 		$fields = array_keys( $GLOBALS['wp_settings_fields'][ self::PAGE ]['evcert_features'] );
 
 		$this->assertContains( 'evcert_verification', $fields );
 		$this->assertSame( Environment\has_camptix(), in_array( 'evcert_self_issue', $fields, true ) );
-		$this->assertSame( Environment\has_camptix(), in_array( 'evcert_declaration', $fields, true ) );
+		$this->assertContains( 'evcert_declaration', $fields );
+		$this->assertFalse( (bool) Settings\defaults()['declaration'], 'The declaration page starts off.' );
 		$this->assertArrayNotHasKey( 'evcert_verification', $GLOBALS['wp_settings_fields'][ self::PAGE ]['evcert_authenticity'], 'It is not repeated in its own section.' );
 	}
 

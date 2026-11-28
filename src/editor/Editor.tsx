@@ -4,7 +4,7 @@
  * the other elements, and a floating Dock with everything else.
  */
 import { fontStack, weightFor } from './fonts';
-import { darkEnabled } from './darkMode';
+import { darkEnabled, declarationEnabled } from './darkMode';
 import apiFetch from '@wordpress/api-fetch';
 import { Button, ColorPalette, DropdownMenu, MenuGroup, MenuItem, Popover, Snackbar, Spinner, RangeControl, SelectControl, TextControl, ToggleControl, __experimentalConfirmDialog as ConfirmDialog } from '@wordpress/components';
 import { store as commandsStore, useCommand } from '@wordpress/commands';
@@ -59,7 +59,7 @@ import { fitScale, isFit, ZOOM_MAX, ZOOM_MIN, type FitMode, type ZoomMode } from
 import './style.scss';
 
 // The block types of a drawing, known to the block editor only to be listed (the canvas draws them): docs/decisions/0046.
-registerBlocks( { text: __( 'Text', 'events-certificates' ), rect: __( 'Rectangle', 'events-certificates' ), ellipse: __( 'Ellipse', 'events-certificates' ), path: __( 'Shape', 'events-certificates' ), line: __( 'Line', 'events-certificates' ), image: __( 'Image', 'events-certificates' ), svg: __( 'SVG', 'events-certificates' ), qr: __( 'QR code', 'events-certificates' ), signature: __( 'Signature', 'events-certificates' ), verification: __( 'Verification', 'events-certificates' ) } );
+registerBlocks( { text: __( 'Text', 'events-certificates' ), rect: __( 'Rectangle', 'events-certificates' ), ellipse: __( 'Ellipse', 'events-certificates' ), group: __( 'Group', 'events-certificates' ), path: __( 'Shape', 'events-certificates' ), line: __( 'Line', 'events-certificates' ), image: __( 'Image', 'events-certificates' ), svg: __( 'SVG', 'events-certificates' ), qr: __( 'QR code', 'events-certificates' ), signature: __( 'Signature', 'events-certificates' ), verification: __( 'Verification', 'events-certificates' ) } );
 
 declare global {
 	interface Window {
@@ -645,7 +645,7 @@ export default function Editor() {
 	useCommand( palette( 'add', __( 'Add an element', 'events-certificates' ), plus, () => setPanel( 'insert' ) ) );
 	useCommand( palette( 'layers', panel === 'layers' ? __( 'Hide layers', 'events-certificates' ) : __( 'Show layers', 'events-certificates' ), listView, () => setPanel( panel === 'layers' ? null : 'layers' ) ) );
 	useCommand( palette( 'sidebar', sidebarTab ? __( 'Hide settings', 'events-certificates' ) : __( 'Show settings', 'events-certificates' ), drawerRight, () => setSidebar( sidebarTab ? null : current ? 'element' : 'design' ) ) );
-	useCommand( palette( 'side', side === 'back' ? __( 'Show the certificate', 'events-certificates' ) : __( 'Show the declaration', 'events-certificates' ), pages, () => showSide( side === 'back' ? 'front' : 'back' ) ) );
+	useCommand( palette( 'side', side === 'back' ? __( 'Show the certificate', 'events-certificates' ) : __( 'Show the declaration', 'events-certificates' ), pages, () => showSide( side === 'back' ? 'front' : 'back' ), ! declarationEnabled() && side !== 'back' ) );
 	useCommand( palette( 'preview', __( 'Preview in new tab', 'events-certificates' ), external, () => preview() ) );
 	useCommand( palette( 'mode', mode === 'light' ? __( 'Preview in dark mode', 'events-certificates' ) : __( 'Preview in light mode', 'events-certificates' ), seen, () => setMode( mode === 'light' ? 'dark' : 'light' ), ! darkEnabled() ) );
 	fitLabels().forEach( ( [ mode, label ] ) => useCommand( palette( `fit-${ mode }`, label, seen, () => fit( mode ) ) ) );
@@ -692,7 +692,7 @@ export default function Editor() {
 					{ /* Screen views (Desktop/Tablet/Mobile, orientation): unfinished, behind EVCERT_DEVELOPMENT_SCREEN_VIEWS. */ }
 					{ config.development?.screenViews && <PreviewDropdown view={ view } onChange={ ( next ) => setView( next ) } /> }
 					{ /* The declaration sheet: pressed while it is shown (the certificate is not shown then); a second press goes back. */ }
-					<Button icon={ pages } isPressed={ side === 'back' } onClick={ () => showSide( side === 'back' ? 'front' : 'back' ) } label={ __( 'Declaration', 'events-certificates' ) } />
+					{ ( declarationEnabled() || side === 'back' ) && <Button icon={ pages } isPressed={ side === 'back' } onClick={ () => showSide( side === 'back' ? 'front' : 'back' ) } label={ __( 'Declaration', 'events-certificates' ) } /> }
 					<Button icon={ external } onClick={ preview } label={ __( 'Preview in new tab', 'events-certificates' ) } />
 					{ /* The same icon as the Colors section's toggle, pressed in dark mode (@wordpress/icons has no moon: the half-filled circle of the Styles). */ }
 					{ darkEnabled() && (
