@@ -137,7 +137,7 @@ function render_settings_tab( $page ) {
 		return;
 	}
 	remove_action( 'gatherpress_settings_section', array( \GatherPress\Core\Settings::get_instance(), 'render_settings_form' ) );
-	Admin\render_settings_body();
+	Admin\render_settings_body( true );
 }
 
 /**

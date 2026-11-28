@@ -245,29 +245,41 @@ class SettingsScreenTest extends Test_Case {
 	}
 
 	/**
-	 * The body of the settings screen, as the three mounts print it.
+	 * The body of the settings screen: the plugin's own screen's (WordPress's tabs), or the hosted one (a tab of GatherPress's or CampTix's settings: sub-tabs).
 	 *
+	 * @param bool $hosted Inside another plugin's settings tab.
 	 * @return string
 	 */
-	private function body() {
+	private function body( $hosted = false ) {
 		wp_set_current_user( 1 );
 		ob_start();
-		Admin\render_settings_body();
+		Admin\render_settings_body( $hosted );
 		return (string) ob_get_clean();
 	}
 
 	/**
-	 * The screen is one piece: the same tabs, the same markup, whichever site it is on (docs/decisions/0057).
+	 * The content is one piece: the same tabs and the same form whichever site it is on; only how the tabs are drawn depends on whether another plugin's tabs surround them (docs/decisions/0057).
 	 */
 	public function test_the_settings_screen_has_the_same_tabs_and_markup_on_every_site() {
-		$html = $this->body();
-		foreach ( array( 'Features', 'Issuing', 'Verification', 'Data', 'Tools' ) as $caption ) {
-			$this->assertStringContainsString( '>' . $caption . '</a>', $html, $caption );
+		foreach ( array( false, true ) as $hosted ) {
+			$html = $this->body( $hosted );
+			foreach ( array( 'Features', 'Issuing', 'Verification', 'Data', 'Tools' ) as $caption ) {
+				$this->assertStringContainsString( '>' . $caption . '</a>', $html, $caption );
+			}
+			$this->assertStringContainsString( 'class="evcert-settings"', $html );
+			
 		}
-		$this->assertStringContainsString( 'class="evcert-settings"', $html );
-		$this->assertStringContainsString( 'subsubsub evcert-settings__tabs', $html );
-		$this->assertStringContainsString( 'evcert-settings__buttons', $html );
-		$this->assertStringNotContainsString( 'nav-tab', $html, 'The tabs are a list of links, not a second row of tabs.' );
+		// On its own screen the tabs are WordPress's, and Export and Import are beside the title (the page's, not the body's).
+		$own = $this->body();
+		$this->assertStringContainsString( 'nav-tab-wrapper', $own );
+		$this->assertStringContainsString( 'nav-tab nav-tab-active', $own );
+		$this->assertStringNotContainsString( 'subsubsub', $own );
+		$this->assertStringNotContainsString( 'evcert-settings__buttons', $own );
+		// Inside another plugin's tab, which already has tabs, they are sub-tabs, with Export and Import.
+		$hosted = $this->body( true );
+		$this->assertStringContainsString( 'subsubsub evcert-settings__tabs', $hosted );
+		$this->assertStringContainsString( 'evcert-settings__buttons', $hosted );
+		$this->assertStringNotContainsString( 'nav-tab', $hosted, 'The tabs are a list of links, not a second row of tabs.' );
 		// The declaration tab is there when its settings are (CampTix, or the declaration turned on); the others always.
 		$this->assertSame( array( 'features', 'certificates', 'verification', 'data', 'tools' ), array_values( array_diff( array_keys( Admin\settings_tabs() ), array( 'declaration' ) ) ) );
 	}
@@ -276,20 +288,18 @@ class SettingsScreenTest extends Test_Case {
 	 * Each mount prints the screen inside its own frame and nothing else of the settings: the body is in it whole.
 	 */
 	public function test_every_mount_prints_the_same_body() {
-		$body = $this->body();
-
 		ob_start();
 		Admin\render_settings_page();
-		$this->assertStringContainsString( $body, (string) ob_get_clean(), 'A site with no integration.' );
+		$this->assertStringContainsString( $this->body(), (string) ob_get_clean(), 'A site with no integration.' );
 
 		ob_start();
 		\EventsCertificate\Compat\CampTix\render_settings_page();
-		$this->assertStringContainsString( $body, (string) ob_get_clean(), 'CampTix.' );
+		$this->assertStringContainsString( $this->body( true ), (string) ob_get_clean(), 'CampTix.' );
 
 		if ( class_exists( '\GatherPress\Core\Settings' ) ) {
 			ob_start();
 			\EventsCertificate\Compat\GatherPress\render_settings_tab( 'gatherpress_certificates' );
-			$this->assertStringContainsString( $body, (string) ob_get_clean(), 'GatherPress.' );
+			$this->assertStringContainsString( $this->body( true ), (string) ob_get_clean(), 'GatherPress.' );
 		}
 	}
 

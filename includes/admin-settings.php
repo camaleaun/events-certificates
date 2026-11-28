@@ -896,6 +896,7 @@ function render_settings_page() {
 	?>
 	<div class="wrap">
 		<h1 class="wp-heading-inline"><?php esc_html_e( 'Settings', 'events-certificates' ); ?></h1>
+		<?php \EventsCertificate\BundleAdmin\render_buttons( 'settings' ); ?>
 		<hr class="wp-header-end">
 		<?php settings_errors(); ?>
 		<?php render_settings_body(); ?>
@@ -904,10 +905,13 @@ function render_settings_page() {
 }
 
 /**
- * The settings screen: Export and Import, the tabs (a list of links, as the sub-tabs of a tab of another plugin's settings) and the form. It is what the three mounts print inside
- * their own frame (this file's header says which): a title and nothing else of their own, so the markup, the content and the styles are one.
+ * The settings screen's body: the tabs and the form, the same content and the same form wherever it is. The plugin's own screen (a site with no integration) wraps it with its
+ * title and Export and Import beside it, and its tabs are WordPress's tabs (`nav-tab-wrapper`); inside another plugin's settings (GatherPress > Settings > Certificates, Tickets > Setup >
+ * Certificates), which already have tabs and make this one of them, it is `$hosted`: the tabs are a list of links under it (sub-tabs) and Export and Import are with them.
+ *
+ * @param bool $hosted Whether it is inside another plugin's settings tab.
  */
-function render_settings_body() {
+function render_settings_body( $hosted = false ) {
 	if ( ! current_user_can( CAPABILITY ) ) {
 		return;
 	}
@@ -918,15 +922,23 @@ function render_settings_body() {
 	$current = isset( $tabs[ $current ] ) ? $current : (string) key( $tabs );
 	?>
 	<div class="evcert-settings">
-		<p class="evcert-settings__buttons"><?php \EventsCertificate\BundleAdmin\render_buttons( 'settings' ); ?></p>
-		<ul class="subsubsub evcert-settings__tabs" aria-label="<?php esc_attr_e( 'Settings sections', 'events-certificates' ); ?>">
-			<?php foreach ( $tabs as $id => $tab ) : ?>
-				<li>
-					<a<?php echo $id === $current ? ' class="current" aria-current="page"' : ''; ?> href="<?php echo esc_url( add_query_arg( 'tab', $id, settings_url() ) ); ?>"><?php echo esc_html( $tab[0] ); ?></a><?php echo array_key_last( $tabs ) === $id ? '' : ' |'; ?>
-				</li>
-			<?php endforeach; ?>
-		</ul>
-		<br class="clear">
+		<?php if ( $hosted ) : ?>
+			<p class="evcert-settings__buttons"><?php \EventsCertificate\BundleAdmin\render_buttons( 'settings' ); ?></p>
+			<ul class="subsubsub evcert-settings__tabs" aria-label="<?php esc_attr_e( 'Settings sections', 'events-certificates' ); ?>">
+				<?php foreach ( $tabs as $id => $tab ) : ?>
+					<li>
+						<a<?php echo $id === $current ? ' class="current" aria-current="page"' : ''; ?> href="<?php echo esc_url( add_query_arg( 'tab', $id, settings_url() ) ); ?>"><?php echo esc_html( $tab[0] ); ?></a><?php echo array_key_last( $tabs ) === $id ? '' : ' |'; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+			<br class="clear">
+		<?php else : ?>
+			<nav class="nav-tab-wrapper" aria-label="<?php esc_attr_e( 'Settings sections', 'events-certificates' ); ?>">
+				<?php foreach ( $tabs as $id => $tab ) : ?>
+					<a class="nav-tab<?php echo $id === $current ? ' nav-tab-active' : ''; ?>"<?php echo $id === $current ? ' aria-current="page"' : ''; ?> href="<?php echo esc_url( add_query_arg( 'tab', $id, settings_url() ) ); ?>"><?php echo esc_html( $tab[0] ); ?></a>
+				<?php endforeach; ?>
+			</nav>
+		<?php endif; ?>
 		<?php if ( 'tools' === $current ) : ?>
 			<?php \EventsCertificate\Tools\render(); ?>
 		<?php else : ?>

@@ -133,7 +133,7 @@ function render_settings_page() {
 		<h1><?php echo esc_html( __( 'CampTix Setup', 'wordcamporg' ) ); // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- CampTix's own words. ?></h1>
 		<?php settings_errors(); ?>
 		<h3 class="nav-tab-wrapper"><?php setup_tabs(); ?></h3>
-		<?php Admin\render_settings_body(); ?>
+		<?php Admin\render_settings_body( true ); ?>
 	</div>
 	<?php
 }

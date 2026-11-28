@@ -1,6 +1,6 @@
 # 0057 — One settings screen, wherever the plugin is
 
-Status: accepted (0.72). Amends 0026 (classic screens like core), 0040 (the Tools tab) and 0044 (restrictions).
+Status: accepted (0.72); the look of the plugin's own screen amended 2026-11-28 (below). Amends 0026 (classic screens like core), 0040 (the Tools tab) and 0044 (restrictions).
 
 ## Context
 
@@ -34,3 +34,9 @@ fields one after the other. Those tabs were left as they were when the settings 
 
 - A change to the settings screen is made once and shows up in the three places.
 - With CampTix or GatherPress the Export and Import buttons are gone from the lists and the settings, and the export and import screens do not exist.
+
+## Amendment (2026-11-28): the plugin's own screen keeps its own look
+
+The content, the form and the tabs' list are still one (`settings_tabs()`, `add_settings_fields()`, the form in `render_settings_body()`), but how the tabs are drawn depends on the frame: **on the plugin's own screen**
+(Certificates > Settings) they are WordPress's tabs (`nav-tab-wrapper`) and Export and Import are beside the page title, as on the other screens; **inside another plugin's settings tab** (GatherPress, CampTix),
+which already has tabs and makes this one of them, `render_settings_body( true )` draws a list of links under it (sub-tabs) with Export and Import. `SettingsScreenTest` holds both.
