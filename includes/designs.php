@@ -336,6 +336,9 @@ function block_options() {
 		$blocks[ $type ] = 'events-certificates/certificate-' . $type;
 	}
 
+	// A text that is the date of emission is a block of its own (the package writes `type:slot` as that block, with no slot).
+	$blocks['text:date-of-emission'] = 'events-certificates/certificate-date-of-emission';
+
 	return array(
 		// The keys that are fields in a text (`[name]`); any other [word] is text (the same list as the editor's: templates/fields.json).
 		'fields'   => field_keys(),
@@ -346,6 +349,7 @@ function block_options() {
 		'names'    => array(
 			'signature'  => 'Signature',
 			'image:logo' => 'Community logo',
+			'text:date-of-emission' => 'Date of emission',
 		),
 	);
 }

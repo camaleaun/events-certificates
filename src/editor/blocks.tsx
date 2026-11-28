@@ -15,7 +15,11 @@ import { groupsDeep, canHold, flatten, isGroup, moveEl, findEl, mapEl, MAX_DEPTH
 
 /** The block of each element type (the names the design is written with: src/editor/dialect.ts). */
 export const BLOCK_OF = BLOCK_NAMES;
-const TYPE_OF = Object.fromEntries( Object.entries( BLOCK_OF ).map( ( [ type, name ] ) => [ name, type ] ) );
+/** The key of a block name: the type, or `type:slot` for a type that has a block of its own for a slot (the date of emission). */
+const TYPE_OF = Object.fromEntries( Object.entries( BLOCK_OF ).map( ( [ key, name ] ) => [ name, key ] ) );
+
+/** The key of an element's block: `type:slot` when that slot has a block of its own, else the type. */
+export const blockKey = ( el: { type: string; slot?: string } ): string => ( el.slot && BLOCK_OF[ `${ el.type }:${ el.slot }` ] ? `${ el.type }:${ el.slot }` : el.type );
 
 type Instance = { clientId: string; name: string; isValid: boolean; attributes: Record< string, unknown >; innerBlocks: Instance[] };
 
@@ -40,12 +44,13 @@ export function registerBlocks( titles: Record< string, string > ) {
 		if ( getBlockType( name ) ) {
 			return;
 		}
-		const type = TYPE_OF[ name ];
+		const key = TYPE_OF[ name ];
+		const [ type, slot ] = ( key || '' ).split( ':' );
 		registerBlockType( name, {
 			apiVersion: 3,
-			title: titles[ type ] || name,
+			title: titles[ key ] || name,
 			category: 'design',
-			icon: type ? elementIcon( type as Element[ 'type' ] ) : 'edit',
+			icon: type ? elementIcon( type as Element[ 'type' ], slot ) : 'edit',
 			attributes: ELEMENT_ATTRIBUTES,
 			supports: { html: false, reusable: false, className: false, customClassName: false },
 			// What a group holds is anything but the certificate's own parts (tree.ts says which: the layers' drag is checked there).
@@ -59,14 +64,19 @@ export function registerBlocks( titles: Record< string, string > ) {
 export function toBlocks( elements: Element[] ): Instance[] {
 	return elements.map( ( element ) => {
 		const { type, id, name, ...attributes } = element as Element & { children?: Element[] };
+		const key = blockKey( element );
+		// The block says the slot, so it is not an attribute of it.
+		if ( key !== type ) {
+			delete ( attributes as { slot?: unknown } ).slot;
+		}
 		// What is in a group is its inner blocks, all the way down.
 		delete ( attributes as { children?: unknown } ).children;
 		return {
 			clientId: id,
-			name: BLOCK_OF[ type ] || FALLBACK,
+			name: BLOCK_OF[ key ] || FALLBACK,
 			isValid: true,
 			// The List View shows a block's own name (metadata.name) when it has one.
-			attributes: { ...attributes, ...( BLOCK_OF[ type ] ? {} : { type } ), ...( name ? { metadata: { name: stockName( name ) } } : {} ) },
+			attributes: { ...attributes, ...( BLOCK_OF[ key ] ? {} : { type } ), ...( name ? { metadata: { name: stockName( name ) } } : {} ) },
 			innerBlocks: isGroup( element ) ? toBlocks( element.children || [] ) : [],
 		};
 	} );
@@ -75,10 +85,10 @@ export function toBlocks( elements: Element[] ): Instance[] {
 /** Blocks back to elements: the same order. */
 export function toElements( blocks: Instance[] ): Element[] {
 	return blocks.map( ( block ) => {
-		const type = TYPE_OF[ block.name ] || ( block.attributes.type as string );
+		const [ type, ...slot ] = ( TYPE_OF[ block.name ] || ( block.attributes.type as string ) ).split( ':' );
 		const { metadata, ...attributes } = block.attributes as Record< string, unknown > & { metadata?: { name?: string } };
 		delete attributes.type;
-		const element: Record< string, unknown > = { type, id: block.clientId, ...( metadata?.name ? { name: metadata.name } : {} ), ...attributes };
+		const element: Record< string, unknown > = { type, id: block.clientId, ...( metadata?.name ? { name: metadata.name } : {} ), ...attributes, ...( slot.length ? { slot: slot.join( ':' ) } : {} ) };
 		if ( type === 'group' ) {
 			element.children = toElements( block.innerBlocks || [] );
 		}

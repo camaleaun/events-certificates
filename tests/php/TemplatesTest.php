@@ -471,4 +471,42 @@ class TemplatesTest extends Test_Case {
 		$read = Designs\decode( str_replace( '\\\\[[other]]', '[[other]]', $content ) );
 		$this->assertSame( ' [not a field] and [[other]]', $read['elements'][0]['runs'][2]['text'], 'A word in double brackets that is not a field is text.' );
 	}
+
+	public function test_the_date_of_emission_is_a_block_of_its_own() {
+		$design             = Designs\blank();
+		$design['elements'] = array(
+			array(
+				'id'   => 'text-3',
+				'type' => 'text',
+				'slot' => 'date-of-emission',
+				'name' => 'Date of emission',
+				'x'    => 1,
+				'y'    => 2,
+				'w'    => 200,
+				'h'    => 16,
+			),
+			array(
+				'id'   => 'date',
+				'type' => 'text',
+				'slot' => 'date-of-emission',
+				'name' => 'Date of emission',
+				'x'    => 1,
+				'y'    => 2,
+				'w'    => 200,
+				'h'    => 16,
+				'runs' => array( array( 'text' => 'd/m/Y' ) ),
+			),
+		);
+		$content            = Designs\content( $design );
+
+		$this->assertSame( 2, substr_count( $content, 'wp:events-certificates/certificate-date-of-emission' ) );
+		$this->assertSame( 0, preg_match( '/"(slot|name|runs)"|"id":"text-3"/', $content ), 'The block says the slot and the name; an empty one has no text.' );
+		$this->assertStringContainsString( '"text":"d/m/Y"', $content );
+
+		$back = Designs\decode( $content );
+		$this->assertSame( array( 'date-of-emission', 'date-of-emission' ), array_column( $back['elements'], 'slot' ) );
+		$this->assertSame( array( 'text', 'text' ), array_column( $back['elements'], 'type' ) );
+		$this->assertSame( 'd/m/Y', $back['elements'][1]['runs'][0]['text'] );
+		$this->assertArrayNotHasKey( 'runs', $back['elements'][0] );
+	}
 }

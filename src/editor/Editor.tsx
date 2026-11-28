@@ -59,7 +59,7 @@ import { fitScale, isFit, ZOOM_MAX, ZOOM_MIN, type FitMode, type ZoomMode } from
 import './style.scss';
 
 // The block types of a drawing, known to the block editor only to be listed (the canvas draws them): docs/decisions/0046.
-registerBlocks( { text: __( 'Text', 'events-certificates' ), rect: __( 'Rectangle', 'events-certificates' ), ellipse: __( 'Ellipse', 'events-certificates' ), group: __( 'Group', 'events-certificates' ), path: __( 'Shape', 'events-certificates' ), line: __( 'Line', 'events-certificates' ), image: __( 'Image', 'events-certificates' ), svg: __( 'SVG', 'events-certificates' ), qr: __( 'QR code', 'events-certificates' ), signature: __( 'Signature', 'events-certificates' ), verification: __( 'Verification', 'events-certificates' ) } );
+registerBlocks( { text: __( 'Text', 'events-certificates' ), rect: __( 'Rectangle', 'events-certificates' ), ellipse: __( 'Ellipse', 'events-certificates' ), group: __( 'Group', 'events-certificates' ), path: __( 'Shape', 'events-certificates' ), line: __( 'Line', 'events-certificates' ), image: __( 'Image', 'events-certificates' ), svg: __( 'SVG', 'events-certificates' ), qr: __( 'QR code', 'events-certificates' ), signature: __( 'Signature', 'events-certificates' ), verification: __( 'Verification', 'events-certificates' ), 'text:date-of-emission': __( 'Date of emission', 'events-certificates' ) } );
 
 declare global {
 	interface Window {

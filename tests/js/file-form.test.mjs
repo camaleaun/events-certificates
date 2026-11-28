@@ -85,3 +85,15 @@ test( 'the elements are written by the package: names in full, no id that only c
 	assert.deepEqual( [ back.elements[ 1 ].w, back.elements[ 1 ].vw ], [ 96, 24 ] );
 } );
 
+
+test( 'the date of emission is a block of its own: no slot, no name, no text while it is empty; a format written stays', () => {
+	const empty = { id: 'text-3', type: 'text', slot: 'date-of-emission', name: 'Date of emission', x: 1, y: 2, w: 200, h: 16 };
+	const custom = { id: 'date', type: 'text', slot: 'date-of-emission', name: 'Date of emission', x: 1, y: 2, w: 200, h: 16, runs: [ { text: 'j \\d\\e F \\d\\e Y' } ] };
+	const markup = sandbox.dialect.toMarkup( sandbox.dialect.toFile( { page: {}, elements: [ empty, custom ] } ), sandbox.dialect.BLOCK_OPTIONS );
+	assert.equal( ( markup.match( /certificate-date-of-emission/g ) || [] ).length, 2, 'one self-closing block each' );
+	assert.equal( /"slot"|"name"|"runs"|"id":"text-3"/.test( markup ), false, markup );
+	assert.ok( markup.includes( '"text":"j \\\\\\\\d\\\\\\\\e F \\\\\\\\d\\\\\\\\e Y"' ), markup );
+	const back = plain( sandbox.dialect.fromFile( sandbox.dialect.fromMarkup( markup, sandbox.dialect.BLOCK_OPTIONS ) ) );
+	assert.deepEqual( back.elements.map( ( e ) => [ e.type, e.slot ] ), [ [ 'text', 'date-of-emission' ], [ 'text', 'date-of-emission' ] ] );
+	assert.equal( back.elements[ 1 ].runs[ 0 ].text, 'j \\d\\e F \\d\\e Y' );
+} );

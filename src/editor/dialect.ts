@@ -6,18 +6,23 @@
 import type { Options } from '@camaleaun/draw';
 import { FIELD_KEYS } from './fieldKeys';
 
+/** The slot of the text that is the date of emission. */
+export const DATE_OF_EMISSION = 'date-of-emission';
+
 const SHAPES = [ 'text', 'rect', 'ellipse', 'path', 'line', 'image', 'svg', 'group', 'signature' ];
 
 export const BLOCK_NAMES: Record< string, string > = {
 	...Object.fromEntries( SHAPES.map( ( type ) => [ type, `events-certificates/certificate-${ type }` ] ) ),
 	qr: 'events-certificates/certificate-qr',
 	verification: 'events-certificates/certificate-verification',
+	// A text that is the date of emission is a block of its own (the package writes `type:slot` as that block, with no slot).
+	[ `text:${ DATE_OF_EMISSION }` ]: `events-certificates/certificate-${ DATE_OF_EMISSION }`,
 };
 
 export const FALLBACK = 'events-certificates/certificate-element';
 
 // The names of the certificate's types that the package does not know: not written, as the type says them.
-export const BLOCK_OPTIONS: Options = { fields: FIELD_KEYS, blocks: BLOCK_NAMES, fallback: FALLBACK, paths: 'attribute', names: { signature: 'Signature', 'image:logo': 'Community logo' } };
+export const BLOCK_OPTIONS: Options = { fields: FIELD_KEYS, blocks: BLOCK_NAMES, fallback: FALLBACK, paths: 'attribute', names: { signature: 'Signature', 'image:logo': 'Community logo', [ `text:${ DATE_OF_EMISSION }` ]: 'Date of emission' } };
 
 type Loose = Record< string, unknown >;
 

@@ -5,7 +5,7 @@
  * (title, square, image, code, grid) stood for an element, and these say what the element is.
  */
 import { Circle, Path, Rect, SVG } from '@wordpress/components';
-import { group as groupIcon, image as imageIcon, paragraph as paragraphIcon, separator as separatorIcon, square as squareIcon } from '@wordpress/icons';
+import { calendar as calendarIcon, group as groupIcon, image as imageIcon, paragraph as paragraphIcon, separator as separatorIcon, square as squareIcon } from '@wordpress/icons';
 import type { Element } from './model';
 
 const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
@@ -64,6 +64,9 @@ export const logo = icon(
 export function elementIcon( type: Element[ 'type' ] | 'logo', slot?: string ) {
 	if ( type === 'logo' || ( type === 'image' && slot === 'logo' ) ) {
 		return logo;
+	}
+	if ( type === 'text' && slot === 'date-of-emission' ) {
+		return calendarIcon;
 	}
 	return (
 		{
