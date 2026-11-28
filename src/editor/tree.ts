@@ -236,9 +236,12 @@ export function insertAfter( list: Element[], id: string, el: Element ): Element
 	return found ? out : [ ...list, el ];
 }
 
-/** An element as a copy: new ids for it and for all that is in it, and no slot (a slot is only of one element). */
+/** The slots that say what an element is (the date of emission), not where: a copy keeps them. */
+const KIND_SLOTS = [ 'date-of-emission' ];
+
+/** An element as a copy: new ids for it and for all that is in it, and no slot (a slot is only of one element), except one that says what it is. */
 export function cloneEl( el: Element, name?: string ): Element {
-	const copy = { ...el, id: newId( el.type ), slot: undefined, ...( name ? { name } : {} ) } as Element;
+	const copy = { ...el, id: newId( el.type ), slot: el.slot && KIND_SLOTS.includes( el.slot ) ? el.slot : undefined, ...( name ? { name } : {} ) } as Element;
 	return isGroup( copy ) ? ( { ...copy, children: ( copy.children || [] ).map( ( child ) => cloneEl( child, child.name ) ) } as Element ) : copy;
 }
 

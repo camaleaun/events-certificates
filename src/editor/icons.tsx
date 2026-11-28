@@ -61,11 +61,11 @@ export const logo = icon(
 );
 
 /** The icon of an element (its type, and the slot that makes an image the community's logo). */
-export function elementIcon( type: Element[ 'type' ] | 'logo', slot?: string ) {
+export function elementIcon( type: Element[ 'type' ] | 'logo' | 'date-of-emission', slot?: string ) {
 	if ( type === 'logo' || ( type === 'image' && slot === 'logo' ) ) {
 		return logo;
 	}
-	if ( type === 'text' && slot === 'date-of-emission' ) {
+	if ( type === 'date-of-emission' || ( type === 'text' && slot === 'date-of-emission' ) ) {
 		return calendarIcon;
 	}
 	return (

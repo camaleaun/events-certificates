@@ -7,11 +7,11 @@ import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall, Icon } from '@wordpress/icons';
 import { elementIcon } from './icons';
-import type { Element } from './model';
+import type { Insertable } from './model';
 
-type Item = { type: Element[ 'type' ] | 'logo'; title: string; keywords: string };
+type Item = { type: Insertable; title: string; keywords: string };
 
-export default function Inserter( { onInsert, onClose }: { onInsert: ( type: Element[ 'type' ] | 'logo' ) => void; onClose: () => void } ) {
+export default function Inserter( { onInsert, onClose }: { onInsert: ( type: Insertable ) => void; onClose: () => void } ) {
 	const [ search, setSearch ] = useState( '' );
 	const items: Item[] = [
 		{ type: 'text', title: __( 'Text', 'events-certificates' ), keywords: 'paragraph heading title' },
@@ -22,6 +22,7 @@ export default function Inserter( { onInsert, onClose }: { onInsert: ( type: Ele
 		{ type: 'image', title: __( 'Image', 'events-certificates' ), keywords: 'logo picture png jpg' },
 		{ type: 'svg', title: __( 'SVG', 'events-certificates' ), keywords: 'icon logo ornament vector path' },
 		{ type: 'logo' as const, title: __( 'Community logo', 'events-certificates' ), keywords: 'logo picture community brand' },
+		{ type: 'date-of-emission' as const, title: __( 'Date of emission', 'events-certificates' ), keywords: 'date issue issued emission calendar' },
 		{ type: 'signature' as const, title: __( 'Signature', 'events-certificates' ), keywords: 'signer autograph sign name' },
 		{ type: 'verification' as const, title: __( 'Verification', 'events-certificates' ), keywords: 'qr code verify authenticity hint' },
 	];

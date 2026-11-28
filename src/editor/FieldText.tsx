@@ -210,9 +210,12 @@ type FieldTextProps = {
 	onMarks?: ( marks: { b: boolean; i: boolean } ) => void;
 	// Preview values editable from a field's popover (the Certificate tab's Preview data).
 	preview?: { defaults: Record< string, string >; overrides: Record< string, string >; set: ( key: string, value: string ) => void };
+	// What an empty box shows (the date of emission: the format of the site), and whether a [[field]] is only text (the words of a date format are not fields).
+	emptyText?: string;
+	plain?: boolean;
 };
 
-export default function FieldText( { label, runs, onChange, sample, locale, inline, style, commands, onDone, onMarks, preview }: FieldTextProps ) {
+export default function FieldText( { label, runs, onChange, sample, locale, inline, style, commands, onDone, onMarks, preview, emptyText, plain }: FieldTextProps ) {
 	const info = fields();
 	const ref = useRef< HTMLDivElement >( null );
 	const last = useRef< string >( '' );
@@ -223,7 +226,9 @@ export default function FieldText( { label, runs, onChange, sample, locale, inli
 	if ( placeholder ) {
 		tokens.current = placeholder;
 	}
-	const placeholderText = tokens.current ? tokens.current.map( ( r ) => ( 'field' in r ? fieldValue( r.field, r.format, sample, locale ) : r.text ) ).join( '' ) : '';
+	// Nothing written, and a text to show in its place.
+	const blankText = emptyText !== undefined && ! placeholder && isBlank( runs );
+	const placeholderText = blankText ? emptyText : tokens.current ? tokens.current.map( ( r ) => ( 'field' in r ? fieldValue( r.field, r.format, sample, locale ) : r.text ) ).join( '' ) : '';
 	const firstField = placeholder?.find( ( r ) => 'field' in r );
 
 	// Only rewrite the DOM when the value changed from outside (undo, another element).
@@ -281,7 +286,7 @@ export default function FieldText( { label, runs, onChange, sample, locale, inli
 	};
 	const onPaste = ( event: React.ClipboardEvent ) => {
 		event.preventDefault();
-		const keys = Object.keys( info );
+		const keys = plain ? [] : Object.keys( info );
 		const html = event.clipboardData.getData( 'text/html' );
 		let runs: Run[];
 		if ( html ) {
@@ -295,7 +300,7 @@ export default function FieldText( { label, runs, onChange, sample, locale, inli
 			document.execCommand( 'insertHTML', false, toHtml( runs, info ) );
 		}
 	};
-	const editableClass = ( base: string ) => [ base, placeholder && 'is-placeholder', firstField?.b && 'is-placeholder-b', firstField?.i && 'is-placeholder-i' ].filter( Boolean ).join( ' ' );
+	const editableClass = ( base: string ) => [ base, ( placeholder || blankText ) && 'is-placeholder', firstField?.b && 'is-placeholder-b', firstField?.i && 'is-placeholder-i' ].filter( Boolean ).join( ' ' );
 
 	const insertField = ( field: string ) => {
 		const root = ref.current;

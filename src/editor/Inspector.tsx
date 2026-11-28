@@ -22,7 +22,8 @@ import {
 	__experimentalToolsPanelItem as ToolsPanelItem,
 	__experimentalHStack as HStack,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { createInterpolateElement, useState } from '@wordpress/element';
+import { BLOCK_NAMES, DATE_OF_EMISSION } from './dialect';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { justifyBottom, justifyCenter, justifyCenterVertical, justifyLeft, justifyRight, justifyStretch, justifyStretchVertical, justifyTop, alignCenter, alignLeft, alignRight, cornerBottomLeft, cornerBottomRight, cornerTopLeft, cornerTopRight, formatUppercase, Icon, link, linkOff, reset, settings } from '@wordpress/icons';
 import { elementIcon } from './icons';
@@ -135,7 +136,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 	};
 	const required = !! el.slot && REQUIRED_SLOTS.includes( el.slot );
 	const typeLabel = {
-		text: __( 'Text', 'events-certificates' ),
+		text: el.slot === DATE_OF_EMISSION ? __( 'Date of emission', 'events-certificates' ) : __( 'Text', 'events-certificates' ),
 		line: __( 'Line', 'events-certificates' ),
 		rect: __( 'Rectangle', 'events-certificates' ),
 		ellipse: __( 'Ellipse', 'events-certificates' ),
@@ -147,7 +148,10 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 		qr: __( 'Authenticity', 'events-certificates' ),
 		verification: __( 'Verification', 'events-certificates' ),
 	}[ el.type ];
-	const description = required
+	const isDate = el.type === 'text' && el.slot === DATE_OF_EMISSION;
+	const description = isDate
+		? __( "The date the certificate is issued, in the site's date format or in the one you write.", 'events-certificates' )
+		: required
 		? __( 'Required on every certificate: it can be moved and styled, not deleted.', 'events-certificates' )
 		: el.type === 'qr' || el.type === 'verification'
 		? __( 'The QR code, the code and the hint anyone can use to check the certificate.', 'events-certificates' )
@@ -166,7 +170,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 				<div>
 					<h2 className="evcert-card__title">
 						{ stockName( el.name || '' ) || typeLabel }
-						{ el.slot && <span className="evcert-slot">{ el.slot }</span> }
+						{ el.slot && ! BLOCK_NAMES[ `${ el.type }:${ el.slot }` ] && <span className="evcert-slot">{ el.slot }</span> }
 					</h2>
 					{ description && <p className="evcert-card__description">{ description }</p> }
 				</div>
@@ -262,6 +266,28 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 					</div>
 				) : null;
 			} )() }
+
+			{ tab === 'art' && isDate && (
+				<div className="evcert-inspector__section">
+					<TextControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
+						label={ __( 'Date format', 'events-certificates' ) }
+						placeholder={ sample.date_format || 'F j, Y' }
+						value={ runsOf( el ).map( ( r ) => ( 'text' in r ? r.text : '' ) ).join( '' ) }
+						help={ createInterpolateElement(
+							/* translators: %s: the date as it is shown, e.g. October 31, 2026. <a>: link to the WordPress documentation of date formats. */
+							sprintf( __( 'Shown as %s. Empty: the format of Settings → General. Write the letters as WordPress does, with a backslash before a letter that is a word (<a>documentation</a>).', 'events-certificates' ), fieldValue( 'issued_date', runsOf( el ).map( ( r ) => ( 'text' in r ? r.text : '' ) ).join( '' ) || undefined, sample, locale ) ),
+							// eslint-disable-next-line jsx-a11y/anchor-has-content
+							{ a: <a href="https://wordpress.org/documentation/article/customize-date-and-time-format/" target="_blank" rel="noreferrer" /> }
+						) }
+						onChange={ ( format ) => {
+							const first = runsOf( el )[ 0 ] as { b?: boolean; i?: boolean } | undefined;
+							onChange( { runs: format.trim() ? [ { text: format, ...( first?.b ? { b: true } : {} ), ...( first?.i ? { i: true } : {} ) } ] : undefined, text: undefined } as Partial< Element > );
+						} }
+					/>
+				</div>
+			) }
 
 			{ tab === 'art' && el.type === 'text' && <TextByLanguage el={ el } sample={ sample } onChange={ ( patch ) => onChange( patch as Partial< Element > ) } /> }
 

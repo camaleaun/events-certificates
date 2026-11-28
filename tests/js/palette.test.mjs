@@ -247,6 +247,13 @@ test( 'the date of emission: no words are the date in the format of the site; it
 } );
 
 
+test( 'a new date of emission is a text with that slot and no words: the date in the format of the site until it is written', () => {
+	const design = { page: { w: 800, h: 600 }, colors: {}, palette: [], elements: [] };
+	const el = JSON.parse( JSON.stringify( m.create( 'date-of-emission', design ) ) );
+	assert.deepEqual( [ el.type, el.slot, el.name, el.runs ], [ 'text', 'date-of-emission', 'Date of emission', undefined ] );
+} );
+
+
 test( 'a fill that is a color of the Theme goes to the file and comes back, with the Elements and a literal beside it', () => {
 	// The pickers keep a color of the Theme as "$slug"; the file says it as a preset and reads it back (docs/decisions/0050, 0051).
 	assert.equal( m.color( { page: { bg: '$background' }, colors: {}, palette: [ { slug: 'white', color: '#ffffff' } ], elements: [] }, '$white', 'light' ), '#ffffff' );

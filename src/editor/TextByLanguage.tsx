@@ -55,6 +55,8 @@ export default function TextByLanguage( { el, sample, onChange }: Props ) {
 						onChange={ ( runs ) => set( lang, runs ) }
 						sample={ sample }
 						locale={ lang.replace( '_', '-' ) }
+						emptyText={ el.slot === 'date-of-emission' ? sample.date_format || 'F j, Y' : undefined }
+						plain={ el.slot === 'date-of-emission' }
 					/>
 					{ variants[ lang ] && (
 						<Button variant="link" isDestructive onClick={ () => set( lang, null ) }>

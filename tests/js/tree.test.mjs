@@ -146,3 +146,9 @@ test( 'a new element goes in the selected group, or in the group of the selected
 	assert.deepEqual( plain( t.findEl( made, 'g' ).children.map( ( e ) => e.id ) ), [ 'b', 'n' ] );
 	assert.deepEqual( plain( made.map( ( e ) => e.id ) ), [ 'a', 'g' ] );
 } );
+
+test( 'a copy of the date of emission is a date of emission (its slot is of a kind, not of a place); another slot is not kept', () => {
+	const date = { id: 'd', type: 'text', slot: 'date-of-emission', x: 0, y: 0, w: 1, h: 1, runs: [ { text: 'd/m/Y' } ] };
+	assert.equal( t.cloneEl( date ).slot, 'date-of-emission' );
+	assert.equal( t.cloneEl( { ...date, slot: 'title' } ).slot, undefined );
+} );

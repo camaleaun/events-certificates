@@ -84,11 +84,11 @@ export default function ElementToolbar( { anchor, el, required, onSelectParent, 
 					<ToolbarGroup>
 						<ToolbarButton icon={ formatBold } isPressed={ !! marks?.b } label={ __( 'Bold', 'events-certificates' ) } shortcut="⌘B" onMouseDown={ ( e: { preventDefault: () => void } ) => e.preventDefault() } onClick={ onBold } />
 						<ToolbarButton icon={ formatItalic } isPressed={ !! marks?.i } label={ __( 'Italic', 'events-certificates' ) } shortcut="⌘I" onMouseDown={ ( e: { preventDefault: () => void } ) => e.preventDefault() } onClick={ onItalic } />
-						<ToolbarDropdownMenu
+						{ el.slot !== 'date-of-emission' && <ToolbarDropdownMenu
 							icon={ plus }
 							label={ __( 'Insert a field', 'events-certificates' ) }
 							controls={ [ false, true ].map( ( isText ) => Object.entries( info ).filter( ( [ , f ] ) => ( f.group === 'text' ) === isText ).map( ( [ key, f ] ) => ( { title: f.label, onClick: () => onInsertField?.( key ) } ) ) ) }
-						/>
+						/> }
 					</ToolbarGroup>
 				) }
 				{ ! editing && (

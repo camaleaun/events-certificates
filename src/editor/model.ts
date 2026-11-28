@@ -450,14 +450,20 @@ export function newId( type: string ): string {
 /** The colors a new rectangle or ellipse starts with: the editor remembers the last Fill and Stroke set on one (an empty Fill is a Fill too). */
 export type Paint = { fill: string; stroke: string };
 
-export function create( type: Element[ 'type' ] | 'logo', design: Design, paint?: Paint ): Element {
+/** What the inserter can make: an element type, or one of the places that are an element with a slot (the logo, the date of emission). */
+export type Insertable = Element[ 'type' ] | 'logo' | 'date-of-emission';
+
+export function create( type: Insertable, design: Design, paint?: Paint ): Element {
 	const cx = design.page.w / 2;
 	const cy = design.page.h / 2;
 	// The community's logo may be placed more than once (two positions, say): the first is `logo`, the next ones get their own id.
 	// The place of a signature or of the logo may be put more than once (two places, say): the first is `signature` / `logo`, the next ones get their own id.
 	const first = ( 'logo' === type || 'signature' === type ) && ! design.elements.some( ( el ) => el.id === type );
-	const id = first ? type : newId( 'logo' === type ? 'image' : type );
+	const id = first ? type : newId( 'logo' === type ? 'image' : 'date-of-emission' === type ? 'text' : type );
 	switch ( type ) {
+		case 'date-of-emission':
+			// No words: it is the date in the format of the site until a format is written.
+			return { id, type: 'text', name: 'Date of emission', slot: 'date-of-emission', x: cx - 100, y: cy - 8, w: 200, h: 16, font: 'CertSans', weight: 400, size: 11, color: '$text', align: 'center' } as TextEl;
 		case 'logo': {
 			// The place of the community's logo: it shows the logo set for the event (nothing when none), right-aligned in its box.
 			const right = design.page.w - ( design.page.safe || 28 );

@@ -21,6 +21,7 @@ function strings(): Record< string, string > {
 		'Background frame': __( 'Background frame', 'events-certificates' ),
 		'Background rings': __( 'Background rings', 'events-certificates' ),
 		'Community logo': __( 'Community logo', 'events-certificates' ),
+		'Date of emission': __( 'Date of emission', 'events-certificates' ),
 		Date: __( 'Date', 'events-certificates' ),
 		'Date label': __( 'Date label', 'events-certificates' ),
 		'Date line': __( 'Date line', 'events-certificates' ),

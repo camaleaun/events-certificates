@@ -30,6 +30,7 @@ import {
 	type Box,
 	type Design,
 	type Element,
+	type Insertable,
 	type Mode,
 	type Run,
 	type TextEl,
@@ -208,8 +209,10 @@ export default function Editor() {
 	};
 	const stopEditing = () => {
 		const original = editing ? findEl( design.elements, editing.id ) : null;
+		// The date of emission with no words writes none: it is the date in the site's format.
+		const nothing = !! original && original.slot === 'date-of-emission' && editing?.runs.every( ( run ) => 'text' in run && ! run.text.trim() );
 		if ( editing && original && JSON.stringify( runsOf( original as TextEl ) ) !== JSON.stringify( editing.runs ) ) {
-			update( editing.id, { runs: editing.runs, text: undefined } as Partial< Element > );
+			update( editing.id, ( nothing ? { runs: undefined, text: undefined } : { runs: editing.runs, text: undefined } ) as Partial< Element > );
 		}
 		setEditing( null );
 	};
@@ -434,7 +437,7 @@ export default function Editor() {
 		setSelected( copy.id );
 	};
 	const reorder = ( id: string, to: 'up' | 'down' | 'top' | 'bottom' ) => commit( { ...design, elements: reorderEl( design.elements, id, to ) } );
-	const insert = ( type: Element[ 'type' ] | 'logo' ) => {
+	const insert = ( type: Insertable ) => {
 		let el = create( type, design, paintRef.current );
 		// With a group selected (or an element that is in one) the new element goes in that group, at the end of its own list (the front of what is in it), at its center.
 		const holder = holderFor( design.elements, selected, el );
@@ -847,6 +850,8 @@ export default function Editor() {
 														onChange={ ( runs ) => setEditing( { id: el.id, runs } ) }
 														sample={ sample }
 														locale={ LOCALE }
+														emptyText={ el.slot === 'date-of-emission' ? sample.date_format || 'F j, Y' : undefined }
+														plain={ el.slot === 'date-of-emission' }
 														style={ textStyle( el as TextEl, shown, mode ) }
 														commands={ textCommands }
 														onMarks={ setMarks }
