@@ -9,7 +9,7 @@
  * hint): the generator keeps none, as the server leaves them out on a site
  * where they would mean nothing.
  */
-import { letterSpacingPt, lineHeightFactor } from '@camaleaun/draw';
+import { fontSizePt, letterSpacingPt, lineHeightFactor } from '@camaleaun/draw';
 import { flattenTree } from '../editor/tree';
 import { box, color, datedRuns, isWhite, pageBg, rectPath, resolve, runsIn, type Design, type Element, type Run, type TextEl } from '../editor/model';
 
@@ -162,9 +162,10 @@ function drawText( b: Backend, design: Design, el: TextEl, value: Value, locale:
 	}
 	const font = fontOf( b, el );
 	// The letter spacing is points whatever unit it was said in (a percentage is of the size: said again if the text is shrunk to fit).
-	let spacing = letterSpacingPt( el.ls, el.size || 14 ) * PT;
+	// The size is points or a length with its unit ("4.4mm").
+	let spacing = letterSpacingPt( el.ls, fontSizePt( el.size ) ) * PT;
 	const width = el.w * PT;
-	let size = el.size || 14;
+	let size = fontSizePt( el.size );
 	if ( el.fit ) {
 		const natural = b.measure( text.replace( /\n/g, ' ' ), font, size, spacing );
 		if ( natural > width && natural > 0 ) {

@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9592827aaea93d610894a199d8cc5c69",
+    "content-hash": "29fde8bf8b24144f578a256b97d80536",
     "packages": [
         {
             "name": "camaleaun/draw",
-            "version": "v0.24.4",
+            "version": "v0.25.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/camaleaun/draw.git",
-                "reference": "ee73ad0aabbe6d4c80fef4d2a9cdc2d5e4291486"
+                "reference": "b989605cd035675758e4e604fea33e443c53a1b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/camaleaun/draw/zipball/ee73ad0aabbe6d4c80fef4d2a9cdc2d5e4291486",
-                "reference": "ee73ad0aabbe6d4c80fef4d2a9cdc2d5e4291486",
+                "url": "https://api.github.com/repos/camaleaun/draw/zipball/b989605cd035675758e4e604fea33e443c53a1b2",
+                "reference": "b989605cd035675758e4e604fea33e443c53a1b2",
                 "shasum": ""
             },
             "require": {
@@ -42,10 +42,10 @@
             ],
             "description": "A drawing as blocks: reads and writes block markup (wp:draw/*), with no WordPress needed.",
             "support": {
-                "source": "https://github.com/camaleaun/draw/tree/v0.24.4",
+                "source": "https://github.com/camaleaun/draw/tree/v0.25.0",
                 "issues": "https://github.com/camaleaun/draw/issues"
             },
-            "time": "2026-11-28T18:12:02+00:00"
+            "time": "2026-11-28T19:02:00+00:00"
         },
         {
             "name": "chillerlan/php-qrcode",

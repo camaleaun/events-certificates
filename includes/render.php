@@ -1454,7 +1454,8 @@ function points_css( $points ) {
  * @return float
  */
 function text_size( array $el, array $values, array $options ) {
-	$size = (float) ( $el['size'] ?? 14 );
+	// Points, or a length with its unit ("4.4mm"): camaleaun/draw reads both.
+	$size = \EventsCertificate\Vendor\Camaleaun\Draw\Text::font_size( $el['size'] ?? null );
 	if ( ! empty( $el['fit'] ) && isset( $options['measure'] ) ) {
 		$width = (float) call_user_func( $options['measure'], runs_text( $el, $values ), \EventsCertificate\Fonts\pdf_family( (string) $el['font'] ), \EventsCertificate\Fonts\weight_for( (string) $el['font'], (int) $el['weight'], true ), $size );
 		if ( $width > $el['w'] && $width > 0 ) {

@@ -4,7 +4,7 @@
  *
  *   - The list is in points (8 to 42), as if no theme.json made presets.
  *   - The open field takes pt, px, mm, cm or in, keeps what is typed up to eight decimals (as CSS does), steps by 0.1 and shows it with no zeros at the end.
- *   - The element keeps its size in points; the unit the field was in (`sizeUnit`) is kept beside it, so the field shows it the same way again.
+ *   - The size is a number of points or a length with its unit ("4.4mm"), as a line height's is; the field shows the unit it is written in.
  *
  * It opens in the open field by itself when the size is not one of the list (or its unit is not points).
  */
@@ -13,29 +13,30 @@ import { useInstanceId } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { settings } from '@wordpress/icons';
-import { FONT_SIZES, FONT_SIZE_UNITS, fontSizeChange, fontSizeSlider, fontSizeText, isCustomSize, localizedNumbers, type FontSizeUnit, type ShownUnit } from './size';
+import { FONT_SIZES, FONT_SIZE_UNITS, fontSizeChange, fontSizeShown, fontSizeSlider, fontSizeText, fontSizeUnit, isCustomSize, localizedNumbers, sizePt } from './size';
 
 type Props = {
-	size: number;
-	unit: FontSizeUnit;
-	/** The size in points and the unit it is shown in (undefined for points: none is written). */
-	onChange: ( patch: { size: number; sizeUnit: ShownUnit | undefined } ) => void;
+	/** Points (a number), or a length with its unit ("4.4mm"): the unit the field shows is the one the size is written in. */
+	size: number | string;
+	onChange: ( size: number | string ) => void;
 };
 
-export default function FontSize( { size, unit, onChange }: Props ) {
+export default function FontSize( { size, onChange }: Props ) {
 	const id = useInstanceId( FontSize, 'evcert-font-size' );
-	const [ custom, setCustom ] = useState( () => isCustomSize( size, unit ) );
+	const [ custom, setCustom ] = useState( () => isCustomSize( size ) );
 	// The field is made again when it loses focus, so what was typed ("12.50") is shown as it was understood ("12.5").
 	const [ synced, setSynced ] = useState( 0 );
+	const unit = fontSizeUnit( size );
+	const pt = sizePt( size );
+	const shown = fontSizeShown( size );
 	const slider = fontSizeSlider( unit );
-	const shown = Number.parseFloat( fontSizeText( size, unit ) );
 
 	const options = [
 		// What stands in for the "Default" of the native picker when the size is not one of the list.
-		...( FONT_SIZES.includes( size ) ? [] : [ { key: 'custom', name: __( 'Custom', 'events-certificates' ), hint: localizedNumbers( fontSizeText( size, unit ), document.documentElement.lang || 'en' ) } ] ),
+		...( ! isCustomSize( size ) ? [] : [ { key: 'custom', name: __( 'Custom', 'events-certificates' ), hint: localizedNumbers( shown, document.documentElement.lang || 'en' ) } ] ),
 		...FONT_SIZES.map( ( s ) => ( { key: String( s ), name: `${ s } pt`, hint: String( s ) } ) ),
 	];
-	const selected = options.find( ( o ) => o.key === String( size ) ) || options[ 0 ];
+	const selected = ( isCustomSize( size ) ? options[ 0 ] : options.find( ( o ) => o.key === String( pt ) ) ) || options[ 0 ];
 
 	return (
 		<fieldset className="components-font-size-picker evcert-font-size" aria-labelledby={ id }>
@@ -65,7 +66,7 @@ export default function FontSize( { size, unit, onChange }: Props ) {
 						onChange={ ( { selectedItem } ) => {
 							// A size of the list is in points; "Custom" is the size it already is.
 							if ( selectedItem && selectedItem.key !== 'custom' ) {
-								onChange( { size: Number( selectedItem.key ), sizeUnit: undefined } );
+								onChange( Number( selectedItem.key ) );
 							}
 						} }
 					/>
@@ -84,13 +85,13 @@ export default function FontSize( { size, unit, onChange }: Props ) {
 								min={ 0 }
 								units={ FONT_SIZE_UNITS.map( ( value ) => ( { value, label: value } ) ) }
 								unit={ unit }
-								value={ fontSizeText( size, unit ) }
+								value={ shown }
 								onBlur={ () => setSynced( ( n ) => n + 1 ) }
 								onChange={ ( next ) => {
 									// The control says the same number in the new unit first when the unit is changed: that is only the unit (the size is kept).
-									const patch = next ? fontSizeChange( next, size, unit ) : undefined;
-									if ( patch ) {
-										onChange( patch );
+									const value = next ? fontSizeChange( next, size, unit ) : undefined;
+									if ( value !== undefined ) {
+										onChange( value );
 									}
 								} }
 							/>
@@ -105,12 +106,12 @@ export default function FontSize( { size, unit, onChange }: Props ) {
 									hideLabelFromVision
 									withInputField={ false }
 									{ ...slider }
-									value={ Math.min( slider.max, shown ) }
+									value={ Math.min( slider.max, Number.parseFloat( fontSizeText( pt, unit ) ) ) }
 									onChange={ ( v ) => {
 										if ( v !== undefined && v > 0 ) {
-											const patch = fontSizeChange( `${ v }${ unit }`, size, unit );
-											if ( patch ) {
-												onChange( patch );
+											const value = fontSizeChange( `${ v }${ unit }`, size, unit );
+											if ( value !== undefined ) {
+												onChange( value );
 											}
 										}
 									} }

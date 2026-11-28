@@ -699,6 +699,10 @@ class RenderTest extends Test_Case {
 		$this->assertSame( 12.5, Render\text_size( $el, array(), array() ) );
 		$this->assertSame( 9.75, Render\text_size( array( 'size' => 9.75 ) + $el, array(), array() ) );
 		$this->assertSame( 12.123, Render\text_size( array( 'size' => '12.123' ) + $el, array(), array() ) );
+		// A size with its unit is read in points: 4.4mm is 12.47246 pt.
+		$this->assertSame( 12.47246, Render\text_size( array( 'size' => '4.4mm' ) + $el, array(), array() ) );
+		$this->assertSame( 36.0, Render\text_size( array( 'size' => '0.5in' ) + $el, array(), array() ) );
+		$this->assertSame( 14.0, Render\text_size( array( 'size' => 'abc' ) + $el, array(), array() ), 'what is not a size is the default' );
 	}
 
 	/**

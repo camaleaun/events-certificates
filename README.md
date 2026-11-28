@@ -153,7 +153,7 @@ Sensei's certificates extension, [Sensei Certificates](https://github.com/woocom
 
 * dompdf 3.1 (LGPL-2.1), php-font-lib (LGPL-2.1-or-later), php-svg-lib (LGPL-3.0-or-later), html5-php (MIT) and PHP CSS Parser (MIT): PDF output.
 * php-qrcode and php-settings-container (MIT): QR codes.
-* camaleaun/draw 0.14 (GPL-2.0-or-later, by the plugin's author, https://github.com/camaleaun/draw): reads and writes a certificate design as block markup, in PHP (`includes/third-party/camaleaun/draw/`) and in TypeScript (compiled into `build/`).
+* camaleaun/draw 0.25 (GPL-2.0-or-later, by the plugin's author, https://github.com/camaleaun/draw): reads and writes a certificate design as block markup, in PHP (`includes/third-party/camaleaun/draw/`) and in TypeScript (compiled into `build/`).
 * IBM Plex Sans and Instrument Serif (SIL Open Font License 1.1, subsets in `fonts/`): the generator's certificate. The plugin ships no other font: the ones a template uses are installed in WordPress.
 * jsPDF 2.5.1 (MIT), JSZip 3.10.1 (MIT or GPL-3.0-or-later) and SheetJS Community Edition 0.18.5 (Apache-2.0), in `assets/third-party/`: the generator's PDF, ZIP and spreadsheet reading in the browser. They are plugin files; nothing is loaded from a CDN.
 * Lucide icons (ISC), redrawn as filled shapes, in `assets/images/tutorial-step-image/icons/`: the Generator's step by step.

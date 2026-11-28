@@ -7,18 +7,20 @@ import { fontStack, weightFor } from './fonts';
 import { stockName } from './base';
 import { QR_PLACEHOLDER } from './qr-placeholder';
 import { verificationParts } from './verification';
-import { letterSpacingPt, lineHeightFactor } from '@camaleaun/draw';
+import { fontSizePt as sizePt, letterSpacingPt, lineHeightFactor } from '@camaleaun/draw';
 import { color, datedRuns, rectPath, runsHtml, runsOf, svgPaths, type Design, type Element, type Mode, type SvgPath, type TextEl } from './model';
 
 /** A text element's CSS, shared by the canvas and the inline editor. */
 export function textStyle( el: TextEl, design: Design, mode: Mode ) {
+	// The size is points or a length with its unit ("4.4mm"): the screen takes points (a point is a pixel here).
+	const size = sizePt( el.size );
 	return {
 		fontFamily: fontStack( el.font ),
 		fontWeight: weightFor( el.font, el.weight ),
-		fontSize: `${ el.size }px`,
+		fontSize: `${ size }px`,
 		// A line height is a multiplier of the size and a letter spacing is points (a point is a pixel here), whatever unit they were said in.
-		lineHeight: lineHeightFactor( el.lh, el.size ),
-		letterSpacing: letterSpacingPt( el.ls, el.size ) ? `${ letterSpacingPt( el.ls, el.size ) }px` : undefined,
+		lineHeight: lineHeightFactor( el.lh, size ),
+		letterSpacing: letterSpacingPt( el.ls, size ) ? `${ letterSpacingPt( el.ls, size ) }px` : undefined,
 		color: color( design, el.color, mode ),
 		textAlign: el.align || 'left',
 		whiteSpace: el.fit ? ( 'nowrap' as const ) : ( 'pre-line' as const ),
@@ -202,7 +204,7 @@ export function Shape( { el, design, mode, sample }: { el: Element; design: Desi
 		case 'text': {
 			const style = textStyle( el, design, mode );
 			return (
-				<foreignObject x={ el.x } y={ el.y } width={ el.w } height={ Math.max( el.h, el.size * lineHeightFactor( el.lh, el.size ) * 6 ) } opacity={ opacity } style={ { overflow: 'visible' } }>
+				<foreignObject x={ el.x } y={ el.y } width={ el.w } height={ Math.max( el.h, sizePt( el.size ) * lineHeightFactor( el.lh, sizePt( el.size ) ) * 6 ) } opacity={ opacity } style={ { overflow: 'visible' } }>
 					{ /* Only the lines of the text take a click, not the whole box (a tall box would hide the text under it): a click beside the text goes to what is under it. */ }
 					<div className="evcert-text" style={ { ...style, pointerEvents: 'none' } }>
 						<span style={ { pointerEvents: 'auto' } } dangerouslySetInnerHTML={ { __html: runsHtml( datedRuns( el, runsOf( el ) ), sample, LOCALE, el.upper ) } } />

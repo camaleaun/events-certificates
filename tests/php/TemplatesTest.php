@@ -129,20 +129,19 @@ class TemplatesTest extends Test_Case {
 	}
 
 	/**
-	 * Saving a template keeps the unit a font size was shown in (the size stays in points); points write none, and what is not a unit of ours is dropped.
+	 * Saving a template keeps the font size as it was written: points as a number, any other unit as a length with it (the unit is in the length, as a margin's is).
 	 */
 	public function test_saving_keeps_the_unit_of_a_font_size() {
-		$text = static function ( $more ) {
-			return '<!-- wp:events-certificates/certificate {"page":{"width":"297mm","height":"210mm"}} --><!-- wp:events-certificates/certificate-text {"id":"t","x":10,"y":10,"width":100,"height":20,"size":12.47246' . $more . '} /--><!-- /wp:events-certificates/certificate -->';
+		$text = static function ( $size ) {
+			return '<!-- wp:events-certificates/certificate {"page":{"width":"297mm","height":"210mm"}} --><!-- wp:events-certificates/certificate-text {"id":"t","x":10,"y":10,"width":100,"height":20,"size":' . $size . '} /--><!-- /wp:events-certificates/certificate -->';
 		};
-		foreach ( array( 'mm', 'px', 'cm', 'in' ) as $unit ) {
-			$out = Designs\content( Designs\decode( $text( ',"sizeUnit":"' . $unit . '"' ) ) );
-			$this->assertStringContainsString( '"sizeUnit":"' . $unit . '"', $out, $unit );
-			$this->assertStringContainsString( '"size":12.47246', $out );
+		foreach ( array( '"4.4mm"', '"16px"', '"0.5in"', '"12.5pt"' ) as $size ) {
+			$out = Designs\content( Designs\decode( $text( $size ) ) );
+			$this->assertStringContainsString( '"size":' . $size, $out, $size );
 		}
-		foreach ( array( 'pt', 'em' ) as $not ) {
-			$this->assertStringNotContainsString( 'sizeUnit', Designs\content( Designs\decode( $text( ',"sizeUnit":"' . $not . '"' ) ) ), $not );
-		}
+		$out = Designs\content( Designs\decode( $text( '12.47246' ) ) );
+		$this->assertStringContainsString( '"size":12.47246', $out, 'points stay a number' );
+		$this->assertStringNotContainsString( 'sizeUnit', $out );
 	}
 
 	/**

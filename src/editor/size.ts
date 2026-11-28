@@ -2,7 +2,7 @@
  * The size typed in the SVG editor's Size row, as the patch of the element it is for: the new width and height, and its layout (a layout
  * keeps the sizes as lengths) made again for the box it has now. Nothing when there is no size or it is the one the element already has.
  */
-import { layoutFrom, lockedSide, parseLen, UNITS, type Axis, type AxisMode, type Layout, type PageBox } from '@camaleaun/draw';
+import { fontSizePt as sizePt, layoutFrom, lockedSide, parseLen, UNITS, type Axis, type AxisMode, type Layout, type PageBox } from '@camaleaun/draw';
 
 type Sized = { x: number; y: number; w: number; h: number; layout?: Layout; lock?: number };
 
@@ -135,8 +135,9 @@ export const FONT_SIZES = [ 8, 10, 12, 14, 16, 18, 24, 32, 42 ];
 /** The units a font size may be typed in (the unit of the field; px is the point). */
 export const FONT_SIZE_UNITS = [ 'pt', 'px', 'mm', 'cm', 'in' ] as const;
 export type FontSizeUnit = ( typeof FONT_SIZE_UNITS )[ number ];
-/** The units a file writes beside the size: points are the default and are not written. */
-export type ShownUnit = Exclude< FontSizeUnit, 'pt' >;
+
+/** The size of a text in points: a number is points, a text a length with its unit ("4.4mm"); camaleaun/draw reads both. */
+export { sizePt };
 
 const round8 = ( n: number ) => Math.round( n * 1e8 ) / 1e8;
 
@@ -163,30 +164,48 @@ export function fontSizeText( pt: number, unit: string = 'pt' ): string {
 	return `${ Number( ( pt / ( UNITS[ unit ] || 1 ) ).toFixed( 8 ) ) }${ unit }`;
 }
 
-/** The unit a font size is shown in, from what a file says: px, mm, cm or in; anything else (and nothing) is points. */
-export function fontSizeUnit( value: unknown ): FontSizeUnit {
-	return value === 'px' || value === 'mm' || value === 'cm' || value === 'in' ? value : 'pt';
+/** The unit a size is written in: px, mm, cm or in when it is a length with one, else points. */
+export function fontSizeUnit( size: unknown ): FontSizeUnit {
+	const unit = typeof size === 'string' ? /([a-z]+)\s*$/i.exec( size )?.[ 1 ].toLowerCase() : undefined;
+	return unit === 'px' || unit === 'mm' || unit === 'cm' || unit === 'in' ? unit : 'pt';
 }
 
-/** Whether the size is not one of the list (or is shown in another unit than points): the field opens by itself. */
-export function isCustomSize( pt: number, unit: string ): boolean {
-	return unit !== 'pt' || ! FONT_SIZES.includes( pt );
+/** The size as the field shows it: the length as it was written ("4.4mm", with no zeros at the end), or the points with their unit. */
+export function fontSizeShown( size: unknown ): string {
+	const written = typeof size === 'string' ? /^\s*(\d*\.?\d+)/.exec( size )?.[ 1 ] : undefined;
+	return written !== undefined ? `${ Number( written ) }${ fontSizeUnit( size ) }` : fontSizeText( sizePt( size ), 'pt' );
 }
+
+/** Whether the size is not one of the list (or is written in another unit than points): the field opens by itself. */
+export function isCustomSize( size: unknown ): boolean {
+	return fontSizeUnit( size ) !== 'pt' || ! FONT_SIZES.includes( sizePt( size ) );
+}
+
+/** What the size is for a number in a unit: points are a number (what files wrote before units), any other unit a length ("4.4mm"). */
+const sizeValue = ( n: number, unit: string ): number | string => ( unit === 'pt' ? n : `${ n }${ unit }` );
 
 /**
- * What a change of the field makes of the element. The unit control says "the same number in the new unit" first when the unit is changed: that keeps the size (points) and
- * changes the unit it is shown in; any other text is a size. Nothing when there is nothing to change. `sizeUnit` is undefined for points (none is written).
+ * What a change of the field makes of the size. The unit control says "the same number in the new unit" first when the unit is changed: that keeps the size (points) and writes it in
+ * the new unit; any other text is a number in the unit of the field, as typed. Nothing when there is nothing to change.
  */
-export function fontSizeChange( text: string, pt: number, unit: string ): { size: number; sizeUnit: ShownUnit | undefined } | undefined {
+export function fontSizeChange( text: string, size: unknown, unit: string ): number | string | undefined {
+	const pt = sizePt( size );
 	const typed = /^\s*\d*[.,]?\d+\s*([a-z]*)\s*$/i.exec( text )?.[ 1 ].toLowerCase();
-	if ( typed && typed !== unit && UNITS[ typed ] && FONT_SIZE_UNITS.includes( typed as FontSizeUnit ) ) {
-		return { size: pt, sizeUnit: typed === 'pt' ? undefined : ( typed as ShownUnit ) };
+	let next: number | string | undefined;
+	if ( typed && typed !== unit && FONT_SIZE_UNITS.includes( typed as FontSizeUnit ) ) {
+		next = sizeValue( round8( pt / UNITS[ typed ] ), typed );
+	} else {
+		const points = fontSizePt( text, unit );
+		const f = UNITS[ unit ] || 1;
+		const n = /^\s*(\d*[.,]?\d+)/.exec( text )?.[ 1 ];
+		if ( points === undefined || n === undefined ) {
+			return undefined;
+		}
+		const typedNumber = round8( Number.parseFloat( n.replace( ',', '.' ) ) );
+		const inRange = typedNumber * f >= 1 && typedNumber * f <= 1000 ? typedNumber : round8( points / f );
+		next = sizeValue( inRange, unit );
 	}
-	const size = fontSizePt( text, unit );
-	if ( size === undefined || ( size === pt && fontSizeUnit( unit ) === unit ) ) {
-		return undefined;
-	}
-	return { size, sizeUnit: unit === 'pt' ? undefined : ( fontSizeUnit( unit ) as ShownUnit ) };
+	return next === size ? undefined : next;
 }
 
 /** The range of the slider beside the field, in the unit shown: 1 to 100 points, by tenths (hundredths for the units that are big). */
