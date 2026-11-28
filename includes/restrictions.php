@@ -42,18 +42,24 @@ function labels() {
 
 /**
  * What is allowed when nothing says otherwise: everything on a single site; on a network the features that carry files or drawings in
- * and out are for super administrators only.
+ * and out are for super administrators only; with CampTix or GatherPress the export and import of lists (templates, events, people, certificates, settings) are off for now:
+ * only a single template travels (the editor's own Export and Import, which this does not touch).
  *
- * @param bool|null $multisite Whether it is a network (null: this site).
- * @param bool|null $super     Whether the user is a super administrator (null: the current user).
+ * @param bool|null $multisite  Whether it is a network (null: this site).
+ * @param bool|null $super      Whether the user is a super administrator (null: the current user).
+ * @param bool|null $integrated Whether CampTix or GatherPress is active (null: this site).
  * @return array<string, bool>
  */
-function defaults( $multisite = null, $super = null ) {
+function defaults( $multisite = null, $super = null, $integrated = null ) {
 	$allowed = array_fill_keys( FEATURES, true );
 	if ( null === $multisite ? is_multisite() : $multisite ) {
 		foreach ( array( 'zip', 'fonts', 'pictures', 'vectors' ) as $feature ) {
 			$allowed[ $feature ] = null === $super ? is_super_admin() : $super;
 		}
+	}
+	if ( null === $integrated ? \EventsCertificate\Environment\has_camptix() || \EventsCertificate\Environment\has_gatherpress() : $integrated ) {
+		$allowed['export'] = false;
+		$allowed['import'] = false;
 	}
 
 	return $allowed;

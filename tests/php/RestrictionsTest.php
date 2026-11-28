@@ -58,13 +58,18 @@ class RestrictionsTest extends Test_Case {
 	 * A single site allows everything; a network leaves the features that carry files and drawings to the super administrator.
 	 */
 	public function test_the_defaults() {
-		$this->assertSame( array_fill_keys( Restrictions\FEATURES, true ), Restrictions\defaults( false ) );
-		$network = Restrictions\defaults( true, false );
+		$this->assertSame( array_fill_keys( Restrictions\FEATURES, true ), Restrictions\defaults( false, null, false ) );
+		// With CampTix or GatherPress the lists do not travel (a single template does, from the editor).
+		$integrated = Restrictions\defaults( false, null, true );
+		$this->assertFalse( $integrated['export'] );
+		$this->assertFalse( $integrated['import'] );
+		$this->assertTrue( $integrated['zip'] );
+		$network = Restrictions\defaults( true, false, false );
 		$this->assertTrue( $network['export'] );
 		$this->assertTrue( $network['import'] );
 		foreach ( array( 'zip', 'fonts', 'pictures', 'vectors' ) as $feature ) {
 			$this->assertFalse( $network[ $feature ], $feature );
-			$this->assertTrue( Restrictions\defaults( true, true )[ $feature ], 'A super administrator.' );
+			$this->assertTrue( Restrictions\defaults( true, true, false )[ $feature ], 'A super administrator.' );
 		}
 	}
 
@@ -81,7 +86,7 @@ class RestrictionsTest extends Test_Case {
 			)
 		); // phpcs:ignore Universal.Arrays.MultipleStatementAlignment
 		$this->assertFalse( Restrictions\allows( 'vectors' ), 'The option.' );
-		$this->assertTrue( Restrictions\allows( 'export' ), 'What it does not say stays.' );
+		$this->assertSame( Restrictions\defaults()['export'], Restrictions\allows( 'export' ), 'What it does not say stays.' );
 		$this->assertFalse( Restrictions\allows( 'nonsense' ), 'Not a feature.' );
 
 		add_filter(
@@ -260,6 +265,14 @@ class RestrictionsTest extends Test_Case {
 	 * The buttons of a list are the ones that are allowed.
 	 */
 	public function test_the_buttons_follow_the_restrictions() {
+		// Export and import are off by default with CampTix or GatherPress: these tests are about the buttons.
+		update_option(
+			Restrictions\OPTION,
+			array(
+				'export' => true,
+				'import' => true,
+			)
+		);
 		$both = $this->buttons();
 		$this->assertStringContainsString( 'evcert-export', $both );
 		$this->assertStringContainsString( 'evcert-import', $both );

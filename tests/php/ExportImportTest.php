@@ -11,6 +11,7 @@ use EventsCertificate\Bundle;
 use EventsCertificate\BundleAdmin;
 use EventsCertificate\Certificates;
 use EventsCertificate\Documents;
+use EventsCertificate\Restrictions;
 use EventsCertificate\Events;
 use EventsCertificate\People;
 
@@ -346,6 +347,14 @@ class ExportImportTest extends Test_Case {
 	 * The buttons open the Export and the Import screens with their section ticked, and only for who can manage.
 	 */
 	public function test_the_buttons_and_the_address() {
+		// Export and import are off by default with CampTix or GatherPress: these tests are about the buttons.
+		update_option(
+			Restrictions\OPTION,
+			array(
+				'export' => true,
+				'import' => true,
+			)
+		);
 		ob_start();
 		BundleAdmin\render_buttons( 'certificates' );
 		$html = (string) ob_get_clean();

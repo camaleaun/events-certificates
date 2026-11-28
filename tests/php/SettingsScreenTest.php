@@ -182,6 +182,15 @@ class SettingsScreenTest extends Test_Case {
 	 */
 	public function test_the_settings_screen_has_export_and_import_buttons() {
 		wp_set_current_user( 1 );
+		// Export and import are off by default with CampTix or GatherPress: these tests are about the buttons.
+		update_option(
+			\EventsCertificate\Restrictions\OPTION,
+			array(
+				'export' => true,
+				'import' => true,
+			)
+		);
+
 		ob_start();
 		Admin\render_settings_page();
 		$html = (string) ob_get_clean();

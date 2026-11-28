@@ -1305,6 +1305,24 @@ function render_settings_page() {
 	if ( ! current_user_can( CAPABILITY ) ) {
 		return;
 	}
+	?>
+	<div class="wrap evcert-settings">
+		<h1 class="wp-heading-inline"><?php esc_html_e( 'Settings', 'events-certificates' ); ?></h1>
+		<?php \EventsCertificate\BundleAdmin\render_buttons( 'settings' ); ?>
+		<hr class="wp-header-end">
+		<?php settings_errors(); ?>
+		<?php render_settings_body(); ?>
+	<?php
+}
+
+/**
+ * The body of the settings screen: its tabs (Features, Issuing, Verification, Declaration, Data, Tools) and the form. The screen of the plugin wraps it with its title; an
+ * integration that has the settings as a tab of its own (GatherPress > Settings > Certificates) prints it inside that tab (`$hosted`: the tabs are a list of links, and Export and
+ * Import are with them), with its own form, as GatherPress's own Tools tab has.
+ *
+ * @param bool $hosted Whether it is inside another plugin's settings tab.
+ */
+function render_settings_body( $hosted = false ) {
 	add_settings_fields( SLUG_SETTINGS );
 	$sections = array_keys( (array) ( $GLOBALS['wp_settings_sections'][ SLUG_SETTINGS ] ?? array() ) );
 	// One tab per group of sections; every section is on the form (the others are only hidden), so saving keeps them all.
@@ -1326,16 +1344,30 @@ function render_settings_page() {
 	$current = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
 	$current = isset( $tabs[ $current ] ) ? $current : (string) key( $tabs );
 	?>
-	<div class="wrap evcert-settings">
-		<h1 class="wp-heading-inline"><?php esc_html_e( 'Settings', 'events-certificates' ); ?></h1>
-		<?php \EventsCertificate\BundleAdmin\render_buttons( 'settings' ); ?>
-		<hr class="wp-header-end">
-		<?php settings_errors(); ?>
-		<nav class="nav-tab-wrapper" aria-label="<?php esc_attr_e( 'Settings sections', 'events-certificates' ); ?>">
-			<?php foreach ( $tabs as $id => $tab ) : ?>
-				<a class="nav-tab<?php echo $id === $current ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'tab', $id, settings_url() ) ); ?>"<?php echo $id === $current ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $tab[0] ); ?></a>
-			<?php endforeach; ?>
-		</nav>
+	<?php if ( $hosted ) : ?>
+		<p class="evcert-settings__buttons"><?php \EventsCertificate\BundleAdmin\render_buttons( 'settings' ); ?></p>
+	<?php endif; ?>
+	<?php
+	$tag   = $hosted ? 'ul' : 'nav';
+	$class = $hosted ? 'subsubsub evcert-settings__tabs' : 'nav-tab-wrapper';
+	?>
+	<<?php echo esc_html( $tag ); ?> class="<?php echo esc_attr( $class ); ?>" aria-label="<?php esc_attr_e( 'Settings sections', 'events-certificates' ); ?>">
+		<?php foreach ( $tabs as $id => $tab ) : ?>
+			<?php
+			$link = sprintf(
+				'<a class="%1$s" href="%2$s"%3$s>%4$s</a>',
+				esc_attr( $hosted ? ( $id === $current ? 'current' : '' ) : 'nav-tab' . ( $id === $current ? ' nav-tab-active' : '' ) ),
+				esc_url( add_query_arg( 'tab', $id, settings_url() ) ),
+				$id === $current ? ' aria-current="page"' : '',
+				esc_html( $tab[0] )
+			);
+			echo $hosted ? '<li>' . $link . ( array_key_last( $tabs ) === $id ? '' : ' |' ) . '</li> ' : $link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+			?>
+		<?php endforeach; ?>
+	</<?php echo esc_html( $tag ); ?>>
+	<?php if ( $hosted ) : ?>
+		<br class="clear">
+	<?php endif; ?>
 		<?php if ( 'tools' === $current ) : ?>
 			<?php \EventsCertificate\Tools\render(); ?>
 		<?php else : ?>
@@ -1363,7 +1395,6 @@ function render_settings_page() {
 			<?php submit_button(); ?>
 		</form>
 		<?php endif; ?>
-	</div>
 	<?php
 }
 

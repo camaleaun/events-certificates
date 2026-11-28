@@ -68,31 +68,11 @@ class AdminTest extends Test_Case {
 			array( 'Coupons', 'read', 'edit.php?post_type=tix_coupon' ),
 			array( 'Setup', 'read', 'camptix_options' ),
 			array( 'Certificates', 'read', Admin\SLUG ),
-			array( 'Certificate settings', 'read', CampTix\SETTINGS_SLUG ),
 		);
 		CampTix\move_after_attendees();
 		$slugs   = wp_list_pluck( $submenu[ CampTix\MENU ], 2 );
 		$submenu = $backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$this->assertSame( array( CampTix\MENU, 'post-new.php?post_type=tix_ticket', 'edit.php?post_type=tix_attendee', Admin\SLUG, CampTix\SETTINGS_SLUG, 'edit.php?post_type=tix_coupon', 'camptix_options' ), array_values( $slugs ) );
-	}
-
-	public function test_certificate_settings_go_right_after_certificates_in_the_events_menu() {
-		global $submenu;
-
-		$menu             = \EventsCertificate\Compat\GatherPress\PARENT_SLUG;
-		$backup           = $submenu;
-		$submenu[ $menu ] = array( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			array( 'All Events', 'read', $menu ),
-			array( 'Certificates', 'read', Admin\SLUG ),
-			array( 'Settings', 'read', 'gatherpress_general' ),
-			array( 'Email', 'read', 'gatherpress_email' ),
-			array( 'Certificate settings', 'read', \EventsCertificate\Compat\GatherPress\SETTINGS_SLUG ),
-		);
-		\EventsCertificate\Compat\GatherPress\move_after_certificates();
-		$slugs   = wp_list_pluck( $submenu[ $menu ], 2 );
-		$submenu = $backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		$this->assertSame( array( $menu, Admin\SLUG, \EventsCertificate\Compat\GatherPress\SETTINGS_SLUG, 'gatherpress_general', 'gatherpress_email' ), array_values( $slugs ) );
+		$this->assertSame( array( CampTix\MENU, 'post-new.php?post_type=tix_ticket', 'edit.php?post_type=tix_attendee', Admin\SLUG, 'edit.php?post_type=tix_coupon', 'camptix_options' ), array_values( $slugs ) );
 	}
 }

@@ -24,7 +24,7 @@ Docs and a demo: read the [documentation](https://camaleaun.github.io/events-cer
 * **GatherPress**: with GatherPress active, import an event: RSVPs "attending" come in as registered and checked-in people as attended. Sync again after the event. Tested with GatherPress 0.37.0.
 * **WordCamp.org's CampTix**: on a WordCamp site, attendees get their own certificate from their ticket, with the days they attended and, optionally, a declaration page with the talks they chose.
 * **Get my certificate**: a block, the `[evcert_mine]` shortcode and a page (`/certificates/`) where attendees type the e-mail they registered with and get their certificate if they were marked as present. You choose how the e-mail is proven: a simplified view first and a code to get the full certificate (the default), no proof at all, a 4 or 6-digit code or a one-use link sent by e-mail.
-* **Export and import**: templates, events, participants, certificates and settings in one JSON file, or events and participants as a CSV with its columns mapped, in a wizard with a progress bar. A certificate is found by its code and never written over; importing twice changes nothing.
+* **Export and import**: templates, events, participants, certificates and settings in one JSON file, or events and participants as a CSV with its columns mapped, in a wizard with a progress bar. A certificate is found by its code and never written over; importing twice changes nothing. With GatherPress or CampTix, export and import of lists are off for now (a single template can still be exported and imported from the template editor).
 * **Trash**: participants and certificates go to a Trash before they are deleted, with restore.
 
 **Design the certificate**
