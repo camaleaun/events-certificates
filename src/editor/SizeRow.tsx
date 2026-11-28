@@ -50,7 +50,7 @@ export default function SizeRow( { w, h, units, onUnit, placeholder, disabled, o
 	};
 	const field = ( side: 'w' | 'h', label: string, value?: number ) =>
 		units ? (
-			<UnitControl
+			<UnitControl step="any" spinFactor={ 0.1 }
 				__next40pxDefaultSize
 				label={ label }
 				min={ 0.01 }

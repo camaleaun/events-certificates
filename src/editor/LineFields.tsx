@@ -17,7 +17,7 @@ export default function LineFields( { el, onChange }: { el: LineEl; onChange: ( 
 	const box = { x: Math.min( el.x1, el.x2 ), y: Math.min( el.y1, el.y2 ), w: Math.abs( el.x2 - el.x1 ), h: Math.abs( el.y2 - el.y1 ) };
 	// Another unit keeps the length and says it in that unit; typing changes it in the unit it is in.
 	const field = ( key: 'x' | 'y' | 'w' | 'h', label: string ) => (
-		<UnitControl
+		<UnitControl step="any" spinFactor={ 0.1 }
 			key={ `${ key }-${ unit }` }
 			__next40pxDefaultSize
 			label={ label }

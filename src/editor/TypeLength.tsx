@@ -56,7 +56,7 @@ export default function TypeLength( { label, value, units, defaultUnit, placehol
 	const text = shown( value, defaultUnit );
 	const unit = text ? unitOfValue( value, defaultUnit ) : chosen;
 	return (
-		<UnitControl
+		<UnitControl step="any" spinFactor={ 0.1 }
 			// Another unit makes the field again: it would keep the number it had.
 			key={ unit }
 			__next40pxDefaultSize

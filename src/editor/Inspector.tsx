@@ -350,7 +350,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 							</HStack>
 							<HStack className="evcert-radius__linked" alignment="center">
 							{ /* The width is in px (a pixel is a point here, as in the drawing package), like the core's border width. */ }
-							<UnitControl __next40pxDefaultSize label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision units={ STROKE_UNITS } min={ 0 } value={ ( el as any ).strokeWidth ? `${ ( el as any ).strokeWidth }px` : '' } placeholder="0" onChange={ ( v ) => onChange( { strokeWidth: Math.max( 0, parseFloat( v || '0' ) || 0 ) || ( el.type === 'line' ? 0 : undefined ) } as Partial< Element > ) } />
+							<UnitControl step="any" spinFactor={ 0.1 } __next40pxDefaultSize label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision units={ STROKE_UNITS } min={ 0 } value={ ( el as any ).strokeWidth ? `${ ( el as any ).strokeWidth }px` : '' } placeholder="0" onChange={ ( v ) => onChange( { strokeWidth: Math.max( 0, parseFloat( v || '0' ) || 0 ) || ( el.type === 'line' ? 0 : undefined ) } as Partial< Element > ) } />
 							<RangeControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Width', 'events-certificates' ) } hideLabelFromVision withInputField={ false } value={ ( el as any ).strokeWidth || 0 } min={ 0 } max={ 60 } step={ 0.25 } onChange={ ( v ) => onChange( { strokeWidth: v || ( el.type === 'line' ? 0 : undefined ) } as Partial< Element > ) } />
 						</HStack>
 						</div>
@@ -373,7 +373,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 								</HStack>
 								{ linked ? (
 									<HStack className="evcert-radius__linked" alignment="center">
-										<UnitControl
+										<UnitControl step="any" spinFactor={ 0.1 }
 											__next40pxDefaultSize
 											label={ __( 'All corners', 'events-certificates' ) }
 											hideLabelFromVision
@@ -389,7 +389,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 										{ [ cornerTopLeft, cornerTopRight, cornerBottomRight, cornerBottomLeft ].map( ( icon, i ) => (
 											<HStack key={ i }>
 												<Icon icon={ icon } />
-												<UnitControl
+												<UnitControl step="any" spinFactor={ 0.1 }
 													__next40pxDefaultSize
 													label={ [ __( 'Top left', 'events-certificates' ), __( 'Top right', 'events-certificates' ), __( 'Bottom right', 'events-certificates' ), __( 'Bottom left', 'events-certificates' ) ][ i ] }
 													hideLabelFromVision
@@ -519,7 +519,7 @@ function LengthField( { label, value, total, onChange, locked }: { label: string
 			</HStack>
 			{ locked ? (
 				// Follows the other size (aspect ratio kept): shown, not edited.
-				<UnitControl __next40pxDefaultSize label={ label } hideLabelFromVision units={ LEN_UNITS } value={ value } disabled onChange={ () => undefined } />
+				<UnitControl step="any" spinFactor={ 0.1 } __next40pxDefaultSize label={ label } hideLabelFromVision units={ LEN_UNITS } value={ value } disabled onChange={ () => undefined } />
 			) : custom ? (
 				<TextControl
 					__next40pxDefaultSize
@@ -535,7 +535,7 @@ function LengthField( { label, value, total, onChange, locked }: { label: string
 					onChange={ setText }
 				/>
 			) : (
-				<UnitControl
+				<UnitControl step="any" spinFactor={ 0.1 }
 					__next40pxDefaultSize
 					label={ label }
 					hideLabelFromVision

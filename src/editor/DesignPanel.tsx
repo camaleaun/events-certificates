@@ -34,7 +34,7 @@ const POINTS: Record< LengthUnit, number > = { pt: 1, px: 1, mm: MM, cm: MM * 10
  */
 function Margin( { label, pt, unit, onChange }: { label: string; pt: number; unit: LengthUnit; onChange: ( pt: number, unit: LengthUnit ) => void } ) {
 	return (
-		<UnitControl
+		<UnitControl step="any" spinFactor={ 0.1 }
 			// Another unit makes the field again: it would keep the number it had (10) for the same length in the new unit (28.35).
 			key={ unit }
 			__next40pxDefaultSize
