@@ -23,7 +23,7 @@ export default function Inserter( { onInsert, onClose }: { onInsert: ( type: Ele
 		{ type: 'svg', title: __( 'SVG', 'events-certificates' ), keywords: 'icon logo ornament vector path' },
 		{ type: 'logo' as const, title: __( 'Community logo', 'events-certificates' ), keywords: 'logo picture community brand' },
 		{ type: 'signature' as const, title: __( 'Signature', 'events-certificates' ), keywords: 'signer autograph sign name' },
-		{ type: 'verification' as const, title: __( 'Verification (QR, code, hint)', 'events-certificates' ), keywords: 'qr code verify authenticity hint' },
+		{ type: 'verification' as const, title: __( 'Verification', 'events-certificates' ), keywords: 'qr code verify authenticity hint' },
 	];
 	const term = search.trim().toLowerCase();
 	const shown = term ? items.filter( ( i ) => `${ i.title } ${ i.keywords }`.toLowerCase().includes( term ) ) : items;
