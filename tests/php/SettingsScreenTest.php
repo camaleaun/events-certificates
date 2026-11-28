@@ -308,7 +308,7 @@ class SettingsScreenTest extends Test_Case {
 	 * (Tickets > Setup with CampTix; Events > Settings with GatherPress), and any other page is left as WordPress says.
 	 */
 	public function test_the_hidden_settings_page_highlights_the_settings_it_belongs_to() {
-		$saved = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$saved        = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$_GET['page'] = 'certificates';
 		$this->assertSame( 'camptix_options', \EventsCertificate\Compat\CampTix\highlight_setup( 'certificates' ), 'CampTix: Setup.' );
 		$this->assertSame( 'gatherpress_events_settings', \EventsCertificate\Compat\GatherPress\highlight_settings( 'certificates' ), 'GatherPress: Settings.' );
