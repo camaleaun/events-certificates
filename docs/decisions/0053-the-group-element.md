@@ -31,3 +31,5 @@ A template made by hand from a Figma file stacked rectangles and SVGs that belon
 
 - A design with groups needs `camaleaun/draw` 0.18; an earlier version keeps `draw/group` as a block it does not know (a generic block), so nothing is lost.
 - The text of an element takes a click only on its lines, not on the whole box: a tall box no longer hides what is under it. A rectangle or an ellipse with no fill is picked by its outline.
+
+Selecting several elements to group them, and the bar over them, are in ADR 0056.

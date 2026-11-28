@@ -57,6 +57,7 @@ question, what was chosen, what was left out and why, and what follows from it.
 | [0053](0053-the-group-element.md) | The group element: Group, Row, Stack and Grid, what is in it placed from its corner, grouped from a selection | Accepted (2026-11-27) |
 | [0054](0054-text-written-as-text.md) | The text of an element written as text in a file and on the clipboard: `[fields]`, `*bold*`, `_italic_` | Accepted (2026-11-28) |
 | [0055](0055-the-date-of-emission.md) | The date of emission: a text with its own block whose words are a date format; empty, the site's | Accepted (2026-11-28) |
+| [0056](0056-selection-and-clipboard.md) | Selecting, grouping and copying several elements: the editor's list of ids, a box, the post editor's look and toolbar, copy and paste | Accepted (2026-11-28) |
 
 New decisions get the next number. A decision that is replaced keeps its file,
 with its status changed to "Replaced by NNNN".

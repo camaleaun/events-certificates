@@ -1567,6 +1567,16 @@ $evcert-sidebar-width: 280px;
 		font-size: 11px;
 	}
 }
+// What a click would select, under the pointer.
+.evcert-hover {
+	fill: none;
+	stroke: var(--wp-admin-theme-color, #3858e9);
+	stroke-width: 1;
+	stroke-opacity: 0.6;
+	vector-effect: non-scaling-stroke;
+	pointer-events: none;
+}
+
 // The box dragged on the page to select what it touches.
 .evcert-marquee {
 	fill: var(--wp-admin-theme-color, #3858e9);

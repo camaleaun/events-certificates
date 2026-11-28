@@ -62,6 +62,8 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	const [ preview, setPreview ] = useState< Element | null >( null );
 	// The others that move along while several are dragged, where they would be.
 	// A box drawn on the page to select what it touches: from where it began, to where it is, whether it adds to the selection, and the locked element it began on (a click on it selects it).
+	// What a click would select where the pointer is (a faint outline, so the rule that a click selects the group can be seen).
+	const [ hover, setHover ] = useState< string | null >( null );
 	const [ marquee, setMarquee ] = useState< { from: { x: number; y: number }; to: { x: number; y: number }; add: boolean; on: string | null } | null >( null );
 	const [ peerPreview, setPeerPreview ] = useState< Record< string, Element > | null >( null );
 	const [ guides, setGuides ] = useState< Guide[] >( [] );
@@ -104,6 +106,13 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	};
 
 	const onMove = ( event: React.PointerEvent ) => {
+		if ( ! dragRef.current && ! marquee && tab === 'art' && ! editingId ) {
+			const id = ( event.target as globalThis.Element ).closest?.( 'g.evcert-el' )?.getAttribute( 'data-id' );
+			const over = id ? clickTarget( shownTree, id, selection.ids ) : null;
+			if ( over !== hover ) {
+				setHover( over );
+			}
+		}
 		if ( marquee ) {
 			setMarquee( { ...marquee, to: toPage( event ) } );
 			return;
@@ -265,6 +274,7 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 		return (
 			<g
 				key={ el.id }
+				data-id={ el.id }
 				className={ `evcert-el${ el.locked ? ' is-locked' : '' }` }
 				onDoubleClick={ ( event ) => {
 					event.stopPropagation();
@@ -310,7 +320,7 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	};
 
 	return (
-		<svg ref={ svgRef } className="evcert-canvas" width={ ( w + bleed * 2 ) * zoom } height={ ( h + bleed * 2 ) * zoom } viewBox={ `${ -bleed } ${ -bleed } ${ w + bleed * 2 } ${ h + bleed * 2 }` } onPointerMove={ onMove } onPointerUp={ onUp } onPointerDown={ ( event ) => tab === 'art' && beginMarquee( event, null ) }>
+		<svg ref={ svgRef } className="evcert-canvas" width={ ( w + bleed * 2 ) * zoom } height={ ( h + bleed * 2 ) * zoom } viewBox={ `${ -bleed } ${ -bleed } ${ w + bleed * 2 } ${ h + bleed * 2 }` } onPointerMove={ onMove } onPointerUp={ onUp } onPointerLeave={ () => setHover( null ) } onPointerDown={ ( event ) => tab === 'art' && beginMarquee( event, null ) }>
 			<defs>
 				<pattern id="evcert-checker" width="12" height="12" patternUnits="userSpaceOnUse">
 					<rect width="12" height="12" fill="#ffffff" />
@@ -343,6 +353,11 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 					g.kind === 'gap' ? null : g.axis === 'x' ? <line key={ i } x1={ g.at } x2={ g.at } y1={ -bleed } y2={ h + bleed } className="evcert-snap" /> : <line key={ i } y1={ g.at } y2={ g.at } x1={ -bleed } x2={ w + bleed } className="evcert-snap" />
 				) }
 			</g>
+			{ hover && ! dragRef.current && ! marquee && ! selection.ids.includes( hover ) && tab === 'art' && ! editingId && ( () => {
+				const over = findEl( shownTree, hover ) as Placed | undefined;
+				const b = over ? pageBox( over ) : null;
+				return b ? <rect className="evcert-hover" x={ b.x } y={ b.y } width={ Math.max( 1, b.w ) } height={ Math.max( 1, b.h ) } /> : null;
+			} )() }
 			{ marquee && ( marquee.from.x !== marquee.to.x || marquee.from.y !== marquee.to.y ) && (
 				<rect className="evcert-marquee" x={ Math.min( marquee.from.x, marquee.to.x ) } y={ Math.min( marquee.from.y, marquee.to.y ) } width={ Math.abs( marquee.to.x - marquee.from.x ) } height={ Math.abs( marquee.to.y - marquee.from.y ) } />
 			) }
