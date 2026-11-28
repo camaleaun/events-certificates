@@ -98,7 +98,7 @@ test( 'the layout keeps its unit when the size is typed', () => {
 	assert.equal( patch.layout.v.size, '96pt' );
 } );
 
-const { alignAxis, anchorAxis, axisAt, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
+const { alignAxis, anchorAxis, axisAt, fontSizePt, fontSizeText, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
 
 test( 'a length says its unit, and a length in points is written in it', () => {
 	assert.deepEqual( [ '12mm', '3.5in', '10px', '5', 'calc(1pt + 1pt)', '50%' ].map( unitOf ), [ 'mm', 'in', 'px', 'pt', 'pt', '%' ] );
@@ -261,3 +261,28 @@ test( 'a side of an SVG left empty says no size: the layout has none there, and 
 	assert.ok( loose.layout.h.size, 'the other side says what it is' );
 } );
 
+
+test( 'a font size typed with decimals keeps them, in points with up to three', () => {
+	assert.equal( fontSizePt( '12.5pt' ), 12.5 );
+	assert.equal( fontSizePt( '9.75pt' ), 9.75 );
+	assert.equal( fontSizePt( '12.1234' ), 12.123, 'no unit: the unit given, points by default' );
+	assert.equal( fontSizePt( '12,5' ), 12.5, 'a comma is a decimal point' );
+	assert.equal( fontSizePt( '4.4mm' ), 12.472 );
+	assert.equal( fontSizePt( '0.5in' ), 36 );
+	assert.equal( fontSizePt( '9.5', 'px' ), 9.5, 'the unit of the field when the text has none' );
+	assert.equal( fontSizePt( '12', 'mm' ), 34.016 );
+	assert.equal( fontSizePt( '0.2' ), 1, 'at least 1 pt' );
+	assert.equal( fontSizePt( '5000' ), 1000, 'at most 1000 pt (what a file may say)' );
+	assert.equal( fontSizePt( '' ), undefined );
+	assert.equal( fontSizePt( 'abc' ), undefined );
+} );
+
+test( 'a font size is shown in its unit with up to three decimals and no zeros at the end', () => {
+	assert.equal( fontSizeText( 12.5, 'pt' ), '12.5pt' );
+	assert.equal( fontSizeText( 12, 'pt' ), '12pt' );
+	assert.equal( fontSizeText( 9.75, 'pt' ), '9.75pt' );
+	assert.equal( fontSizeText( 12.3456, 'pt' ), '12.346pt' );
+	assert.equal( fontSizeText( 12.472, 'mm' ), '4.4mm' );
+	assert.equal( fontSizeText( 72, 'in' ), '1in' );
+	assert.equal( fontSizeText( 12.5, 'px' ), '12.5px' );
+} );

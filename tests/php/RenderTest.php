@@ -687,6 +687,21 @@ class RenderTest extends Test_Case {
 	}
 
 	/**
+	 * A font size with decimals reaches the page as it was written (the editor takes 12.5 or 9.75 pt, with up to three decimals).
+	 */
+	public function test_a_font_size_with_decimals_is_kept() {
+		$el = array(
+			'size'   => 12.5,
+			'font'   => 'inter',
+			'weight' => 400,
+			'w'      => 100,
+		);
+		$this->assertSame( 12.5, Render\text_size( $el, array(), array() ) );
+		$this->assertSame( 9.75, Render\text_size( array( 'size' => 9.75 ) + $el, array(), array() ) );
+		$this->assertSame( 12.123, Render\text_size( array( 'size' => '12.123' ) + $el, array(), array() ) );
+	}
+
+	/**
 	 * A drawing that says no size on an axis is as big as its viewBox, like camaleaun/draw's resolve() says; one that says it has it.
 	 */
 	public function test_an_svg_with_no_size_is_as_big_as_its_viewbox() {

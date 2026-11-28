@@ -114,6 +114,32 @@ export function alignAxis( side: 'start' | 'center' | 'end', sizePt: number, pre
 	return axisAt( mode, pos, sizePt, previous, origin, total );
 }
 
+/** The units a font size may be typed in (the unit of the field; px is the point). */
+export const FONT_SIZE_UNITS = [ 'pt', 'px', 'mm', 'cm', 'in' ] as const;
+
+/**
+ * A font size typed ("12.5", "9.75pt", "4,4mm") in points, with up to three decimals: what is typed is kept, not rounded to a step. The unit is the text's, or
+ * `unit` (the field's) when it has none. At least 1 pt and at most 1000 (what a file may say); nothing for a text that is not a size.
+ */
+export function fontSizePt( text: string, unit: string = 'pt' ): number | undefined {
+	const m = /^\s*(\d*[.,]?\d+)\s*([a-z]*)\s*$/i.exec( text );
+	if ( ! m ) {
+		return undefined;
+	}
+	const typed = m[ 2 ].toLowerCase();
+	const factor = UNITS[ typed || unit ];
+	if ( ! factor ) {
+		return undefined;
+	}
+	const pt = Math.round( Number.parseFloat( m[ 1 ].replace( ',', '.' ) ) * factor * 1000 ) / 1000;
+	return Math.min( 1000, Math.max( 1, pt ) );
+}
+
+/** A font size in points as the field shows it in a unit: up to three decimals, with no zeros at the end ("12.5pt", "12pt", "4.4mm"). */
+export function fontSizeText( pt: number, unit: string = 'pt' ): string {
+	return `${ Number( ( pt / ( UNITS[ unit ] || 1 ) ).toFixed( 3 ) ) }${ unit }`;
+}
+
 /** The layout an element has, or the one that holds it where it is (anchored to the start of the page). */
 function layoutOf( el: Sized, page: PageBox ): Layout {
 	return el.layout || layoutFrom( { h: { mode: 'start' }, v: { mode: 'start' }, ref: 'page' }, { x: el.x, y: el.y, w: el.w, h: el.h }, page );

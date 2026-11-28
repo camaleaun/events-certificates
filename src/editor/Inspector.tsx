@@ -7,7 +7,6 @@
 import { DEFAULT_FONT, fallbackOf, fontFamilies, fontLabel } from './fonts';
 import {
 	Button,
-	FontSizePicker,
 	RangeControl,
 	SelectControl,
 	TextareaControl,
@@ -36,7 +35,7 @@ import TextByLanguage from './TextByLanguage';
 import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, type GroupEl, fieldValue, runsOf } from './model';
 import { stockName } from './base';
 import GroupPanel from './GroupPanel';
-import { UNITS } from '@camaleaun/draw';
+import FontSize from './FontSize';
 import TypeLength, { LETTER_SPACING_UNITS, LINE_HEIGHT_UNITS } from './TypeLength';
 import LineFields from './LineFields';
 import { innerPage } from './tree';
@@ -69,7 +68,6 @@ function fontOptions( current: string ) {
 	return options;
 }
 
-const FONT_SIZES = [ 8, 10, 12, 14, 16, 18, 24, 32, 42 ].map( ( size ) => ( { name: `${ size } pt`, slug: String( size ), size } ) );
 const num = ( v: number ) => Math.round( v * 100 ) / 100;
 const PT = [ { value: 'pt', label: 'pt', default: 0 } ];
 /** A corner radius is in points or in percent of the shorter side. */
@@ -78,39 +76,6 @@ const RADIUS_UNITS = [
 	{ value: '%', label: '%', step: 0.1 },
 ];
 const STROKE_UNITS = [ { value: 'px', label: 'px', step: 0.25 } ];
-
-const SIZE_PICKER_UNITS = [ 'pt', 'px', 'mm', 'cm', 'in' ];
-
-/**
- * The font size: a size of the list or a custom one in pt (the first), px, mm, cm or in. The element keeps points; the unit chosen is only how the
- * custom field shows and takes it (px is pt: 1/72 in).
- */
-function SizePicker( { size, onChange }: { size: number; onChange: ( size: number ) => void } ) {
-	const [ unit, setUnit ] = useState( 'pt' );
-	const shown = Math.round( ( size / ( UNITS[ unit ] || 1 ) ) * 1000 ) / 1000;
-	return (
-		<FontSizePicker
-			__next40pxDefaultSize
-			fontSizes={ FONT_SIZES }
-			value={ `${ shown }${ unit }` }
-			onChange={ ( next ) => {
-				const m = /^\s*(-?\d*\.?\d+)\s*([a-z]*)\s*$/i.exec( String( next ?? '' ) );
-				if ( ! m ) {
-					return;
-				}
-				const typed = m[ 2 ].toLowerCase();
-				// A size of the list comes as points; a custom one with the unit of the field.
-				if ( typed && SIZE_PICKER_UNITS.includes( typed ) ) {
-					setUnit( typed );
-				}
-				onChange( Number( m[ 1 ] ) * ( UNITS[ typed || 'pt' ] || 1 ) || 14 );
-			} }
-			withSlider
-			withReset={ false }
-			units={ SIZE_PICKER_UNITS }
-		/>
-	);
-}
 
 export default function Inspector( { el, stored, design, mode, tab, locale, sample, onChange, onImage, onBox, holder }: Props ) {
 	// What is in a group is placed in the group's box (its corner is 0, 0), not on the page.
@@ -301,7 +266,7 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 						<SelectControl __next40pxDefaultSize __nextHasNoMarginBottom label={ __( 'Font', 'events-certificates' ) } value={ el.font as any } options={ fontOptions( el.font ) } onChange={ ( font ) => onChange( { font } ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem label={ __( 'Size', 'events-certificates' ) } hasValue={ () => el.size !== 14 } onDeselect={ () => onChange( { size: 14 } ) } isShownByDefault>
-						<SizePicker size={ el.size } onChange={ ( size ) => onChange( { size } ) } />
+						<FontSize size={ el.size } onChange={ ( size ) => onChange( { size } ) } />
 					</ToolsPanelItem>
 					<ToolsPanelItem label={ __( 'Appearance', 'events-certificates' ) } hasValue={ () => el.weight !== 400 } onDeselect={ () => onChange( { weight: 400 } ) } isShownByDefault>
 						<SelectControl

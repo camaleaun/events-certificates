@@ -823,6 +823,11 @@ $evcert-sidebar-width: 280px;
 		flex: 1;
 	}
 }
+.evcert-font-size {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
 .evcert-anchors {
 	display: flex;
 	flex-direction: column;
