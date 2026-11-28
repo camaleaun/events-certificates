@@ -1405,6 +1405,10 @@ function format_date( $ts, $format ) {
 	if ( 'iso' === $format ) {
 		return wp_date( 'Y-m-d', $ts );
 	}
+	// Any other format that is not one of the named ones is a date pattern (the letters of Settings → General: "d/m/Y"); the date of emission writes its own.
+	if ( is_string( $format ) && '' !== $format && ! in_array( $format, array( 'site', 'long', 'medium', 'short', 'month' ), true ) ) {
+		return wp_date( $format, $ts );
+	}
 	if ( ! $format || 'site' === $format || ! class_exists( 'IntlDateFormatter' ) ) {
 		return \EventsCertificate\Dates\date_text( $ts );
 	}
@@ -1565,7 +1569,7 @@ function phrase_field( $text ) {
  * @return string
  */
 function runs_html( array $el, array $values ) {
-	$runs = element_runs( $el );
+	$runs = date_of_emission_runs( $el, element_runs( $el ) );
 	$html = '';
 	$gap  = true; // At the start, or right after an empty field.
 	foreach ( $runs as $run ) {
@@ -1614,6 +1618,49 @@ function element_runs( array $el ) {
 
 	// The text an earlier version kept (`{name}` and `**bold**`) is read as the package reads a text.
 	return \EventsCertificate\Vendor\Camaleaun\Draw\Runs::parse( (string) ( $el['text'] ?? '' ), \EventsCertificate\Designs\field_keys() );
+}
+
+/**
+ * The runs of the date of emission (a text with that slot): its words are the format of the date, and while they are empty the date is in the format of the site. Each word
+ * of the text becomes the field `issued_date` in that format (keeping its marks); the rest is drawn as it is. Only for drawing: what is saved is the words.
+ *
+ * @param array<string, mixed>             $el   Text element.
+ * @param array<int, array<string, mixed>> $runs Its runs.
+ * @return array<int, array<string, mixed>>
+ */
+function date_of_emission_runs( array $el, array $runs ) {
+	if ( 'text' !== ( $el['type'] ?? '' ) || 'date-of-emission' !== ( $el['slot'] ?? '' ) ) {
+		return $runs;
+	}
+	$blank = true;
+	foreach ( $runs as $run ) {
+		if ( isset( $run['field'] ) || '' !== trim( (string) ( $run['text'] ?? '' ) ) ) {
+			$blank = false;
+		}
+	}
+	if ( $blank ) {
+		return array( array( 'field' => 'issued_date' ) );
+	}
+	$out = array();
+	foreach ( $runs as $run ) {
+		$text = (string) ( $run['text'] ?? '' );
+		if ( isset( $run['field'] ) || '' === trim( $text ) ) {
+			$out[] = $run;
+			continue;
+		}
+		$out[] = array(
+			'field'  => 'issued_date',
+			'format' => $text,
+		) + array_intersect_key(
+			$run,
+			array(
+				'b' => true,
+				'i' => true,
+			)
+		);
+	}
+
+	return $out;
 }
 
 /**
