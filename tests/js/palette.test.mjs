@@ -247,3 +247,17 @@ test( 'a new rectangle starts with a black fill and an empty stroke', () => {
 	assert.equal( rect.stroke, '' );
 } );
 
+test( 'a margin and a bleed keep the unit they were chosen in (mm when none)', () => {
+	const stored = { page: { width: '297mm', height: '210mm', safe: '28.35pt', bleed: '3mm' }, colors: {}, elements: [] };
+	const design = m.fromStored( stored );
+	assert.equal( design.page.safeUnit, 'pt' );
+	assert.equal( design.page.bleedUnit, undefined );
+	assert.ok( Math.abs( design.page.safe - 28.35 ) < 0.01 );
+	const back = plain( m.toStored( design ).page );
+	assert.equal( back.safe, '28.35pt' );
+	assert.equal( back.bleed, '3mm' );
+	assert.equal( back.safeUnit, undefined, 'the unit is in the length, not a field' );
+	const inches = m.toStored( { ...design, page: { ...design.page, safe: 36, safeUnit: 'in' } } );
+	assert.equal( plain( inches.page ).safe, '0.5in' );
+} );
+

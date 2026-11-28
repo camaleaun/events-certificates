@@ -346,4 +346,24 @@ class RenderTest extends Test_Case {
 		$this->assertSame( Render\artwork( $design, array(), array() ), $quarter, '25% of the shorter side (40) is 10 points.' );
 		$this->assertNotSame( $points, $quarter );
 	}
+
+	/**
+	 * A margin and a bleed may be kept in any unit: the page reads them as points.
+	 */
+	public function test_a_margin_and_a_bleed_may_be_in_any_unit() {
+		$design = \EventsCertificate\Vendor\Camaleaun\Draw\Page::in_points(
+			array(
+				'page' => array(
+					'width'  => '297mm',
+					'height' => '210mm',
+					'safe'   => '28.35pt',
+					'bleed'  => '0.5in',
+				),
+			)
+		);
+		$page   = $design['page'];
+
+		$this->assertEqualsWithDelta( 28.35, $page['safe'], 0.01 );
+		$this->assertEqualsWithDelta( 36.0, $page['bleed'], 0.01 );
+	}
 }

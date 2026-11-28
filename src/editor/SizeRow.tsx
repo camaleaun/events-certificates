@@ -10,7 +10,7 @@ import type { Element } from './model';
 import { followed, resizeSideLen, sizeIn, stretched, unitOf, unitPatch, type Unit } from './size';
 
 /** The units a size is typed in: decimals are kept (0.01, three in inches). */
-const SIZE_UNITS = [
+export const SIZE_UNITS = [
 	{ value: 'pt', label: 'pt', step: 0.01 },
 	{ value: 'px', label: 'px', step: 0.01 },
 	{ value: 'mm', label: 'mm', step: 0.01 },

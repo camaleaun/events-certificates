@@ -12,6 +12,7 @@ import {
 	TextControl,
 	__experimentalHStack as HStack,
 	__experimentalNumberControl as NumberControl,
+	__experimentalUnitControl as UnitControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption, CheckboxControl, __experimentalVStack as VStack, RadioControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
@@ -19,9 +20,39 @@ import { Icon, page as pageIcon } from '@wordpress/icons';
 import ColorsSection from './ColorsSection';
 import { pageSize } from '@camaleaun/draw';
 import { ColorChoices, colorLabel } from './ColorChoices';
+import { SIZE_UNITS } from './SizeRow';
+import { lengthIn, unitOf } from './size';
+import type { LengthUnit } from './model';
 import type { Design, Mode } from './model';
 
 const MM = 2.83465;
+const POINTS: Record< LengthUnit, number > = { pt: 1, px: 1, mm: MM, cm: MM * 10, in: 72 };
+
+/**
+ * A margin or a bleed in the unit the person chose (mm by default), with decimals. Choosing another unit keeps the length and says it in
+ * that unit (10mm is 28.35pt); typing changes the length in the unit it is in.
+ */
+function Margin( { label, pt, unit, onChange }: { label: string; pt: number; unit: LengthUnit; onChange: ( pt: number, unit: LengthUnit ) => void } ) {
+	return (
+		<UnitControl
+			// Another unit makes the field again: it would keep the number it had (10) for the same length in the new unit (28.35).
+			key={ unit }
+			__next40pxDefaultSize
+			label={ label }
+			min={ 0 }
+			units={ SIZE_UNITS.filter( ( u ) => u.value !== '%' ) }
+			value={ lengthIn( pt, unit ) }
+			onChange={ ( v ) => {
+				if ( v === undefined || v === '' ) {
+					onChange( 0, unit );
+					return;
+				}
+				const next = unitOf( v ) as LengthUnit;
+				onChange( next !== unit ? pt : ( Number.parseFloat( v ) || 0 ) * POINTS[ unit ], next );
+			} }
+		/>
+	);
+}
 
 /** Fields whose preview value can be changed (the others come from the site or the certificate). */
 export const PREVIEW_FIELDS = (): Array< [ string, string ] > => [
@@ -176,19 +207,15 @@ export default function DesignPanel( { design, mode, title, status, roles, roleL
 						</>
 					) }
 				</DropdownRow>
-				<DropdownRow label={ __( 'Safe margin', 'events-certificates' ) } value={ `${ Math.round( page.safe / MM ) } mm` }>
-					{ () => (
-						<NumberControl __next40pxDefaultSize label={ __( 'Safe margin', 'events-certificates' ) } min={ 0 } max={ 40 } value={ Math.round( page.safe / MM ) } suffix={ <span className="evcert-suffix">mm</span> } onChange={ ( v ) => setPage( { safe: ( Number( v ) || 0 ) * MM } ) } />
-					) }
+				<DropdownRow label={ __( 'Safe margin', 'events-certificates' ) } value={ lengthIn( page.safe, page.safeUnit || 'mm' ) }>
+					{ () => <Margin label={ __( 'Safe margin', 'events-certificates' ) } pt={ page.safe } unit={ page.safeUnit || 'mm' } onChange={ ( safe, safeUnit ) => setPage( { safe, safeUnit } ) } /> }
 				</DropdownRow>
 				{ /* The page is not an element: its color is chosen here, from the Theme or the Elements (the Background by default). */ }
 				<DropdownRow plain label={ __( 'Background', 'events-certificates' ) } value={ colorLabel( design, page.bg as string ) }>
 					{ () => <ColorChoices theme value={ typeof page.bg === 'string' ? page.bg : '$background' } clearTo="$background" design={ design } mode={ mode } onChange={ ( bg ) => setPage( { bg } ) } /> }
 				</DropdownRow>
-				<DropdownRow label={ __( 'Bleed', 'events-certificates' ) } value={ `${ Math.round( page.bleed / MM ) } mm` }>
-					{ () => (
-						<NumberControl __next40pxDefaultSize label={ __( 'Bleed', 'events-certificates' ) } min={ 0 } max={ 10 } value={ Math.round( page.bleed / MM ) } suffix={ <span className="evcert-suffix">mm</span> } onChange={ ( v ) => setPage( { bleed: ( Number( v ) || 0 ) * MM } ) } />
-					) }
+				<DropdownRow label={ __( 'Bleed', 'events-certificates' ) } value={ lengthIn( page.bleed, page.bleedUnit || 'mm' ) }>
+					{ () => <Margin label={ __( 'Bleed', 'events-certificates' ) } pt={ page.bleed } unit={ page.bleedUnit || 'mm' } onChange={ ( bleed, bleedUnit ) => setPage( { bleed, bleedUnit } ) } /> }
 				</DropdownRow>
 			</div>
 

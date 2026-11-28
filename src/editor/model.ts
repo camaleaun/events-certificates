@@ -142,7 +142,7 @@ export type Element = TextEl | RectEl | EllipseEl | PathEl | LineEl | ImageEl | 
 
 export type Design = {
 	// bg: one color for both modes, or one per mode (e.g. none in Light, a dark color in Dark); '' = the page's own color.
-	page: { w: number; h: number; bg: string | { light?: string; dark?: string }; safe: number; bleed: number };
+	page: { w: number; h: number; bg: string | { light?: string; dark?: string }; safe: number; bleed: number; safeUnit?: LengthUnit; bleedUnit?: LengthUnit };
 	colors: Record< string, ColorVar >;
 	// The colors an element's picker offers as a shortcut (the "Theme" list); absent in older designs, made from the colors when read.
 	palette?: Swatch[];
@@ -695,21 +695,30 @@ export function normalizeColors( design: Design ): Design {
 
 const round2 = ( n: number ) => Math.round( n * 100 ) / 100;
 
+/** The unit a margin or a bleed is kept in (mm unless the person chose another). */
+export type LengthUnit = 'pt' | 'px' | 'mm' | 'cm' | 'in';
+const unitIn = ( text: unknown ): LengthUnit | undefined => {
+	const m = typeof text === 'string' ? /(pt|px|mm|cm|in)\s*$/i.exec( text ) : null;
+	return m ? ( m[ 1 ].toLowerCase() as LengthUnit ) : undefined;
+};
+/** A length in points written in a unit, as it is kept in the file ("10mm", "28.35pt", "0.394in"). */
+const keepIn = ( pt: number, unit: LengthUnit ) => `${ Math.round( ( pt / ( UNITS[ unit ] || 1 ) ) * ( unit === 'in' ? 1000 : 100 ) ) / ( unit === 'in' ? 1000 : 100 ) }${ unit }`;
+
 /**
  * A design's page as it is kept: lengths with their unit, as CSS says them. The width and height are in the unit that makes both round (an A4 is
  * 297mm by 210mm, a letter 11in by 8.5in: pageSize() in the camaleaun/draw package), the margins in mm, the background as backgroundColor, and no
  * safe margin and no bleed when there is none. There is no version: the unit says what it is. In the editor the page is numbers in points (w, h, bg, safe, bleed).
  */
 export function toStored( design: Design ): Design {
-	const { w, h, bg, safe, bleed, ...rest } = design.page;
+	const { w, h, bg, safe, bleed, safeUnit, bleedUnit, ...rest } = design.page;
 	const [ width, height ] = pageSize( w, h );
 	const page: Record< string, unknown > = { width, height, backgroundColor: bg, ...rest };
 	// No safe margin and no bleed when there is none.
 	if ( safe ) {
-		page.safe = `${ round2( safe / UNITS.mm ) }mm`;
+		page.safe = keepIn( safe, safeUnit || 'mm' );
 	}
 	if ( bleed ) {
-		page.bleed = `${ round2( bleed / UNITS.mm ) }mm`;
+		page.bleed = keepIn( bleed, bleedUnit || 'mm' );
 	}
 	const { version: _earlier, ...kept } = design as Design & { version?: number };
 	return { ...kept, page } as unknown as Design;
@@ -735,7 +744,7 @@ export function fromStored( design: Design ): Design {
 	}
 	const { width, height, backgroundColor, safe, bleed, ...rest } = page;
 	const [ w, h ] = snapPaper( round2( parseLen( width as string, 0 ) ) || 841.89, round2( parseLen( height as string, 0 ) ) || 595.28 );
-	return { ...design, page: { ...rest, w, h, bg: backgroundColor ?? '$background', safe: parseLen( safe as string, 0 ), bleed: parseLen( bleed as string, 0 ) } } as Design;
+	return { ...design, page: { ...rest, w, h, bg: backgroundColor ?? '$background', safe: parseLen( safe as string, 0 ), bleed: parseLen( bleed as string, 0 ), ...( unitIn( safe ) && unitIn( safe ) !== 'mm' ? { safeUnit: unitIn( safe ) } : {} ), ...( unitIn( bleed ) && unitIn( bleed ) !== 'mm' ? { bleedUnit: unitIn( bleed ) } : {} ) } } as Design;
 }
 
 export function migrate( input: Design ): Design {
