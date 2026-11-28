@@ -13,7 +13,7 @@ a close button for the settings that was not the core's.
 - **A pixel is a point** (1/72 in, as in `camaleaun/draw`). Size and position accept pt, px, mm, cm and in, with decimals (two, three in inches).
   The unit lives in the length of the layout (`"42.5mm"`), not in a separate field; x, y and the size stay numbers in points in the block's attributes.
   Switching the unit rewrites the same length in the new one (four decimals, no resize), so going pt → cm → pt does not drift.
-- **Alignment sets the offsets.** Left, Center, Right and Fill write the anchor with an offset of 0 (`alignAxis()`), instead of keeping the old ones.
+- ~~**Alignment sets the offsets.** Left, Center, Right and Fill write the anchor with an offset of 0 (`alignAxis()`), instead of keeping the old ones.~~ Replaced by 0058: the buttons are the anchor and keep the place; an Align row moves.
 - **"Relative to" (Page / Margin) is disabled, with nothing selected, when the safe margin is 0**: both boxes are the same. The stored reference is kept.
 - **A corner radius is points or a percentage** of the shorter side (0 to 50%; 50% is a pill): `"25%"` in the block's `radius` list, a unit selector
   for all the corners and for each. The draw package resolves it (`radiusPt()` in JS, `Svg::radius()` in PHP) so the page, the PDF and the quick

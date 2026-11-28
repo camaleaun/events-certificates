@@ -59,6 +59,7 @@ question, what was chosen, what was left out and why, and what follows from it.
 | [0055](0055-the-date-of-emission.md) | The date of emission: a text with its own block whose words are a date format; empty, the site's | Accepted (2026-11-28) |
 | [0056](0056-selection-and-clipboard.md) | Selecting, grouping and copying several elements: the editor's list of ids, a box, the post editor's look and toolbar, copy and paste | Accepted (2026-11-28) |
 | [0057](0057-one-settings-screen.md) | One settings screen, wherever the plugin is: the plugin's own, a short `certificates` page under Events or Tickets | Accepted (2026-11-28) |
+| [0058](0058-anchor-and-align.md) | The anchor (keeps the place) and the alignment (moves, keeps the anchor) are two things; align several elements; the font size takes decimals | Accepted (2026-11-28) |
 
 New decisions get the next number. A decision that is replaced keeps its file,
 with its status changed to "Replaced by NNNN".
