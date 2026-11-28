@@ -163,10 +163,23 @@ test( 'the box of a line moves or stretches its two ends and keeps the way it go
 	assert.deepEqual( patch( line, 'w', -5 ), { x2: 100 }, 'no negative width' );
 } );
 
-test( 'a side of an SVG left empty is the size of its viewBox, in the unit the side has', () => {
-	const own = ( ...a ) => sandbox.size.viewBoxLength( ...a );
-	assert.equal( own( { vw: 24, vh: 12 }, 'w', 'pt' ), '24pt' );
-	assert.equal( own( { vw: 24, vh: 12 }, 'h', 'mm' ), '4.23mm', 'a unit of the viewBox is a point, said in millimeters' );
-	assert.equal( own( { vw: 24, vh: 12 }, 'w', '%' ), '24pt', 'a percentage is not a size of its own' );
-	assert.equal( own( {}, 'w', 'pt' ), '', 'no viewBox, nothing to say' );
+test( 'a side of an SVG left empty says no size: the layout has none there, and only that side', () => {
+	const svg = { type: 'svg', vw: 24, vh: 12, x: 100, y: 50, w: 96, h: 96, layout: { ref: 'page', h: { mode: 'start', start: '100pt', size: '96pt' }, v: { mode: 'start', start: '50pt', size: '96pt' } } };
+	const cleared = plain( sandbox.size.clearSizePatch( svg, 'w', page ) );
+	assert.equal( cleared.layout.h.size, undefined );
+	assert.equal( cleared.layout.h.start, '100pt', 'the place is kept' );
+	assert.equal( cleared.layout.v.size, '96pt', 'the other side keeps its size' );
+	const empty = { ...svg, layout: cleared.layout };
+	assert.equal( sandbox.size.sizeEmpty( empty, 'w' ), true );
+	assert.equal( sandbox.size.sizeEmpty( empty, 'h' ), false );
+	assert.equal( sandbox.size.sizeEmpty( { ...empty, type: 'rect' }, 'w' ), false, 'only a drawing has a size of its own' );
+	// Typing the height makes the layout again with both sizes: the width, which said none, keeps saying none.
+	const typed = plain( sandbox.size.keepEmpty( empty, { layout: { ...svg.layout } }, 'h' ) );
+	assert.equal( typed.layout.h.size, undefined );
+	assert.equal( typed.layout.v.size, '96pt' );
+	// With no layout an SVG gets one that says no size on the side.
+	const loose = plain( sandbox.size.clearSizePatch( { type: 'svg', vw: 24, vh: 12, x: 10, y: 20, w: 96, h: 96 }, 'h', page ) );
+	assert.equal( loose.layout.v.size, undefined );
+	assert.ok( loose.layout.h.size, 'the other side says what it is' );
 } );
+

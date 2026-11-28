@@ -108,8 +108,14 @@ function resolve( array $el, array $page, array $group = array() ) {
 			? array( $safe, $safe, $page['w'] - $safe * 2, $page['h'] - $safe * 2 )
 			: array( 0, 0, $page['w'], $page['h'] );
 	}
-	list( $el['x'], $el['w'] ) = resolve_axis( (array) ( $layout['h'] ?? array() ), $ref[0], $ref[2] );
-	list( $el['y'], $el['h'] ) = resolve_axis( (array) ( $layout['v'] ?? array() ), $ref[1], $ref[3] );
+	// A drawing (svg) that says no size on an axis is as big as its viewBox (a unit of it is a point): camaleaun/draw's resolve() says the same.
+	$own                       = static function ( $axis, $size ) use ( $el ) {
+		return 'svg' === ( $el['type'] ?? '' ) && 'stretch' !== ( $axis['mode'] ?? 'start' ) && ! isset( $axis['size'] ) && (float) $size > 0 ? (float) $size : null;
+	};
+	$h_axis                    = (array) ( $layout['h'] ?? array() );
+	$v_axis                    = (array) ( $layout['v'] ?? array() );
+	list( $el['x'], $el['w'] ) = resolve_axis( $h_axis, $ref[0], $ref[2], $own( $h_axis, $el['vw'] ?? 0 ) );
+	list( $el['y'], $el['h'] ) = resolve_axis( $v_axis, $ref[1], $ref[3], $own( $v_axis, $el['vh'] ?? 0 ) );
 
 	// Aspect ratio kept (src/editor/model.ts resolve()): the height follows the width, unless only the height fills.
 	$ratio  = locked_ratio( $el );

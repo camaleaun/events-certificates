@@ -1584,3 +1584,11 @@ $evcert-sidebar-width: 280px;
 	flex-direction: column;
 	gap: 16px;
 }
+
+// The toolbar over several selected elements: as the block toolbar, a bordered bar with the four layouts of a group.
+.evcert-many-toolbar.components-accessible-toolbar {
+	display: inline-flex;
+	background: #fff;
+	border: 1px solid #1e1e1e;
+	border-radius: 2px;
+}

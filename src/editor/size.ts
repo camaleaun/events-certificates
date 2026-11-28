@@ -172,12 +172,34 @@ export function lineBoxPatch( el: { x1: number; y1: number; x2: number; y2: numb
 	}
 }
 
-/**
- * The size an SVG has with nothing said for a side (the field left empty): the size of its viewBox, a unit of the viewBox being a point, written in the unit the
- * side has (a percentage is not a size of its own: points). '' when the element has no viewBox to say it.
- */
-export function viewBoxLength( el: { vw?: number; vh?: number }, side: 'w' | 'h', unit: Unit ): string {
-	const own = side === 'w' ? el.vw : el.vh;
-	return own && own > 0 ? lengthIn( own, unit === '%' ? 'pt' : unit ) : '';
+/** Whether an SVG says no size on a side (its layout has none there and does not stretch): it is as big as its viewBox. */
+export function sizeEmpty( el: Sized & { type?: string }, side: 'w' | 'h' ): boolean {
+	const axis = side === 'w' ? el.layout?.h : el.layout?.v;
+	return el.type === 'svg' && !! axis && axis.mode !== 'stretch' && axis.size === undefined;
+}
+
+/** The patch of an SVG for a side left empty: its layout is made again with no size on that axis (what it is then is the viewBox's, which the layout does not say). */
+export function clearSizePatch( el: Sized, side: 'w' | 'h', page: PageBox ): Partial< Sized > {
+	const key = side === 'w' ? 'h' : 'v';
+	const base = layoutOf( el, page );
+	if ( base[ key ].mode === 'stretch' ) {
+		return {};
+	}
+	const { size: _said, ...rest } = base[ key ];
+	return { layout: { ...base, [ key ]: rest } };
+}
+
+/** A patch that makes a layout again: the sides that said no size keep saying none (only the one that was typed gets its size). */
+export function keepEmpty( el: Sized & { type?: string }, patch: Partial< Sized >, typed: 'w' | 'h' ): Partial< Sized > {
+	if ( ! patch.layout ) {
+		return patch;
+	}
+	const layout = { ...patch.layout, h: { ...patch.layout.h }, v: { ...patch.layout.v } };
+	( [ [ 'w', 'h' ], [ 'h', 'v' ] ] as const ).forEach( ( [ side, key ] ) => {
+		if ( side !== typed && sizeEmpty( el, side ) ) {
+			delete layout[ key ].size;
+		}
+	} );
+	return { ...patch, layout };
 }
 

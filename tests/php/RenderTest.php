@@ -632,4 +632,51 @@ class RenderTest extends Test_Case {
 		$this->assertIsString( $pdf );
 		$this->assertSame( '%PDF', substr( $pdf, 0, 4 ) );
 	}
+
+	/**
+	 * A drawing that says no size on an axis is as big as its viewBox, like camaleaun/draw's resolve() says; one that says it has it.
+	 */
+	public function test_an_svg_with_no_size_is_as_big_as_its_viewbox() {
+		$page = array(
+			'w'    => 800,
+			'h'    => 600,
+			'safe' => 0,
+		);
+		$svg  = array(
+			'type'   => 'svg',
+			'vw'     => 24,
+			'vh'     => 12,
+			'layout' => array(
+				'h' => array(
+					'mode'  => 'start',
+					'start' => '10pt',
+				),
+				'v' => array(
+					'mode'  => 'center',
+					'start' => '0pt',
+				),
+			),
+		);
+		$out  = Render\resolve( $svg, $page );
+		$this->assertEqualsWithDelta( 24.0, $out['w'], 0.001 );
+		$this->assertEqualsWithDelta( 12.0, $out['h'], 0.001 );
+		$this->assertEqualsWithDelta( 294.0, $out['y'], 0.001, 'Centered with its own height.' );
+		$svg['layout']['h']['size'] = '50pt';
+		$this->assertEqualsWithDelta( 50.0, Render\resolve( $svg, $page )['w'], 0.001 );
+		$rect = array(
+			'type'   => 'rect',
+			'vw'     => 24,
+			'layout' => array(
+				'h' => array(
+					'mode'  => 'start',
+					'start' => '0pt',
+				),
+				'v' => array(
+					'mode'  => 'start',
+					'start' => '0pt',
+				),
+			),
+		);
+		$this->assertEqualsWithDelta( 0.0, Render\resolve( $rect, $page )['w'], 0.001, 'Only a drawing has a size of its own.' );
+	}
 }

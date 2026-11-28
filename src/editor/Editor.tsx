@@ -449,16 +449,25 @@ export default function Editor() {
 		setSidebar( 'element' );
 		setPanel( null );
 	};
-	/** The selected elements (one or more of one list) put in a group, as big as they are together and in their place; the group asks for its layout. */
-	const group = ( ids: string[] ) => {
+	/**
+	 * The selected elements (one or more of one list) put in a group, as big as they are together and in their place: free, or as a row, a stack or a grid (the
+	 * group's layout chosen with the toolbar of the selection; a group of one element asks for it). In a row, a stack or a grid each keeps the size it has.
+	 */
+	const group = ( ids: string[], arrange?: GroupEl[ 'arrange' ] ) => {
 		const made = create( 'group', design ) as GroupEl;
 		const next = groupEls( design.elements, design.page, ids, made );
 		if ( ! next ) {
 			return;
 		}
-		commit( { ...design, elements: next } );
+		let elements = next;
+		if ( arrange ) {
+			const placed = findEl( resolveTree( next, design.page ), made.id ) as GroupEl | undefined;
+			elements = mapEl( next, made.id, ( g ) => ( { ...g, arrange, children: bakeChildren( placed?.children || [] ) } as Element ) );
+		}
+		commit( { ...design, elements } );
 		setSelected( made.id );
-		setChoosing( made.id );
+		// Asked for a layout already (the selection's toolbar) or not (one element: the group asks).
+		setChoosing( ids.length === 1 && ! arrange ? made.id : null );
 		setSidebar( 'element' );
 	};
 	/** A group undone: what is in it goes to its place in the list, each where it is on the page. */
@@ -899,7 +908,7 @@ export default function Editor() {
 			</div>
 			</BlocksProvider>
 
-			{ current && ( tab === 'art' || editing ) && ! drawing && (
+			{ current && selectedMany.length < 2 && ( tab === 'art' || editing ) && ! drawing && (
 				<ElementToolbar
 					anchor={ editing ? editAnchor : anchor }
 					editing={ !! editing }

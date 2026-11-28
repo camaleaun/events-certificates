@@ -7,12 +7,12 @@ import { useRef, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { resizeBox, snap, type Guide } from '@camaleaun/draw';
-import { Button } from '@wordpress/components';
+import { Button, Toolbar, ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { group as groupIcon, row as rowIcon, stack as stackIcon, grid as gridIcon } from '@wordpress/icons';
 import { toElements } from './blocks';
 import { box, lockedRatio, moved, pageColor, placed, type Design, type Element, type GroupEl, type Mode } from './model';
 import { Shape } from './Shape';
+import { VARIATIONS } from './GroupPanel';
 import { findEl, flatten, innerPage, isGroup, mapEl, pageBox, parentOf, resolveTree, type Placed } from './tree';
 
 const HANDLES = [ 'nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w' ];
@@ -39,7 +39,7 @@ type Props = {
 	choosing: string | null;
 	onChoose: ( id: string, arrange: GroupEl[ 'arrange' ] ) => void;
 	/** Puts the selected elements in a group (the editor knows how). */
-	onGroup: ( ids: string[] ) => void;
+	onGroup: ( ids: string[], arrange?: GroupEl[ 'arrange' ] ) => void;
 	/** What the editor draws in place of a picture with nothing chosen yet (a foreignObject, or null for the usual drawing). */
 	placeholder: ( el: Element, select: () => void, startMove: ( event: React.PointerEvent ) => void ) => React.ReactNode;
 };
@@ -263,11 +263,16 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 						const x = Math.min( ...boxes.map( ( b ) => b.x ) );
 						const y = Math.min( ...boxes.map( ( b ) => b.y ) );
 						return (
-							<foreignObject x={ x } y={ y - 40 / zoom } width={ 120 / zoom } height={ 36 / zoom } style={ { overflow: 'visible' } }>
+							<foreignObject x={ x } y={ y - 40 / zoom } width={ 200 / zoom } height={ 44 / zoom } style={ { overflow: 'visible' } }>
 								<div className="evcert-many-bar" style={ { transform: `scale(${ 1 / zoom })`, transformOrigin: '0 0' } }>
-									<Button variant="primary" size="compact" icon={ groupIcon } onClick={ () => onGroup( many ) }>
-										{ __( 'Group', 'events-certificates' ) }
-									</Button>
+									{ /* As the block toolbar of several blocks: they are put in a group, free or as a row, a stack or a grid (the core's Group variations, in its order). */ }
+									<Toolbar label={ __( 'Group the selection', 'events-certificates' ) } className="evcert-many-toolbar">
+										<ToolbarGroup>
+											{ VARIATIONS.map( ( v ) => (
+												<ToolbarButton key={ v.label } icon={ v.icon } label={ v.label } onClick={ () => onGroup( many, v.arrange ) } />
+											) ) }
+										</ToolbarGroup>
+									</Toolbar>
 								</div>
 							</foreignObject>
 						);
@@ -296,12 +301,7 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 
 /** The core's choice of a layout for a group that has just been put in: Group, Row, Stack or Grid, in that order. */
 function Variations( { group, onChoose }: { group: GroupEl; onChoose: ( arrange: GroupEl[ 'arrange' ] ) => void } ) {
-	const options: Array< { arrange: GroupEl[ 'arrange' ]; label: string; icon: JSX.Element } > = [
-		{ arrange: undefined, label: __( 'Group', 'events-certificates' ), icon: groupIcon },
-		{ arrange: 'row', label: __( 'Row', 'events-certificates' ), icon: rowIcon },
-		{ arrange: 'stack', label: __( 'Stack', 'events-certificates' ), icon: stackIcon },
-		{ arrange: 'grid', label: __( 'Grid', 'events-certificates' ), icon: gridIcon },
-	];
+	const options = VARIATIONS;
 	return (
 		<foreignObject x={ 0 } y={ 0 } width={ Math.max( 0, group.w ) } height={ Math.max( 0, group.h ) } onPointerDown={ ( event ) => event.stopPropagation() }>
 			<div className="evcert-variations" role="group" aria-label={ __( 'Choose a layout for the group', 'events-certificates' ) }>

@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import type { PageBox } from '@camaleaun/draw';
 import { DropdownRow } from './DesignPanel';
 import type { Element } from './model';
-import { followed, resizeSideLen, sizeIn, stretched, unitOf, unitPatch, viewBoxLength, type Unit } from './size';
+import { clearSizePatch, followed, keepEmpty, resizeSideLen, sizeEmpty, sizeIn, stretched, unitOf, unitPatch, type Unit } from './size';
 
 /** The units a size is typed in: decimals are kept (0.01, three in inches). */
 export const SIZE_UNITS = [
@@ -30,13 +30,15 @@ type Props = {
 	// A size that something else decides (the ratio that is kept, an axis that fills) shows its value and cannot be typed.
 	disabled?: { w?: boolean; h?: boolean };
 	onChange: ( side: 'w' | 'h', value: string | number | undefined ) => void;
+	// What the row says when closed, if it is not the numbers the fields have (a side left empty is the placeholder's).
+	shown?: string;
 	// A line under the fields.
 	note?: string;
 };
 
-export default function SizeRow( { w, h, units, onUnit, placeholder, disabled, onChange, note }: Props ) {
+export default function SizeRow( { w, h, units, onUnit, placeholder, disabled, onChange, note, shown }: Props ) {
 	const same = units && units.w === units.h;
-	const summary = ! ( w && h ) ? '- × -' : units ? ( same ? `${ w } × ${ h } ${ units.w }` : `${ w }${ units.w } × ${ h }${ units.h }` ) : `${ w } × ${ h }`;
+	const summary = shown ? shown : ! ( w && h ) ? '- × -' : units ? ( same ? `${ w } × ${ h } ${ units.w }` : `${ w }${ units.w } × ${ h }${ units.h }` ) : `${ w } × ${ h }`;
 	// Choosing another unit keeps the size and says it in that unit (96pt is 33.87mm), as the core's fields do not: the control itself keeps the number.
 	const change = ( side: 'w' | 'h', text: string ) => {
 		const unit = unitOf( text );
@@ -55,6 +57,7 @@ export default function SizeRow( { w, h, units, onUnit, placeholder, disabled, o
 				units={ SIZE_UNITS }
 				disabled={ disabled?.[ side ] }
 				value={ value === undefined ? '' : `${ value }${ units[ side ] }` }
+				placeholder={ value === undefined && placeholder ? String( placeholder[ side === 'w' ? 0 : 1 ] ) : undefined }
 				onChange={ ( v ) => v && change( side, v ) }
 				// Left empty: the size is the one it has with nothing said (the parent knows which: an SVG's viewBox).
 				onBlur={ ( event: React.FocusEvent< HTMLInputElement > ) => {
@@ -87,17 +90,24 @@ export function ElementSize( { el, page, onChange }: { el: Element; page: PageBo
 	const fills = stretched( el as never );
 	const width = sizeIn( el as never, 'w' );
 	const height = sizeIn( el as never, 'h' );
+	// A side an SVG says nothing of is as big as its viewBox: the field is empty, the viewBox's size is its placeholder.
+	const emptyW = sizeEmpty( el as never, 'w' );
+	const emptyH = sizeEmpty( el as never, 'h' );
+	const own: [ number, number ] | undefined = el.type === 'svg' ? [ el.vw, el.vh ] : undefined;
+	const part = ( _empty: boolean, size: { value: number; unit: Unit } ) => `${ size.value }${ size.unit }`;
 	return (
 		<SizeRow
-			w={ width.value }
-			h={ height.value }
+			w={ emptyW ? undefined : width.value }
+			h={ emptyH ? undefined : height.value }
 			units={ { w: width.unit, h: height.unit } }
-			onUnit={ ( side, unit ) => onChange( unitPatch( el as never, side, unit, page ) as Partial< Element > ) }
+			placeholder={ own }
+			shown={ emptyW || emptyH ? `${ part( emptyW, width ) } × ${ part( emptyH, height ) }` : undefined }
+			onUnit={ ( side, unit ) => onChange( keepEmpty( el as never, unitPatch( el as never, side, unit, page ), side ) as Partial< Element > ) }
 			disabled={ { w: follows === 'w' || fills.w, h: follows === 'h' || fills.h } }
 			onChange={ ( side, value ) => {
-				// A side left empty is the drawing's own: the size of its viewBox (a unit of it is a point), written in the unit the side has.
-				const text = value === '' && el.type === 'svg' ? viewBoxLength( el, side, ( side === 'w' ? width : height ).unit ) || String( value ) : String( value );
-				onChange( resizeSideLen( el as never, side, text, page ) as Partial< Element > );
+				// A side left empty (an SVG's) says no size: it is as big as its viewBox.
+				const patch = value === '' && el.type === 'svg' ? clearSizePatch( el as never, side, page ) : keepEmpty( el as never, resizeSideLen( el as never, side, String( value ), page ), side );
+				onChange( patch as Partial< Element > );
 			} }
 		/>
 	);
