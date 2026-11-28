@@ -57,7 +57,8 @@ function register() {
 	add_filter( 'evcert_settings_slug', __NAMESPACE__ . '\settings_slug' );
 	add_action( 'admin_menu', __NAMESPACE__ . '\register_settings_menu', 20 );
 	add_action( 'admin_menu', __NAMESPACE__ . '\move_after_attendees', 99 );
-	add_action( 'admin_init', __NAMESPACE__ . '\redirect_old_settings' );
+	// WordPress refuses an unknown page before admin_init, so the redirect is done as the menu is made.
+	add_action( 'admin_menu', __NAMESPACE__ . '\redirect_old_settings', 99 );
 }
 
 /**

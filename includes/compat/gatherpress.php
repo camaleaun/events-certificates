@@ -86,8 +86,9 @@ function register_screen() {
 	// The settings screen: its short address, and a submenu next to Certificates.
 	add_filter( 'evcert_settings_slug', __NAMESPACE__ . '\settings_slug' );
 	add_action( 'admin_menu', __NAMESPACE__ . '\register_settings_menu', 20 );
-	// The address of the tab this screen replaces goes to it.
-	add_action( 'admin_init', __NAMESPACE__ . '\redirect_old_settings' );
+	// The address of the tab this screen replaces goes to it (WordPress refuses an unknown page before admin_init, so it is done as the menu is made).
+	add_action( 'admin_menu', __NAMESPACE__ . '\redirect_old_settings', 99 );
+	add_action( 'admin_menu', __NAMESPACE__ . '\move_after_certificates', 99 );
 }
 
 /**
@@ -114,6 +115,39 @@ function settings_slug() {
 function register_settings_menu() {
 	$title = __( 'Certificate settings', 'events-certificates' );
 	add_submenu_page( PARENT_SLUG, $title, $title, Admin\CAPABILITY, SETTINGS_SLUG, 'EventsCertificate\Admin\render_settings_page' );
+}
+
+/**
+ * Moves the settings right after Certificates in the Events menu (GatherPress's own items come after it otherwise).
+ */
+function move_after_certificates() {
+	global $submenu;
+
+	if ( empty( $submenu[ PARENT_SLUG ] ) ) {
+		return;
+	}
+	$items = array_values( $submenu[ PARENT_SLUG ] );
+	$ours  = null;
+	foreach ( $items as $index => $item ) {
+		if ( SETTINGS_SLUG === $item[2] ) {
+			$ours = $item;
+			unset( $items[ $index ] );
+			break;
+		}
+	}
+	if ( null === $ours ) {
+		return;
+	}
+	$items    = array_values( $items );
+	$position = count( $items );
+	foreach ( $items as $index => $item ) {
+		if ( Admin\SLUG === $item[2] ) {
+			$position = $index + 1;
+			break;
+		}
+	}
+	array_splice( $items, $position, 0, array( $ours ) );
+	$submenu[ PARENT_SLUG ] = $items; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering the submenu is the point.
 }
 
 /**
