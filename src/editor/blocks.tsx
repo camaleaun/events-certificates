@@ -168,7 +168,8 @@ function SyncSelection( { selection, tree, onChange }: { selection: Selection; t
 	const { selectBlock, multiSelect, clearSelectedBlock } = ( useDispatch as any )( blockEditorStore ) as { selectBlock: ( id: string ) => void; multiSelect: ( a: string, b: string ) => void; clearSelectedBlock: () => void };
 	// What the store should say after what was pushed to it: the echo of that is not a choice made in the layers.
 	const expected = useRef( '' );
-	useEffect( () => {
+	/** Puts the editor's selection in the store (one element, or a run of siblings; anything else leaves the store empty). */
+	const push = () => {
 		const ids = selection.ids;
 		const ordered = inListOrder( tree, ids );
 		let want = '';
@@ -188,11 +189,21 @@ function SyncSelection( { selection, tree, onChange }: { selection: Selection; t
 		} else {
 			clearSelectedBlock();
 		}
+	};
+	useEffect( () => {
+		push();
 		// Only when the editor's selection changes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ key ] );
 	useEffect( () => {
 		if ( inStore === expected.current || inStore === key ) {
+			return;
+		}
+		// The store lost the selection while the layers were not being used (it does when the blocks are reset after a change, as typing a number in the settings of an element that is in a
+		// group): that is not a choice, the selection is put back.
+		if ( ! inStore && key && ! document.activeElement?.closest?.( '.block-editor-list-view' ) ) {
+			expected.current = '';
+			push();
 			return;
 		}
 		// Chosen in the layers (not a tree id such as an inner block of a path, which has a colon).
