@@ -23,7 +23,7 @@ const rich = await import( 'data:text/javascript;base64,' + Buffer.from( built.o
 test( 'a copy says the runs as text and a paste reads them back, fields as fields', () => {
 	const runs = [ { text: 'held in ' }, { field: 'location', b: true }, { text: ', ' }, { field: 'issued_date', format: 'long' } ];
 	const text = rich.textFromRuns( runs );
-	assert.equal( text, 'held in *[location]*, [issued_date:long]' );
+	assert.equal( text, 'held in **[location]**, [issued_date:long]' );
 	assert.deepEqual( rich.runsFromText( text, listed ), runs );
 	assert.deepEqual( rich.runsFromText( 'a [nope] b\r\nc', listed ), [ { text: 'a [nope] b\nc' } ], 'A word in brackets that is not a field is text; a line break is one.' );
 } );

@@ -1,5 +1,5 @@
 /**
- * What the text editor does with the clipboard (docs/decisions/0054): a copy says the selected runs as text (`Dear [name], held in *[location]*`) and a paste reads
+ * What the text editor does with the clipboard (docs/decisions/0054): a copy says the selected runs as text (`Dear [name], held in **[location]**`) and a paste reads
  * text as runs, with the grammar of camaleaun/draw, so a field comes back as a chip and a mark as a mark. The parts that need no DOM are here, to be tested.
  */
 import { parseRuns, runsToText } from '@camaleaun/draw';

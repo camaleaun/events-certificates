@@ -79,7 +79,7 @@ test( 'the elements are written by the package: names in full, no id that only c
 	assert.equal( /"id":"(rect-2|svg-)/.test( markup ), false );
 	assert.equal( /"name":"(Rectangle|SVG|Signature|Community logo)"/.test( markup ), false, 'no default name' );
 	assert.ok( markup.includes( '"name":"Band"' ) && markup.includes( '"id":"title"' ) );
-	assert.ok( markup.includes( '"viewBox":"0 0 24 24"' ) && markup.includes( '"horizontal"' ) && markup.includes( '"text":"*a*"' ) && ! markup.includes( '"runs"' ) );
+	assert.ok( markup.includes( '"viewBox":"0 0 24 24"' ) && markup.includes( '"horizontal"' ) && markup.includes( '"text":"**a**"' ) && ! markup.includes( '"runs"' ) );
 	const back = plain( sandbox.dialect.fromFile( sandbox.dialect.fromMarkup( markup, sandbox.dialect.BLOCK_OPTIONS ) ) );
 	assert.deepEqual( back.elements.map( ( e ) => e.id ), [ 'rect-1', 'svg-2', 'title', 'signature', 'logo' ] );
 	assert.deepEqual( [ back.elements[ 1 ].w, back.elements[ 1 ].vw ], [ 96, 24 ] );

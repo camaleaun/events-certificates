@@ -426,7 +426,7 @@ class TemplatesTest extends Test_Case {
 		$this->assertStringContainsString( '"viewBox":"0 0 24 24"', $content );
 		$this->assertStringContainsString( '"horizontal":{"mode":"stretch"}', $content );
 		$this->assertStringContainsString( '"lineHeight":1.2', $content );
-		$this->assertStringContainsString( '"text":"*a*"', $content, 'A text is written as text.' );
+		$this->assertStringContainsString( '"text":"**a**"', $content, 'A text is written as text.' );
 		$this->assertStringNotContainsString( '"runs"', $content );
 
 		$back = Designs\decode( $content );
@@ -465,7 +465,7 @@ class TemplatesTest extends Test_Case {
 		);
 		$content = Designs\content( $design );
 
-		$this->assertStringContainsString( '"text":"Dear *[name]* \\\\[not a field] and \\\\[other]"', $content );
+		$this->assertStringContainsString( '"text":"Dear **[name]** \\\\[not a field] and \\\\[other]"', $content );
 		$back = Designs\decode( $content );
 		$this->assertSame( $design['elements'][0]['runs'], $back['elements'][0]['runs'] );
 		$read = Designs\decode( str_replace( '\\\\[other]', '[other]', $content ) );
