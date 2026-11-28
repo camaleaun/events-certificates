@@ -33,8 +33,10 @@ $evcert-sidebar-width: 280px;
 	align-items: center;
 	gap: 4px;
 }
+// The buttons on the right are 8px apart, as the post editor's header settings (editor-header__settings: $grid-unit-10).
 .evcert-header-right {
 	justify-content: flex-end;
+	gap: 8px;
 }
 .evcert-back {
 	width: 64px;
