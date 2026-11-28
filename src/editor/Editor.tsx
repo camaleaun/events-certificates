@@ -388,10 +388,11 @@ export default function Editor() {
 	};
 	const replaceDesign = ( next: Design ) => dispatch( { type: 'commit', design: next } );
 	/** An element moved by dx, dy (an anchored one by its anchors, to the size of its group when it is in one). */
-	const shift = ( e: Element, dx: number, dy: number ): Element => {
-		const holder = parentOf( resolvedShown.elements, e.id );
-		const at = findEl( resolvedShown.elements, e.id ) as Element;
-		return e.layout ? placed( e, box( moved( at, dx, dy ) ), ( holder ? innerPage( holder ) : design.page ) as never ) : moved( e, dx, dy );
+	// `from` is the element that is placed now (a copy is moved from the place of the one it copies): its box, and the group it is in, are looked up by its id.
+	const shift = ( e: Element, dx: number, dy: number, from: Element = e ): Element => {
+		const holder = parentOf( resolvedShown.elements, from.id );
+		const at = findEl( resolvedShown.elements, from.id ) as Element | undefined;
+		return e.layout && at ? placed( e, box( moved( at, dx, dy ) ), ( holder ? innerPage( holder ) : design.page ) as never ) : moved( e, dx, dy );
 	};
 	// The Fill and the Stroke last set on a rectangle or an ellipse: the next one starts with them (only while the editor is open).
 	const paintRef = useRef< Paint >( { fill: '#000000', stroke: '' } );
@@ -428,7 +429,7 @@ export default function Editor() {
 		if ( ! el || flatten( design.elements ).length + flatten( [ el ] ).length > MAX_ELEMENTS ) {
 			return;
 		}
-		const copy = shift( cloneEl( el, `${ el.name || el.type } copy` ), 10, 10 );
+		const copy = shift( cloneEl( el, `${ el.name || el.type } copy` ), 10, 10, el );
 		commit( { ...design, elements: insertAfter( design.elements, id, copy ) } );
 		setSelected( copy.id );
 	};

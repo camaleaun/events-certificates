@@ -104,6 +104,27 @@ function SyncSelection( { selected, onSelect, onMany }: { selected: string | nul
 	return null;
 }
 
+/**
+ * Tells the block editor's store that every group holds blocks of its own (what InnerBlocks does when a block draws them): without it the List View's menu does not offer to
+ * duplicate, copy or move what is in a group, as the store takes the group for a block that has no list.
+ */
+function GroupLists() {
+	const ids = ( useSelect as any )(
+		( select: any ) => {
+			const walk = ( blocks: Instance[] ): string[] => blocks.flatMap( ( b ) => ( b.name === BLOCK_OF.group ? [ b.clientId, ...walk( b.innerBlocks ) ] : walk( b.innerBlocks ) ) );
+			return walk( select( blockEditorStore ).getBlocks() ).join( ',' );
+		},
+		[]
+	) as string;
+	const { updateBlockListSettings } = ( useDispatch as any )( blockEditorStore ) as { updateBlockListSettings: ( id: string, settings: Record< string, unknown > ) => void };
+	useEffect( () => {
+		ids.split( ',' ).filter( Boolean ).forEach( ( id ) => updateBlockListSettings( id, { templateLock: false } ) );
+		// Only when the groups change.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ ids ] );
+	return null;
+}
+
 /** Whether a tree of elements may be: no group deeper than MAX_DEPTH, no more than MAX_ELEMENTS, and nothing in a group that has its place on the certificate itself. */
 export function validTree( list: Element[] ): boolean {
 	return flatten( list ).length <= MAX_ELEMENTS && list.every( ( el ) => groupsDeep( el ) <= MAX_DEPTH ) && list.every( ( el ) => ! isGroup( el ) || ( el.children || [] ).every( canHold ) );
@@ -163,6 +184,7 @@ export function BlocksProvider( { elements, page, selected, onSelect, onMany, on
 	return (
 		<BlockEditorProvider key={ refused } value={ blocks } onChange={ change } onInput={ change } settings={ {} }>
 			<SyncSelection selected={ selected } onSelect={ onSelect } onMany={ onMany } />
+			<GroupLists />
 			{ children }
 		</BlockEditorProvider>
 	);
