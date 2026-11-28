@@ -7,7 +7,7 @@ import { useRef, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { resizeBox, snap, type Guide } from '@camaleaun/draw';
-import { Button, Toolbar, ToolbarButton, ToolbarGroup } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { toElements, type Selection } from './blocks';
 import { clickTarget, rangeIds, toggleIds } from './selection';
@@ -67,6 +67,11 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 	const shownTree = preview ? ( mapEl( resolved, preview.id, ( el ) => ( { ...preview, ox: ( el as Placed ).ox, oy: ( el as Placed ).oy } as unknown as Element ) ) as Placed[] ) : resolved;
 	const current = ( findEl( shownTree, selected ) as Placed | undefined ) || null;
 	const selBox = current ? pageBox( current ) : null;
+	// The box of all the selected elements together.
+	const manyBoxes = many.map( ( id ) => findEl( shownTree, id ) as Placed | undefined ).filter( Boolean ).map( ( el ) => pageBox( el as Placed ) );
+	const manyBox = manyBoxes.length
+		? { x: Math.min( ...manyBoxes.map( ( b ) => b.x ) ), y: Math.min( ...manyBoxes.map( ( b ) => b.y ) ), w: Math.max( ...manyBoxes.map( ( b ) => b.x + b.w ) ) - Math.min( ...manyBoxes.map( ( b ) => b.x ) ), h: Math.max( ...manyBoxes.map( ( b ) => b.y + b.h ) ) - Math.min( ...manyBoxes.map( ( b ) => b.y ) ) }
+		: null;
 	// What a row, a stack or a grid places is not dragged or resized by hand: the layers and the group's own settings decide it.
 	const flowed = ( el: Element ) => {
 		const g = parentOf( shownTree, el.id );
@@ -271,30 +276,15 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 			</g>
 			{ many.length > 1 && tab === 'art' && ! editingId && (
 				<g className="evcert-selection is-many">
-					{ many.map( ( id ) => {
-						const el = findEl( shownTree, id ) as Placed | undefined;
-						const b = el ? pageBox( el ) : null;
-						return b ? <rect key={ id } x={ b.x } y={ b.y } width={ Math.max( 1, b.w ) } height={ Math.max( 1, b.h ) } /> : null;
-					} ) }
-					{ ( () => {
-						const boxes = many.map( ( id ) => findEl( shownTree, id ) as Placed | undefined ).filter( Boolean ).map( ( el ) => pageBox( el as Placed ) );
-						const x = Math.min( ...boxes.map( ( b ) => b.x ) );
-						const y = Math.min( ...boxes.map( ( b ) => b.y ) );
-						return (
-							<foreignObject x={ x } y={ y - 40 / zoom } width={ 200 / zoom } height={ 44 / zoom } style={ { overflow: 'visible' } }>
-								<div className="evcert-many-bar" style={ { transform: `scale(${ 1 / zoom })`, transformOrigin: '0 0' } }>
-									{ /* As the block toolbar of several blocks: they are put in a group, free or as a row, a stack or a grid (the core's Group variations, in its order). */ }
-									<Toolbar label={ __( 'Group the selection', 'events-certificates' ) } className="evcert-many-toolbar">
-										<ToolbarGroup>
-											{ VARIATIONS.map( ( v ) => (
-												<ToolbarButton key={ v.label } icon={ v.icon } label={ v.label } onClick={ () => onGroup( many, v.arrange ) } />
-											) ) }
-										</ToolbarGroup>
-									</Toolbar>
-								</div>
-							</foreignObject>
-						);
-					} )() }
+					{ /* Each selected element is a fill with some opacity (as the post editor's selected blocks); they are not drawn while one is dragged, so the guides can be seen. */ }
+					{ ! dragRef.current?.moved &&
+						many.map( ( id ) => {
+							const el = findEl( shownTree, id ) as Placed | undefined;
+							const b = el ? pageBox( el ) : null;
+							return b ? <rect key={ id } className="evcert-selection__fill" x={ b.x } y={ b.y } width={ Math.max( 4 / zoom, b.w ) } height={ Math.max( 4 / zoom, b.h ) } /> : null;
+						} ) }
+					{ /* The box of them all: its outline, and where the toolbar is anchored. */ }
+					{ manyBox && <rect ref={ selRef } className="evcert-selection__bounds" x={ manyBox.x } y={ manyBox.y } width={ Math.max( 1, manyBox.w ) } height={ Math.max( 1, manyBox.h ) } /> }
 				</g>
 			) }
 			{ current && selBox && tab === 'art' && ! editingId && (

@@ -86,3 +86,8 @@ export function elementIcon( type: Element[ 'type' ] | 'logo' | 'date-of-emissio
 		} as Record< string, JSX.Element >
 	 )[ type ];
 }
+
+/** Cut: scissors (the icons of the block editor have none). */
+export const cut = icon(
+	<Path key="a" d="M7.5 15.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5zM7.5 4.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5zM9.4 8.4l9.1 9.6M9.4 15.6l9.1-9.6" { ...stroke } />
+);

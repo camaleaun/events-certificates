@@ -1567,17 +1567,34 @@ $evcert-sidebar-width: 280px;
 		font-size: 11px;
 	}
 }
-// The Group button over a selection of several elements.
-.evcert-many-bar {
-	display: inline-block;
-	pointer-events: auto;
+// Several selected elements, as the post editor draws selected blocks: each is a fill of the theme color with some opacity, and the box of them all is outlined (it is also where the toolbar is).
+@keyframes evcert-selection-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 0.4;
+	}
 }
-.evcert-selection.is-many rect {
-	fill: none;
-	stroke: var(--wp-admin-theme-color, #3858e9);
-	stroke-width: 1;
-	stroke-dasharray: 4 3;
-	vector-effect: non-scaling-stroke;
+.evcert-selection.is-many {
+	pointer-events: none;
+	.evcert-selection__fill {
+		fill: var(--wp-admin-theme-color, #3858e9);
+		stroke: none;
+		opacity: 0.4;
+		animation: evcert-selection-fade-in 0.1s ease-out;
+	}
+	.evcert-selection__bounds {
+		fill: none;
+		stroke: var(--wp-admin-theme-color, #3858e9);
+		stroke-width: 1;
+		vector-effect: non-scaling-stroke;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.evcert-selection.is-many .evcert-selection__fill {
+		animation: none;
+	}
 }
 
 // The place and size of a line: two rows of fields with room between them.
@@ -1587,10 +1604,3 @@ $evcert-sidebar-width: 280px;
 	gap: 16px;
 }
 
-// The toolbar over several selected elements: as the block toolbar, a bordered bar with the four layouts of a group.
-.evcert-many-toolbar.components-accessible-toolbar {
-	display: inline-flex;
-	background: #fff;
-	border: 1px solid #1e1e1e;
-	border-radius: 2px;
-}

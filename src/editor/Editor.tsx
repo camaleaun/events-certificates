@@ -49,9 +49,10 @@ import PreviewDropdown from './PreviewDropdown';
 import SvgEditor from './SvgEditor';
 import type { Picked } from './media';
 import { BlockLayers, BlocksProvider, registerBlocks, type Selection } from './blocks';
-import { escapeIds, selectAllIds } from './selection';
+import { canGroupIds, escapeIds, selectAllIds, selectionType } from './selection';
+import SelectionToolbar from './SelectionToolbar';
 import BlockCanvas from './BlockCanvas';
-import { bakeChildren, cloneEl, duplicateEls, nudgeEls, removeEls, findEl, holderFor, insertInto, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
+import { bakeChildren, cloneEl, duplicateEls, nudgeEls, removeEls, reorderEls, setFlag, findEl, holderFor, insertInto, flatten, groupEls, innerPage, insertAfter, isGroup, mapEl, parentOf, removeEl, reorderEl, resolveTree, ungroupEl, canHold, MAX_ELEMENTS, type Placed } from './tree';
 import { cleanForSlug } from '@wordpress/url';
 import { fromMarkup, isMarkup, lineHeightFactor, toMarkup } from '@camaleaun/draw';
 import { BLOCK_OPTIONS, fromFile, toFile } from './dialect';
@@ -248,7 +249,7 @@ export default function Editor() {
 	const savedRolesRef = useRef( '' );
 	const selRef = useRef< SVGRectElement >( null );
 	const [ anchor, setAnchor ] = useState< SVGRectElement | null >( null );
-	useEffect( () => setAnchor( selRef.current ), [ selected, tab, zoom ] );
+	useEffect( () => setAnchor( selRef.current ), [ selection.ids.join( ',' ), tab, zoom ] );
 
 	// Load the design.
 	useEffect( () => {
@@ -449,6 +450,9 @@ export default function Editor() {
 	};
 	const duplicate = ( id: string ) => duplicateMany( [ id ] );
 	const reorder = ( id: string, to: 'up' | 'down' | 'top' | 'bottom' ) => commit( { ...design, elements: reorderEl( design.elements, id, to ) } );
+	// The same for several at once: each list keeps their order; lock and hide are on for all, or off when all had it.
+	const reorderMany = ( ids: string[], to: 'up' | 'down' | 'top' | 'bottom' ) => commit( { ...design, elements: reorderEls( design.elements, ids, to ) } );
+	const toggleMany = ( ids: string[], key: 'locked' | 'hidden' ) => commit( { ...design, elements: setFlag( design.elements, ids, key ) } );
 	const insert = ( type: Insertable ) => {
 		let el = create( type, design, paintRef.current );
 		// With a group selected (or an element that is in one) the new element goes in that group, at the end of its own list (the front of what is in it), at its center.
@@ -967,6 +971,20 @@ export default function Editor() {
 			</div>
 			</BlocksProvider>
 
+			{ selectedMany.length > 1 && tab === 'art' && ! editing && ! drawing && (
+				<SelectionToolbar
+					anchor={ anchor }
+					els={ selectedMany.map( ( id ) => findEl( design.elements, id ) ).filter( Boolean ) as Element[] }
+					type={ selectionType( design.elements, selectedMany ) }
+					canGroup={ canGroupIds( design.elements, selectedMany ) }
+					required={ selectedMany.every( ( id ) => { const el = findEl( design.elements, id ); return ! el || isRequired( el, flatten( design.elements ) ); } ) }
+					onGroup={ ( arrange ) => group( selectedMany, arrange ) }
+					onOrder={ ( to ) => reorderMany( selectedMany, to ) }
+					onToggle={ ( key ) => toggleMany( selectedMany, key ) }
+					onDuplicate={ () => duplicateMany( selectedMany ) }
+					onRemove={ () => removeMany( selectedMany ) }
+				/>
+			) }
 			{ current && selectedMany.length < 2 && ( tab === 'art' || editing ) && ! drawing && (
 				<ElementToolbar
 					anchor={ editing ? editAnchor : anchor }
