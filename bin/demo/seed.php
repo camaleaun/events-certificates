@@ -66,41 +66,35 @@ $names = $br
 	? array( 'Ana Exemplo', 'Bruno Amostra', 'Carla Demonstração', 'Diego Teste', 'Elisa Ficção', 'Fábio Modelo', 'Gabi Maquete' )
 	: array( 'Ana Example', 'Bruno Sample', 'Carla Demo', 'Diego Test', 'Elisa Fiction', 'Fabio Placeholder', 'Gabi Mockup' );
 
-// The meetup: seven people, issued certificates, a correction and one in the Trash.
+// The meetup is the sample of the tutorial's pictures (the WordPress NYC group and its GatherPress talk) with the two names the Quick
+// generator's list shows as an example: what a person sees in the plugin's own examples is what the pictures show.
 $event = (int) Events\save(
 	array(
-		'title'     => $br ? 'Blocos para iniciantes' : 'Blocks for beginners',
-		'community' => $br ? 'Meetup WordPress Curitiba' : 'WordPress Meetup New York',
-		'start'     => '2026-11-14 09:00',
-		'end'       => '2026-11-14 12:00',
-		'venue'     => $br ? 'Biblioteca Exemplo' : 'Example Library',
-		'city'      => $br ? 'Curitiba' : 'New York',
-		'speakers'  => 'Sam Taylor',
-		'hours'     => '3',
+		'title'     => $br ? 'Blocos para iniciantes' : 'A Case for Community: Open Source Events with GatherPress',
+		'community' => $br ? 'Meetup WordPress Curitiba' : 'WordPress NYC Meetup Group',
+		'start'     => '2026-10-27 18:00',
+		'end'       => '2026-10-27 20:00',
+		'venue'     => $br ? 'Biblioteca Exemplo' : '166 Crosby Street',
+		'city'      => $br ? 'Curitiba' : 'New York, NY',
+		'speakers'  => $br ? 'Sam Taylor' : 'Mike Auteri',
+		'hours'     => '2',
 	)
 );
-foreach ( $names as $i => $name ) {
+foreach ( $br ? array( 'Ana Exemplo', 'Bruno Amostra' ) : array( 'Emily Johnson', 'John Smith' ) as $i => $name ) {
 	People\add(
 		$event,
 		array(
 			'name'   => $name,
 			'email'  => 'person' . ( $i + 1 ) . '@example.test',
-			'status' => $i < 5 ? 'attended' : ( 5 === $i ? 'no_show' : 'registered' ),
-			'roles'  => 1 === $i ? array( 'speaker' ) : array( 'attendee' ),
+			'status' => 'attended',
+			'roles'  => array( 'attendee' ),
 			'source' => 'manual',
 		)
 	);
 }
 foreach ( People\query( $event )['rows'] as $person ) {
-	if ( 'attended' === $person['status'] ) {
-		People\issue( $person, (string) array_key_first( $person['roles'] ) );
-	}
+	People\issue( $person, (string) array_key_first( $person['roles'] ) );
 }
-$first = People\query( $event, array( 'search' => 'Ana' ) )['rows'][0];
-Certificates\reissue( People\certificate( $first, 'attendee' ), array( 'name' => $br ? 'Ana Maria Exemplo' : 'Ana Maria Example' ) );
-$last = People\query( $event, array( 'search' => $br ? 'Gabi' : 'Gabi' ) )['rows'][0];
-People\trash( array( (int) $last['id'] ), $event );
-
 // The course: four classes, each its own event; the instructor is a speaker.
 $course = 0;
 foreach ( range( 1, 4 ) as $class ) {
@@ -141,6 +135,11 @@ foreach ( range( 1, 4 ) as $class ) {
 	// The classes already given have their certificates issued.
 	foreach ( People\query( $id )['rows'] as $person ) {
 		People\issue( $person, (string) array_key_first( $person['roles'] ) );
+	}
+	// A correction in the first class: the old certificate says it was replaced.
+	if ( 1 === $class ) {
+		$one = People\query( $id, array( 'search' => $br ? 'Ana' : 'Ana' ) )['rows'][0];
+		Certificates\reissue( People\certificate( $one, 'attendee' ), array( 'name' => $br ? 'Ana Maria Exemplo' : 'Ana Maria Example' ) );
 	}
 }
 
