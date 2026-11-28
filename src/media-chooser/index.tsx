@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
 import SvgSource from '../editor/SvgSource';
 import { defaultDrawing, type SvgDraft } from '../editor/svg-draft';
 import { PATH_DESIGN, drawingJson } from './shared';
+import { PICTURE_PATH_DATA } from '../editor/model';
 import { offerFor, parseSvgText } from './svg-code';
 
 declare global {
@@ -27,7 +28,7 @@ export const hasMedia = () => !! window.wp?.media;
 
 /** The drawing in an SVG file (read here, in the browser, never uploaded: WordPress does not take SVG files), or null. */
 async function svgFile( file: File ): Promise< SvgDraft | null > {
-	const parsed = parseSvgText( await file.text(), file.name.replace( /\.svg$/i, '' ) );
+	const parsed = parseSvgText( await file.text(), file.name.replace( /\.svg$/i, '' ), PICTURE_PATH_DATA );
 	return 'draft' in parsed ? parsed.draft : null;
 }
 
@@ -150,7 +151,7 @@ export function ClipboardToast( { onPaste, modal }: { onPaste: ( draft: SvgDraft
 					type="button"
 					className="button-link"
 					onClick={ () => {
-						const parsed = parseSvgText( toast.text );
+						const parsed = parseSvgText( toast.text, '', PICTURE_PATH_DATA );
 						if ( 'draft' in parsed ) {
 							onPaste( parsed.draft );
 						}

@@ -6,7 +6,8 @@
 import { Button, DropZone, TextareaControl } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { parseSvgText, problemText, SVG_EXAMPLE } from '../media-chooser/svg-code';
+import { parseSvgText, problemText, skippedText, SVG_EXAMPLE } from '../media-chooser/svg-code';
+import { PICTURE_PATH_DATA } from './model';
 import type { Design, Mode } from './model';
 import SvgFields from './SvgFields';
 import { taken, type SvgDraft } from './svg-draft';
@@ -30,18 +31,24 @@ const isSvgFile = ( file: File ) => /^image\/svg/i.test( file.type ) || /\.svg$/
 export default function SvgSource( { draft, onChange, design, mode, current, element, base, dropFiles }: Props ) {
 	const [ text, setText ] = useState( '' );
 	const [ problem, setProblem ] = useState( '' );
+	// How many paths the drawing taken lost (too long for the place, or not path data): it says so, not to look whole.
+	const [ skipped, setSkipped ] = useState( 0 );
 	const has = !! draft;
 	useEffect( () => {
 		if ( has ) {
 			setText( '' );
 			setProblem( '' );
+		} else {
+			setSkipped( 0 );
 		}
 	}, [ has ] );
 
 	/** Takes a text that is a usable SVG; says so and returns false when it is not. */
 	const take = ( value: string, say: boolean, title = '' ): boolean => {
-		const parsed = parseSvgText( value, title );
+		// An element of a template takes long paths; a picture (a signature, a logo) takes what the server keeps of those.
+		const parsed = parseSvgText( value, title, element ? undefined : PICTURE_PATH_DATA );
 		if ( 'draft' in parsed ) {
+			setSkipped( parsed.skipped || 0 );
 			onChange( taken( parsed.draft, base, element ) );
 			return true;
 		}
@@ -63,6 +70,11 @@ export default function SvgSource( { draft, onChange, design, mode, current, ele
 						<Button variant="tertiary" size="compact" onClick={ () => onChange( null ) }>
 							{ __( 'Paste another SVG', 'events-certificates' ) }
 						</Button>
+						{ skipped > 0 && (
+							<p className="evcert-svg-code__problem" role="status">
+								{ skippedText( skipped ) }
+							</p>
+						) }
 					</div>
 				}
 			/>

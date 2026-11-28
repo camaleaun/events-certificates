@@ -21,7 +21,7 @@ const built = await esbuild.build( {
 			name: 'stub-i18n',
 			setup( build ) {
 				build.onResolve( { filter: /^@wordpress\/i18n$/ }, () => ( { path: 'i18n', namespace: 'stub' } ) );
-				build.onLoad( { filter: /.*/, namespace: 'stub' }, () => ( { contents: 'export const __ = ( s ) => s; export const sprintf = ( s ) => s;', loader: 'js' } ) );
+				build.onLoad( { filter: /.*/, namespace: 'stub' }, () => ( { contents: 'export const __ = ( s ) => s; export const _n = ( one, many, n ) => ( n === 1 ? one : many ); export const sprintf = ( s, ...a ) => a.reduce( ( t, v ) => t.replace( /%d|%s/, v ), s );', loader: 'js' } ) );
 			},
 		},
 	],
@@ -60,4 +60,9 @@ test( 'the clipboard offers new SVG code once: not what is not SVG, not what was
 	assert.equal( m.offerFor( '', '' ), null );
 	assert.equal( m.offerFor( 'just text', '' ), null );
 	assert.equal( m.offerFor( '<svg><script>x()</script></svg>', '' ), null );
+} );
+
+test( 'a drawing that lost paths says how many, in the singular and the plural', () => {
+	assert.equal( m.skippedText( 1 ), '1 path was left out: it is too long, or not made of path commands.' );
+	assert.equal( m.skippedText( 3 ), '3 paths were left out: they are too long, or not made of path commands.' );
 } );

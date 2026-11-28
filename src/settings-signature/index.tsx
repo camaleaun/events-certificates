@@ -12,7 +12,7 @@ import { createInterpolateElement, createRoot, useEffect, useRef, useState } fro
 import { __, _x, sprintf } from '@wordpress/i18n';
 import SvgSource from '../editor/SvgSource';
 import { defaultDrawing, type SvgDraft } from '../editor/svg-draft';
-import { SVG_LIMITS, sanitizeSvg, svgCodeAllowed } from '../editor/model';
+import { PICTURE_PATH_DATA, SVG_LIMITS, sanitizeSvg, svgCodeAllowed } from '../editor/model';
 import { ClipboardToast, hasMedia, openMediaChooser, type Choice } from '../media-chooser';
 import { PATH_DESIGN, drawingJson, readVector } from '../media-chooser/shared';
 
@@ -55,7 +55,7 @@ function UploadTab( { onPicked, onSvg }: { onPicked: ( choice: Choice ) => void;
 			if ( 'image/svg+xml' === file.type || /\.svg$/i.test( file.name ) ) {
 				// Never uploaded as a file: only its filled paths are kept (the same cleaning as the design editor's import), and
 				// a file that is too big is not even read.
-				const svg = file.size > SVG_LIMITS.bytes ? null : sanitizeSvg( await file.text() );
+				const svg = file.size > SVG_LIMITS.bytes ? null : sanitizeSvg( await file.text(), { pathData: PICTURE_PATH_DATA } );
 				if ( ! svg || ! svg.paths.length ) {
 					setError( __( 'That SVG cannot be used: it is too big, carries scripts or has no filled paths. Paths are what a signature is made of.', 'events-certificates' ) );
 				} else {

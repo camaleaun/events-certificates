@@ -2,8 +2,8 @@
  * SVG as text, for the media modal's SVG tab and the toast that offers a copied SVG: what is a usable SVG, why a text is
  * not one, and whether the clipboard holds something new to offer. Pure, so it is tested without the browser (tests/js).
  */
-import { __ } from '@wordpress/i18n';
-import { sanitizeSvg, SVG_LIMITS, svgCodeAllowed } from '../editor/model';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { PICTURE_PATH_DATA, sanitizeSvg, SVG_LIMITS, svgCodeAllowed } from '../editor/model';
 import { infoSvg, type SvgDraft } from '../editor/svg-draft';
 
 /** SVG code as a drawing program exports it, without the XML prolog and the comments before the <svg> tag. */
@@ -30,8 +30,16 @@ export function problemText( problem: SvgProblem ): string {
 	}
 }
 
-/** The drawing in a text, or why it is not one. */
-export function parseSvgText( text: string, title = '' ): { draft: SvgDraft } | { problem: SvgProblem } {
+/** What to say when a drawing lost paths (too long for the place, or not path data). */
+export function skippedText( skipped: number ): string {
+	return sprintf( /* translators: %d: how many paths were left out of an SVG. */ _n( '%d path was left out: it is too long, or not made of path commands.', '%d paths were left out: they are too long, or not made of path commands.', skipped, 'events-certificates' ), skipped );
+}
+
+/**
+ * The drawing in a text, or why it is not one. `pathData` is the most characters of a path in the place the drawing is for: an element of a template takes
+ * what the draw package says (100000); a picture (a signature, a logo) takes PICTURE_PATH_DATA. `skipped` is how many paths were left out.
+ */
+export function parseSvgText( text: string, title = '', pathData?: number ): { draft: SvgDraft; skipped?: number } | { problem: SvgProblem } {
 	const code = bareSvg( text );
 	if ( ! code ) {
 		return { problem: 'empty' };
@@ -45,8 +53,12 @@ export function parseSvgText( text: string, title = '' ): { draft: SvgDraft } | 
 	if ( ! svgCodeAllowed( code ) ) {
 		return { problem: 'forbidden' };
 	}
-	const svg = sanitizeSvg( code );
-	return svg ? { draft: { title, ...svg } } : { problem: 'no-paths' };
+	const svg = sanitizeSvg( code, pathData ? { pathData } : {} );
+	if ( ! svg ) {
+		return { problem: 'no-paths' };
+	}
+	const { skipped, ...drawing } = svg;
+	return { draft: { title, ...drawing }, ...( skipped ? { skipped } : {} ) };
 }
 
 /**
@@ -58,5 +70,6 @@ export function parseSvgText( text: string, title = '' ): { draft: SvgDraft } | 
  */
 export function offerFor( clip: string | null, handled: string ): string | null {
 	const code = clip ? bareSvg( clip ) : '';
-	return code && code !== handled && 'draft' in parseSvgText( code ) ? code : null;
+	// The media modal is for pictures (a signature, a logo): what the server keeps of those.
+	return code && code !== handled && 'draft' in parseSvgText( code, '', PICTURE_PATH_DATA ) ? code : null;
 }

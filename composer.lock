@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "camaleaun/draw",
-            "version": "v0.24.0",
+            "version": "v0.24.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/camaleaun/draw.git",
-                "reference": "a9557a04cab9bbb178963a22d726e93f5c2697be"
+                "reference": "8a68101c09764fc432c203f9118b8551ea50727a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/camaleaun/draw/zipball/a9557a04cab9bbb178963a22d726e93f5c2697be",
-                "reference": "a9557a04cab9bbb178963a22d726e93f5c2697be",
+                "url": "https://api.github.com/repos/camaleaun/draw/zipball/8a68101c09764fc432c203f9118b8551ea50727a",
+                "reference": "8a68101c09764fc432c203f9118b8551ea50727a",
                 "shasum": ""
             },
             "require": {
@@ -42,10 +42,10 @@
             ],
             "description": "A drawing as blocks: reads and writes block markup (wp:draw/*), with no WordPress needed.",
             "support": {
-                "source": "https://github.com/camaleaun/draw/tree/v0.24.0",
+                "source": "https://github.com/camaleaun/draw/tree/v0.24.1",
                 "issues": "https://github.com/camaleaun/draw/issues"
             },
-            "time": "2026-11-28T04:18:17+00:00"
+            "time": "2026-11-28T15:35:37+00:00"
         },
         {
             "name": "chillerlan/php-qrcode",

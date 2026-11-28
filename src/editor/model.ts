@@ -6,12 +6,12 @@
  */
 import {
 	type Axis, type AxisMode, type Box, type CornerShape, type Layout, type PageBox, type SvgPath,
-	SVG_LIMITS, UNITS, isFill, isLen, isPathData, lockedRatio, lockedSide, layoutFrom, pageSize, parseLen, placed as placedAt, rectPath, refBox, resolve as resolveAt, sanitizeSvg, svgCodeAllowed,
+	PICTURE_PATH_DATA, SVG_LIMITS, UNITS, isFill, isLen, isPathData, lockedRatio, lockedSide, layoutFrom, pageSize, parseLen, placed as placedAt, rectPath, refBox, resolve as resolveAt, sanitizeSvg, svgCodeAllowed,
 } from '@camaleaun/draw';
 import { INFO_ICON } from './svg-draft';
 
 export {
-	SVG_LIMITS, UNITS, isFill, isLen, isPathData, lockedRatio, lockedSide, layoutFrom, parseLen, rectPath, refBox, sanitizeSvg, svgCodeAllowed,
+	PICTURE_PATH_DATA, SVG_LIMITS, UNITS, isFill, isLen, isPathData, lockedRatio, lockedSide, layoutFrom, parseLen, rectPath, refBox, sanitizeSvg, svgCodeAllowed,
 };
 export type { Axis, AxisMode, Box, CornerShape, Layout, SvgPath };
 

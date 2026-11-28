@@ -206,6 +206,12 @@ export default function Editor() {
 	const [ marks, setMarks ] = useState( { b: false, i: false } );
 	const [ drawing, setDrawing ] = useState< string | null >( null );
 	const [ notice, setNotice ] = useState< string | null >( null );
+	// Something deep in a panel says a thing (an SVG that lost paths) with a window event, as a message of the editor.
+	useEffect( () => {
+		const say = ( event: Event ) => setNotice( String( ( event as CustomEvent ).detail ) );
+		window.addEventListener( 'evcert-notice', say );
+		return () => window.removeEventListener( 'evcert-notice', say );
+	}, [] );
 	const [ importing, setImporting ] = useState( false );
 	const [ restoring, setRestoring ] = useState( false );
 	const [ editAnchor, setEditAnchor ] = useState< HTMLElement | null >( null );

@@ -25,6 +25,7 @@ import { ElementSize } from './SizeRow';
 import SvgGroups, { ViewBoxRow } from './SvgGroups';
 import { emptiedElement } from './svg-draft';
 import { ColorChoices, colorLabel } from './ColorChoices';
+import { skippedText } from '../media-chooser/svg-code';
 import { color, isPathData, sanitizeSvg, svgPaths, type Design, type Mode, type SvgEl, type SvgPath } from './model';
 
 type Props = {
@@ -58,7 +59,7 @@ export function FillSwatch( { value, design, mode, onChange }: { value?: string;
 }
 
 /** The path data field: kept while typing, saved when it is valid. Pasting SVG code imports it. */
-export function PathData( { index, value, multiline, onChange, onImport, onFocus }: { index: number; value: string; multiline?: boolean; onChange: ( d: string ) => void; onImport: ( svg: { vw: number; vh: number; w?: number; h?: number; paths: SvgPath[] } ) => void; onFocus?: () => void } ) {
+export function PathData( { index, value, multiline, onChange, onImport, onFocus }: { index: number; value: string; multiline?: boolean; onChange: ( d: string ) => void; onImport: ( svg: { vw: number; vh: number; w?: number; h?: number; paths: SvgPath[]; skipped?: number } ) => void; onFocus?: () => void } ) {
 	const [ text, setText ] = useState( value );
 	const valid = ! text || isPathData( text );
 	const props = {
@@ -75,6 +76,10 @@ export function PathData( { index, value, multiline, onChange, onImport, onFocus
 			if ( svg ) {
 				event.preventDefault();
 				onImport( svg );
+				// A drawing that lost paths (too long, or not path data) says so: a message of the editor.
+				if ( svg.skipped ) {
+					window.dispatchEvent( new CustomEvent( 'evcert-notice', { detail: skippedText( svg.skipped ) } ) );
+				}
 			}
 		},
 		onChange: ( d: string ) => {
