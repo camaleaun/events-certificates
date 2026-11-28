@@ -243,4 +243,86 @@ class SettingsScreenTest extends Test_Case {
 		remove_filter( 'evcert_signature_chooser', $react );
 		$this->assertNotContains( 'media-views', wp_scripts()->registered['evcert-generator']->deps );
 	}
+
+	/**
+	 * The body of the settings screen, as the three mounts print it.
+	 *
+	 * @return string
+	 */
+	private function body() {
+		wp_set_current_user( 1 );
+		ob_start();
+		Admin\render_settings_body();
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * The screen is one piece: the same tabs, the same markup, whichever site it is on (docs/decisions/0057).
+	 */
+	public function test_the_settings_screen_has_the_same_tabs_and_markup_on_every_site() {
+		$html = $this->body();
+		foreach ( array( 'Features', 'Issuing', 'Verification', 'Data', 'Tools' ) as $caption ) {
+			$this->assertStringContainsString( '>' . $caption . '</a>', $html, $caption );
+		}
+		$this->assertStringContainsString( 'class="evcert-settings"', $html );
+		$this->assertStringContainsString( 'subsubsub evcert-settings__tabs', $html );
+		$this->assertStringContainsString( 'evcert-settings__buttons', $html );
+		$this->assertStringNotContainsString( 'nav-tab', $html, 'The tabs are a list of links, not a second row of tabs.' );
+		// The declaration tab is there when its settings are (CampTix, or the declaration turned on); the others always.
+		$this->assertSame( array( 'features', 'certificates', 'verification', 'data', 'tools' ), array_values( array_diff( array_keys( Admin\settings_tabs() ), array( 'declaration' ) ) ) );
+	}
+
+	/**
+	 * Each mount prints the screen inside its own frame and nothing else of the settings: the body is in it whole.
+	 */
+	public function test_every_mount_prints_the_same_body() {
+		$body = $this->body();
+
+		ob_start();
+		Admin\render_settings_page();
+		$this->assertStringContainsString( $body, (string) ob_get_clean(), 'A site with no integration.' );
+
+		ob_start();
+		\EventsCertificate\Compat\CampTix\render_settings_page();
+		$this->assertStringContainsString( $body, (string) ob_get_clean(), 'CampTix.' );
+
+		if ( class_exists( '\GatherPress\Core\Settings' ) ) {
+			ob_start();
+			\EventsCertificate\Compat\GatherPress\render_settings_tab( 'gatherpress_certificates' );
+			$this->assertStringContainsString( $body, (string) ob_get_clean(), 'GatherPress.' );
+		}
+	}
+
+	/**
+	 * A tab taken away (or added) once is taken away in every mount: the list of tabs is one.
+	 */
+	public function test_a_tab_changed_in_the_filter_is_changed_in_every_mount() {
+		$drop = static function ( $tabs ) {
+			unset( $tabs['data'] );
+			return $tabs;
+		};
+		add_filter( 'evcert_settings_tabs', $drop );
+		$body = $this->body();
+		$this->assertStringNotContainsString( '>Data</a>', $body );
+		$this->assertStringContainsString( '>Tools</a>', $body );
+
+		ob_start();
+		\EventsCertificate\Compat\CampTix\render_settings_page();
+		$this->assertStringNotContainsString( '>Data</a>', (string) ob_get_clean() );
+		remove_filter( 'evcert_settings_tabs', $drop );
+	}
+
+	/**
+	 * The mounts only mount: nothing in them draws a field, a section or the form of the settings (options.php) (that is includes/admin-settings.php, for all of them).
+	 */
+	public function test_the_mounts_draw_no_settings_of_their_own() {
+		$root   = dirname( __DIR__, 2 ) . '/includes';
+		$mounts = array( $root . '/compat/gatherpress.php', $root . '/compat/camptix.php', $root . '/admin.php' );
+		foreach ( $mounts as $file ) {
+			$code = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the source of the plugin.
+			foreach ( array( 'add_settings_field(', 'add_settings_section(', 'settings_fields(', 'do_settings_fields(', 'options.php' ) as $forbidden ) {
+				$this->assertStringNotContainsString( $forbidden, $code, basename( $file ) . ' draws settings of its own: ' . $forbidden );
+			}
+		}
+	}
 }

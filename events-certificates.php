@@ -47,6 +47,7 @@ require_once __DIR__ . '/includes/sessions.php';
 require_once __DIR__ . '/includes/countries.php';
 require_once __DIR__ . '/includes/documents.php';
 require_once __DIR__ . '/includes/admin.php';
+require_once __DIR__ . '/includes/admin-settings.php';
 require_once __DIR__ . '/includes/admin-app.php';
 require_once __DIR__ . '/includes/templates.php';
 require_once __DIR__ . '/includes/certificates.php';

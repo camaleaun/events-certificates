@@ -55,6 +55,27 @@
 	opacity: 0.5;
 }
 
+/* The screen is one piece wherever it is mounted: Export and Import, then the tabs as a list of links. */
+.evcert-settings__buttons {
+	display: flex;
+	gap: 8px;
+	margin: 12px 0 0;
+}
+
+.evcert-settings__buttons:empty {
+	display: none;
+}
+
+.evcert-settings .evcert-settings__buttons .page-title-action {
+	position: static;
+	margin: 0;
+}
+
+.evcert-settings .evcert-settings__tabs {
+	float: none;
+	margin: 12px 0 0;
+}
+
 .evcert-settings .evcert-tab[hidden] {
 	display: none;
 }

@@ -20,6 +20,16 @@ fields one after the other. Those tabs were left as they were when the settings 
 - **Export and import of lists are off with CampTix or GatherPress, for now** (`Restrictions\defaults()`): only a single template travels, with the editor's own Export and Import. The option
   `evcert_restrictions`, the constant and the filters of ADR 0044 turn them on again.
 
+## Where things are (so they are not fragmented)
+
+- **`includes/admin-settings.php` is the settings screen, all of it**: the option and its sanitizing, the sections and fields (`add_settings_fields()`), the tabs (`settings_tabs()`, filter `evcert_settings_tabs`), the
+  markup (`render_settings_body()`: Export and Import, the tabs as a list of links, the form) and the address (`settings_url()`). Its styles are `assets/scss/settings.scss` and its script `assets/js/settings.js`
+  (both loaded by `add_settings_fields()`, so every mount has them).
+- **The mounts only mount**: `Admin\render_settings_page()` (a site with no integration), `Compat\GatherPress\render_settings_tab()` and `Compat\CampTix\render_settings_page()` print a frame (a title, the tabs of
+  the other plugin) and call `render_settings_body()`. `SettingsScreenTest` holds them to it: the same tabs and markup on every site, the body whole in every mount, a tab taken out by the filter
+  taken out of all, and no field, section or `options.php` in a mount.
+- **To add, change or remove** a field or a section: `add_settings_fields()` and its `render_*` functions; a tab: `settings_tabs()`; markup: `render_settings_body()`; a style: `settings.scss`. One edit, three mounts.
+
 ## Consequences
 
 - A change to the settings screen is made once and shows up in the three places.
