@@ -5,6 +5,7 @@ import { alternates, localeOf } from '@libs/i18n';
 import LanguageMenu from '../components/LanguageMenu.astro';
 import ScenarioMenu from '../components/ScenarioMenu.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import Lightbox from '../components/Lightbox.astro';
 import { fill, uiOf } from '@libs/strings';
 import { href as at } from '@libs/i18n';
 
@@ -58,6 +59,7 @@ const full = title === site.name ? title : `${ title } · ${ site.name }`;
 			</div>
 		</header>
 		<main id="main"><slot /></main>
+		<Lightbox />
 		<footer class="bottom">
 			<div class="wrap">Events Certificates { site.version && `${ site.version } · ` }{ fill( strings.footer, { requires: site.requires, php: site.php } ) }</div>
 		</footer>
