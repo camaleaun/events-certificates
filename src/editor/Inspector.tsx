@@ -31,7 +31,6 @@ import SvgPanel from './SvgPanel';
 import { ElementSize } from './SizeRow';
 import { alignAxis, anchorAxis, fontSizeUnit, radiusConvert, radiusFrom, radiusNumber, radiusUnit, unitOf, type RadiusUnit } from './size';
 import { fields, tokenOnly } from './FieldText';
-import TextByLanguage from './TextByLanguage';
 import { box as boxOf, isLen, layoutFrom, parseLen, lockedRatio, lockedSide, refBox, REQUIRED_SLOTS, type Axis, type AxisMode, type Box, type Layout, type Design, type Element, type Mode, type GroupEl, fieldValue, runsOf } from './model';
 import { stockName } from './base';
 import GroupPanel from './GroupPanel';
@@ -254,7 +253,6 @@ export default function Inspector( { el, stored, design, mode, tab, locale, samp
 				</div>
 			) }
 
-			{ tab === 'art' && el.type === 'text' && <TextByLanguage el={ el } sample={ sample } onChange={ ( patch ) => onChange( patch as Partial< Element > ) } /> }
 
 			{ tab === 'art' && el.type === 'text' && (
 				<ToolsPanel

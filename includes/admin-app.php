@@ -199,7 +199,7 @@ function enqueue() {
 				'development' => array(
 					'screenViews' => defined( 'EVCERT_DEVELOPMENT_SCREEN_VIEWS' ) && EVCERT_DEVELOPMENT_SCREEN_VIEWS,
 				),
-				// The languages of the site (the pages the certificate can be shown in), for a text's variants.
+				// The languages of the site (the pages the certificate can be shown in), for the language switcher of the editor (a text's variants: the panel that edited them left the sidebar on 2026-11-28).
 				'locales'     => array_map(
 					static function ( $locale ) {
 						return array(

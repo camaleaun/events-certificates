@@ -14,7 +14,7 @@ a text** (`d/m/Y`, `j \d\e F \d\e Y`), as the Custom field of Settings → Gener
   writes `type:slot` as a block of its own (`text:date-of-emission` → `certificate-date-of-emission`), with no `slot` and no default name (`Date of emission`) in the file, and reads it
   back as a text with that slot.
 - **Its words are the format.** Empty, it is the date in the format of the site; with words, each of them is the format of the date (the letters of PHP's `date()`, a backslash before a
-  letter that is a word). Bold, italic and a text by language work as in any text. An empty one writes no `text` at all (`<!-- wp:events-certificates/certificate-date-of-emission {"x":…} /-->`):
+  letter that is a word). Bold, italic and a text by language work as in any text (the sidebar panel that edited the text by language left on 2026-11-28; the texts already written are kept and printed, and a language switcher at the top of the editor will edit them). An empty one writes no `text` at all (`<!-- wp:events-certificates/certificate-date-of-emission {"x":…} /-->`):
   what it shows when empty is derived from the slot every time, not kept by the editor, so emptying it again brings the site's format back (what a text made only of fields could not do
   after being closed and opened).
 - **Drawing it** is converted when it is drawn and never saved (`date_of_emission_runs()` in `includes/render.php`, `datedRuns()` in `src/editor/model.ts`): no words are
