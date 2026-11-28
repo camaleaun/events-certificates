@@ -4,14 +4,17 @@
  * List View shows them (as layers) and its store is where a drawing is edited.
  */
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
-import { BlockEditorProvider, __experimentalListView as ListView, store as blockEditorStore } from '@wordpress/block-editor';
+import { BlockEditorProvider, BlockSettingsMenuControls, __experimentalListView as ListView, store as blockEditorStore } from '@wordpress/block-editor';
+import { MenuItem } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { group as groupIcon, lock, seen, ungroup as ungroupIcon, unlock, unseen } from '@wordpress/icons';
 import { registerBlockType, getBlockType } from '@wordpress/blocks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { elementIcon } from './icons';
 import { stockName } from './base';
 import { BLOCK_NAMES, FALLBACK } from './dialect';
-import type { Element } from './model';
-import { inListOrder, isContiguous } from './selection';
+import { isRequired, type Element } from './model';
+import { canGroupIds, inListOrder, isContiguous } from './selection';
 import { groupsDeep, canHold, flatten, isGroup, moveEl, findEl, mapEl, MAX_DEPTH, MAX_ELEMENTS } from './tree';
 
 /** The block of each element type (the names the design is written with: src/editor/dialect.ts). */
@@ -53,7 +56,8 @@ export function registerBlocks( titles: Record< string, string > ) {
 			category: 'design',
 			icon: type ? elementIcon( type as Element[ 'type' ], slot ) : 'edit',
 			attributes: ELEMENT_ATTRIBUTES,
-			supports: { html: false, reusable: false, className: false, customClassName: false },
+			// The core's own Lock and Hide write attributes the design does not have: the layers' menu has ours (LayerMenu).
+			supports: { html: false, reusable: false, className: false, customClassName: false, lock: false, visibility: false },
 			// What a group holds is anything but the certificate's own parts (tree.ts says which: the layers' drag is checked there).
 			edit: () => null,
 			save: () => null,
@@ -95,6 +99,59 @@ export function toElements( blocks: Instance[] ): Element[] {
 		}
 		return element as unknown as Element;
 	} );
+}
+
+/** What the menu of a layer can do with the elements it is for (the editor knows how). */
+export type LayerActions = {
+	onGroup: ( ids: string[] ) => void;
+	onUngroup: ( id: string ) => void;
+	onToggle: ( ids: string[], key: 'locked' | 'hidden' ) => void;
+};
+
+/**
+ * Group, Ungroup, Lock and Hide in the menu of a layer, with the editor's own rules (the core's Group would make a group with no place or size). The core adds its own items next to these:
+ * Duplicate, Copy, Cut, Move to and Delete.
+ */
+function LayerMenu( { tree, actions }: { tree: Element[]; actions: LayerActions } ) {
+	return (
+		<BlockSettingsMenuControls>
+			{ ( { selectedClientIds, onClose }: { selectedClientIds: string[]; onClose?: () => void } ) => {
+				const ids = ( selectedClientIds || [] ).filter( ( id ) => ! id.includes( ':' ) );
+				const els = ids.map( ( id ) => findEl( tree, id ) ).filter( Boolean ) as Element[];
+				if ( ! els.length ) {
+					return null;
+				}
+				const done = ( run: () => void ) => () => {
+					run();
+					onClose?.();
+				};
+				const only = els.length === 1 ? els[ 0 ] : null;
+				const allLocked = els.every( ( el ) => el.locked );
+				const allHidden = els.every( ( el ) => el.hidden );
+				return (
+					<>
+						{ only && isGroup( only ) ? (
+							<MenuItem icon={ ungroupIcon } shortcut="⇧⌘G" onClick={ done( () => actions.onUngroup( only.id ) ) }>
+								{ __( 'Ungroup', 'events-certificates' ) }
+							</MenuItem>
+						) : (
+							canGroupIds( tree, ids ) && (
+								<MenuItem icon={ groupIcon } shortcut="⌘G" onClick={ done( () => actions.onGroup( ids ) ) }>
+									{ __( 'Group', 'events-certificates' ) }
+								</MenuItem>
+							)
+						) }
+						<MenuItem icon={ allLocked ? unlock : lock } onClick={ done( () => actions.onToggle( ids, 'locked' ) ) }>
+							{ allLocked ? __( 'Unlock', 'events-certificates' ) : __( 'Lock', 'events-certificates' ) }
+						</MenuItem>
+						<MenuItem icon={ allHidden ? seen : unseen } onClick={ done( () => actions.onToggle( ids, 'hidden' ) ) }>
+							{ allHidden ? __( 'Show', 'events-certificates' ) : __( 'Hide', 'events-certificates' ) }
+						</MenuItem>
+					</>
+				);
+			} }
+		</BlockSettingsMenuControls>
+	);
 }
 
 /** What is selected: the editor's own list of ids (the core's store can only hold a run of siblings), and where a range from the keyboard or Shift starts. */
@@ -213,13 +270,16 @@ export function reparented( before: Element[], after: Element[], page: Parameter
 }
 
 /** The block editor's store for the editor: the elements as blocks, the selection kept the same, what changes in it written back. */
-export function BlocksProvider( { elements, page, selection, onSelection, onElements, children }: { elements: Element[]; page: Parameters< typeof moveEl >[ 1 ]; selection: Selection; onSelection: ( ids: string[], anchor: string | null ) => void; onElements: ( next: Element[] ) => void; children: React.ReactNode } ) {
+export function BlocksProvider( { elements, page, selection, onSelection, onElements, actions, children }: { elements: Element[]; page: Parameters< typeof moveEl >[ 1 ]; selection: Selection; onSelection: ( ids: string[], anchor: string | null ) => void; onElements: ( next: Element[] ) => void; actions?: LayerActions; children: React.ReactNode } ) {
 	// A key that changes when a change was refused, so the store goes back to the elements.
 	const [ refused, setRefused ] = useState( 0 );
 	const blocks = useMemo( () => toBlocks( elements ), [ elements ] );
 	const change = ( next: Instance[] ) => {
 		const after = reparented( elements, toElements( next ), page );
-		if ( after ) {
+		// What has to be on every certificate is not lost to a delete or a paste in the layers.
+		const all = flatten( elements );
+		const lost = !! after && all.some( ( el ) => isRequired( el, all ) && ! findEl( after, el.id ) );
+		if ( after && ! lost ) {
 			onElements( after );
 		} else {
 			setRefused( ( n ) => n + 1 );
@@ -229,6 +289,7 @@ export function BlocksProvider( { elements, page, selection, onSelection, onElem
 		<BlockEditorProvider key={ refused } value={ blocks } onChange={ change } onInput={ change } settings={ {} }>
 			<SyncSelection selection={ selection } tree={ elements } onChange={ onSelection } />
 			<GroupLists />
+				{ actions && <LayerMenu tree={ elements } actions={ actions } /> }
 			{ children }
 		</BlockEditorProvider>
 	);

@@ -877,6 +877,7 @@ export default function Editor() {
 					}
 				} }
 				onElements={ ( elements ) => commit( { ...design, elements } ) }
+				actions={ { onGroup: ( ids ) => group( ids ), onUngroup: ( id ) => ungroup( id ), onToggle: ( ids, key ) => toggleMany( ids, key ) } }
 			>
 			<div className="evcert-body">
 				{ panel && (
