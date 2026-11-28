@@ -687,7 +687,7 @@ class RenderTest extends Test_Case {
 	}
 
 	/**
-	 * A font size with decimals reaches the page as it was written (the editor takes 12.5 or 9.75 pt, with up to three decimals).
+	 * A font size with decimals reaches the page as it was written (the editor takes 12.5 or 9.75 pt, with up to eight decimals).
 	 */
 	public function test_a_font_size_with_decimals_is_kept() {
 		$el = array(
@@ -699,6 +699,19 @@ class RenderTest extends Test_Case {
 		$this->assertSame( 12.5, Render\text_size( $el, array(), array() ) );
 		$this->assertSame( 9.75, Render\text_size( array( 'size' => 9.75 ) + $el, array(), array() ) );
 		$this->assertSame( 12.123, Render\text_size( array( 'size' => '12.123' ) + $el, array(), array() ) );
+	}
+
+	/**
+	 * A size is written in CSS with up to eight decimals and no zeros at the end: 12.5pt, 12pt, 12.12345679pt, not 12.500pt.
+	 */
+	public function test_a_size_in_points_is_written_with_up_to_eight_decimals() {
+		$this->assertSame( '12.5', Render\points_css( 12.5 ) );
+		$this->assertSame( '12', Render\points_css( 12 ) );
+		$this->assertSame( '14', Render\points_css( '14' ) );
+		$this->assertSame( '6.5', Render\points_css( 6.5 ) );
+		$this->assertSame( '12.47246', Render\points_css( 12.47246 ) );
+		$this->assertSame( '12.12345679', Render\points_css( 12.123456789 ) );
+		$this->assertSame( '0.1', Render\points_css( 0.1 + 0.2 - 0.2 ) );
 	}
 
 	/**

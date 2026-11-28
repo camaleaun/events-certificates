@@ -98,7 +98,7 @@ test( 'the layout keeps its unit when the size is typed', () => {
 	assert.equal( patch.layout.v.size, '96pt' );
 } );
 
-const { alignAxis, anchorAxis, axisAt, decimalSeparator, localizedNumbers, fontSizePt, fontSizeText, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
+const { alignAxis, anchorAxis, axisAt, decimalSeparator, localizedNumbers, fontSizePt, fontSizeText, fontSizeUnit, fontSizeChange, fontSizeSlider, isCustomSize, FONT_SIZES, unitOf, lengthIn, sizeIn, resizeSideLen, unitPatch, radiusUnit, radiusNumber, radiusFrom, radiusConvert } = sandbox.size;
 
 test( 'a length says its unit, and a length in points is written in it', () => {
 	assert.deepEqual( [ '12mm', '3.5in', '10px', '5', 'calc(1pt + 1pt)', '50%' ].map( unitOf ), [ 'mm', 'in', 'px', 'pt', 'pt', '%' ] );
@@ -262,29 +262,77 @@ test( 'a side of an SVG left empty says no size: the layout has none there, and 
 } );
 
 
-test( 'a font size typed with decimals keeps them, in points with up to three', () => {
+test( 'a font size typed with decimals keeps them, in points with up to eight', () => {
 	assert.equal( fontSizePt( '12.5pt' ), 12.5 );
 	assert.equal( fontSizePt( '9.75pt' ), 9.75 );
-	assert.equal( fontSizePt( '12.1234' ), 12.123, 'no unit: the unit given, points by default' );
+	assert.equal( fontSizePt( '12.1234' ), 12.1234, 'no unit: the unit given, points by default' );
+	assert.equal( fontSizePt( '12.123456789' ), 12.12345679, 'eight decimals at most' );
 	assert.equal( fontSizePt( '12,5' ), 12.5, 'a comma is a decimal point' );
-	assert.equal( fontSizePt( '4.4mm' ), 12.472 );
+	assert.equal( fontSizePt( '4.4mm' ), 12.47246 );
 	assert.equal( fontSizePt( '0.5in' ), 36 );
 	assert.equal( fontSizePt( '9.5', 'px' ), 9.5, 'the unit of the field when the text has none' );
-	assert.equal( fontSizePt( '12', 'mm' ), 34.016 );
+	assert.equal( fontSizePt( '12', 'mm' ), 34.0158 );
 	assert.equal( fontSizePt( '0.2' ), 1, 'at least 1 pt' );
 	assert.equal( fontSizePt( '5000' ), 1000, 'at most 1000 pt (what a file may say)' );
 	assert.equal( fontSizePt( '' ), undefined );
 	assert.equal( fontSizePt( 'abc' ), undefined );
 } );
 
-test( 'a font size is shown in its unit with up to three decimals and no zeros at the end', () => {
+test( 'a font size is shown in its unit with up to eight decimals and no zeros at the end', () => {
 	assert.equal( fontSizeText( 12.5, 'pt' ), '12.5pt' );
+	assert.equal( fontSizeText( 12.5000, 'pt' ), '12.5pt' );
 	assert.equal( fontSizeText( 12, 'pt' ), '12pt' );
 	assert.equal( fontSizeText( 9.75, 'pt' ), '9.75pt' );
-	assert.equal( fontSizeText( 12.3456, 'pt' ), '12.346pt' );
-	assert.equal( fontSizeText( 12.472, 'mm' ), '4.4mm' );
+	assert.equal( fontSizeText( 12.3456, 'pt' ), '12.3456pt' );
+	assert.equal( fontSizeText( 12.12345679, 'pt' ), '12.12345679pt' );
+	assert.equal( fontSizeText( 12.47246, 'mm' ), '4.4mm' );
 	assert.equal( fontSizeText( 72, 'in' ), '1in' );
 	assert.equal( fontSizeText( 12.5, 'px' ), '12.5px' );
+} );
+
+test( 'what is typed in a unit comes back the same when it is shown again (the points keep eight decimals)', () => {
+	for ( const unit of [ 'pt', 'px', 'mm', 'cm', 'in' ] ) {
+		for ( const v of [ '4.12345678', '3.33333333', '0.5', '12.1', '7.25' ] ) {
+			const pt = fontSizePt( v + unit );
+			if ( pt > 1 && pt < 1000 ) {
+				assert.equal( fontSizeText( pt, unit ), String( Number( v ) ) + unit, v + unit );
+			}
+		}
+	}
+} );
+
+test( 'the unit of a font size: only px, mm, cm and in are kept, points are the default', () => {
+	assert.equal( fontSizeUnit( 'mm' ), 'mm' );
+	assert.equal( fontSizeUnit( 'in' ), 'in' );
+	for ( const not of [ 'pt', 'em', 'MM', undefined, null, 5, '' ] ) {
+		assert.equal( fontSizeUnit( not ), 'pt', String( not ) );
+	}
+	assert.equal( isCustomSize( 14, 'pt' ), false, 'a size of the list' );
+	assert.equal( isCustomSize( 12.5, 'pt' ), true );
+	assert.equal( isCustomSize( 14, 'mm' ), true, 'a unit that is not points' );
+	assert.ok( FONT_SIZES.includes( 14 ) && ! FONT_SIZES.includes( 13 ) );
+} );
+
+test( 'changing the unit of the field keeps the size; typing a number changes it', () => {
+	const change = ( ...args ) => {
+		const out = fontSizeChange( ...args );
+		return out && [ out.size, out.sizeUnit ];
+	};
+	assert.deepEqual( change( '14mm', 14, 'pt' ), [ 14, 'mm' ], 'the control says the same number in the new unit first' );
+	assert.deepEqual( change( '5mm', 14, 'mm' ), [ 14.17325, 'mm' ] );
+	assert.deepEqual( change( '12.5pt', 14, 'pt' ), [ 12.5, undefined ] );
+	assert.deepEqual( change( '12pt', 14, 'mm' ), [ 14, undefined ], 'back to points keeps the size' );
+	assert.equal( fontSizeChange( '', 14, 'pt' ), undefined );
+	assert.equal( fontSizeChange( '14pt', 14, 'pt' ), undefined, 'nothing changed' );
+	assert.equal( fontSizeChange( 'abc', 14, 'pt' ), undefined );
+} );
+
+test( 'the slider of a font size goes by the unit: tenths, hundredths for the big units', () => {
+	const slider = ( unit ) => { const s = fontSizeSlider( unit ); return [ s.min, s.max, s.step ]; };
+	assert.deepEqual( slider( 'pt' ), [ 1, 100, 0.1 ] );
+	assert.deepEqual( slider( 'px' ), [ 1, 100, 0.1 ] );
+	assert.deepEqual( slider( 'mm' ), [ 0.35, 35.28, 0.1 ] );
+	assert.deepEqual( slider( 'in' ), [ 0.01, 1.39, 0.01 ] );
 } );
 
 test( 'a length is shown with the decimal separator of the language: a comma in pt-BR, a dot in English', () => {

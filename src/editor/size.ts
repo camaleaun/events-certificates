@@ -129,11 +129,17 @@ export function localizedNumbers( text: string, locale: string ): string {
 	return separator === '.' ? text : text.replace( /(\d)\.(?=\d)/g, `$1${ separator }` );
 }
 
+/** The sizes of the list, in points (as if no theme.json made presets). */
+export const FONT_SIZES = [ 8, 10, 12, 14, 16, 18, 24, 32, 42 ];
+
 /** The units a font size may be typed in (the unit of the field; px is the point). */
 export const FONT_SIZE_UNITS = [ 'pt', 'px', 'mm', 'cm', 'in' ] as const;
+export type FontSizeUnit = ( typeof FONT_SIZE_UNITS )[ number ];
+
+const round8 = ( n: number ) => Math.round( n * 1e8 ) / 1e8;
 
 /**
- * A font size typed ("12.5", "9.75pt", "4,4mm") in points, with up to three decimals: what is typed is kept, not rounded to a step. The unit is the text's, or
+ * A font size typed ("12.5", "9.75pt", "4,4mm") in points, with up to eight decimals (as CSS has): what is typed is kept, not rounded to a step. The unit is the text's, or
  * `unit` (the field's) when it has none. At least 1 pt and at most 1000 (what a file may say); nothing for a text that is not a size.
  */
 export function fontSizePt( text: string, unit: string = 'pt' ): number | undefined {
@@ -146,13 +152,46 @@ export function fontSizePt( text: string, unit: string = 'pt' ): number | undefi
 	if ( ! factor ) {
 		return undefined;
 	}
-	const pt = Math.round( Number.parseFloat( m[ 1 ].replace( ',', '.' ) ) * factor * 1000 ) / 1000;
+	const pt = round8( round8( Number.parseFloat( m[ 1 ].replace( ',', '.' ) ) ) * factor );
 	return Math.min( 1000, Math.max( 1, pt ) );
 }
 
-/** A font size in points as the field shows it in a unit: up to three decimals, with no zeros at the end ("12.5pt", "12pt", "4.4mm"). */
+/** A font size in points as the field shows it in a unit: up to eight decimals, with no zeros at the end ("12.5pt", "12pt", "4.4mm"). */
 export function fontSizeText( pt: number, unit: string = 'pt' ): string {
-	return `${ Number( ( pt / ( UNITS[ unit ] || 1 ) ).toFixed( 3 ) ) }${ unit }`;
+	return `${ Number( ( pt / ( UNITS[ unit ] || 1 ) ).toFixed( 8 ) ) }${ unit }`;
+}
+
+/** The unit a font size is shown in, from what a file says: px, mm, cm or in; anything else (and nothing) is points. */
+export function fontSizeUnit( value: unknown ): FontSizeUnit {
+	return value === 'px' || value === 'mm' || value === 'cm' || value === 'in' ? value : 'pt';
+}
+
+/** Whether the size is not one of the list (or is shown in another unit than points): the field opens by itself. */
+export function isCustomSize( pt: number, unit: string ): boolean {
+	return unit !== 'pt' || ! FONT_SIZES.includes( pt );
+}
+
+/**
+ * What a change of the field makes of the element. The unit control says "the same number in the new unit" first when the unit is changed: that keeps the size (points) and
+ * changes the unit it is shown in; any other text is a size. Nothing when there is nothing to change. `sizeUnit` is undefined for points (none is written).
+ */
+export function fontSizeChange( text: string, pt: number, unit: string ): { size: number; sizeUnit: FontSizeUnit | undefined } | undefined {
+	const typed = /^\s*\d*[.,]?\d+\s*([a-z]*)\s*$/i.exec( text )?.[ 1 ].toLowerCase();
+	if ( typed && typed !== unit && UNITS[ typed ] && FONT_SIZE_UNITS.includes( typed as FontSizeUnit ) ) {
+		return { size: pt, sizeUnit: typed === 'pt' ? undefined : ( typed as FontSizeUnit ) };
+	}
+	const size = fontSizePt( text, unit );
+	if ( size === undefined || ( size === pt && fontSizeUnit( unit ) === unit ) ) {
+		return undefined;
+	}
+	return { size, sizeUnit: unit === 'pt' ? undefined : fontSizeUnit( unit ) };
+}
+
+/** The range of the slider beside the field, in the unit shown: 1 to 100 points, by tenths (hundredths for the units that are big). */
+export function fontSizeSlider( unit: string ): { min: number; max: number; step: number } {
+	const f = UNITS[ unit ] || 1;
+	const two = ( n: number ) => Math.round( n * 100 ) / 100;
+	return { min: two( 1 / f ), max: two( 100 / f ), step: f >= 28 ? 0.01 : 0.1 };
 }
 
 /** The layout an element has, or the one that holds it where it is (anchored to the start of the page). */

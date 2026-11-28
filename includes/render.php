@@ -1434,6 +1434,18 @@ function format_date( $ts, $format ) {
 }
 
 /**
+ * A number of points as CSS says it: up to eight decimals and no zeros at the end ("12.5", "12", "12.12345679"), so a size typed in the editor reaches the page as it was typed.
+ *
+ * @param float|int|string $points Points.
+ * @return string
+ */
+function points_css( $points ) {
+	$text = rtrim( rtrim( sprintf( '%.8F', (float) $points ), '0' ), '.' );
+
+	return '' === $text ? '0' : $text;
+}
+
+/**
  * A text element's font size: its own, or smaller when it must fit its width.
  *
  * @param array<string, mixed>  $el      Text element.
@@ -1947,11 +1959,11 @@ function element_html( array $el, array $design, array $values, array $options )
 		case 'text':
 			$size  = text_size( $el, $values, $options );
 			$style = $box . sprintf(
-				'height:auto;font-family:%s;font-weight:%d;font-size:%.3Fpt;line-height:%s;color:%s;text-align:%s;%s%s%s',
+				'height:auto;font-family:%s;font-weight:%d;font-size:%spt;line-height:%s;color:%s;text-align:%s;%s%s%s',
 				// The font the design names and, behind it, the shipped one that stands in for it.
 				\EventsCertificate\Fonts\stack( (string) ( $el['font'] ?? '' ), ! empty( $options['for_pdf'] ) ),
 				\EventsCertificate\Fonts\weight_for( (string) ( $el['font'] ?? '' ), (int) ( $el['weight'] ?? 400 ), ! empty( $options['for_pdf'] ) ),
-				$size,
+				points_css( $size ),
 				\EventsCertificate\Vendor\Camaleaun\Draw\Text::line_height( $el['lh'] ?? null, $size ),
 				color( $design, $el['color'] ?? '$text', $mode ),
 				in_array( $el['align'] ?? 'left', array( 'left', 'center', 'right' ), true ) ? ( $el['align'] ?? 'left' ) : 'left',
