@@ -7,6 +7,7 @@ export const ui = {
 	cases: 'Your case',
 	casesLabel: 'I use WordPress',
 	language: 'Language',
+	theme: 'Light or dark',
 	problem: 'The problem',
 	steps: 'In three steps',
 	also: 'Also included',

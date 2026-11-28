@@ -55,11 +55,65 @@ pre {
 	border-radius: 6px;
 }
 
+:root[data-theme='light'] {
+	color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+	color-scheme: dark;
+}
+
 @media (prefers-color-scheme: dark) {
-	.astro-code,
-	.astro-code span {
+	:root:not([data-theme='light']) .astro-code,
+	:root:not([data-theme='light']) .astro-code span {
 		color: var(--shiki-dark) !important;
 		background-color: var(--shiki-dark-bg) !important;
+	}
+}
+
+:root[data-theme='dark'] .astro-code,
+:root[data-theme='dark'] .astro-code span {
+	color: var(--shiki-dark) !important;
+	background-color: var(--shiki-dark-bg) !important;
+}
+
+.theme {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--text);
+	cursor: pointer;
+}
+
+.theme:hover {
+	color: var(--accent);
+}
+
+/* The icon shows the scheme you would switch to: a sun in the dark, a moon in the light. */
+.theme__sun {
+	display: none;
+}
+
+:root[data-theme='dark'] .theme__sun {
+	display: inline;
+}
+
+:root[data-theme='dark'] .theme__moon {
+	display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) .theme__sun {
+		display: inline;
+	}
+
+	:root:not([data-theme='light']) .theme__moon {
+		display: none;
 	}
 }
 
