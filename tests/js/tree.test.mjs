@@ -71,7 +71,8 @@ test( 'a group does not go into itself, and what may not be in a group stays out
 	assert.equal( t.moveEl( list, page, 'g', 'g' ), list );
 	assert.equal( t.moveEl( list, page, 'g', 'h' ), list, 'not into what it holds' );
 	assert.equal( t.moveEl( list, page, 'q', 'g' ), list, 'the authenticity code stays on the certificate' );
-	assert.equal( t.moveEl( list, page, 's', 'g' ), list, 'and the signature' );
+	assert.notEqual( t.moveEl( list, page, 's', 'g' ), list, 'a signature may go in a group: it is where the signer signs' );
+	assert.equal( t.canHold( { id: 'old', type: 'image', slot: 'signature' } ), false, 'the old signature image slot stays out' );
 	assert.equal( t.canHold( { id: 'v', type: 'verification' } ), false );
 	// Three groups deep, and no more.
 	const deep = [ { id: 'g1', type: 'group', x: 0, y: 0, w: 100, h: 100, children: [ { id: 'g2', type: 'group', x: 0, y: 0, w: 90, h: 90, children: [ { id: 'g3', type: 'group', x: 0, y: 0, w: 80, h: 80, children: [] } ] } ] }, { id: 'g4', type: 'group', x: 0, y: 0, w: 10, h: 10, children: [] } ];

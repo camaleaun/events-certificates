@@ -126,8 +126,11 @@ function cornerOf( resolved: Placed[], id: string | null ): { x: number; y: numb
 	return g ? { x: ( g.ox || 0 ) + g.x, y: ( g.oy || 0 ) + g.y } : { x: 0, y: 0 };
 }
 
-/** Whether an element may be put in a group: the authenticity code, the verification and a signature stay on the certificate itself. */
-export const canHold = ( el: Element ): boolean => ! flatten( [ el ] ).some( ( e ) => e.type === 'qr' || e.type === 'verification' || e.type === 'signature' || e.slot === 'signature' );
+/**
+ * Whether an element may be put in a group: the authenticity code and the verification stay on the certificate itself (the signature does not: it is where the signer signs, in a
+ * group as anywhere; only the old signature picture slot of an image stays out).
+ */
+export const canHold = ( el: Element ): boolean => ! flatten( [ el ] ).some( ( e ) => e.type === 'qr' || e.type === 'verification' || e.slot === 'signature' );
 
 /**
  * An element moved into a group (or out to the page, with `to` null) at a place in its list, keeping its place on the page: its numbers, or its anchors,

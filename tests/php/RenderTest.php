@@ -147,6 +147,59 @@ class RenderTest extends Test_Case {
 	}
 
 	/**
+	 * A signature in a group is drawn where the group puts it (ADR 0053).
+	 */
+	public function test_a_signature_in_a_group_is_drawn() {
+		$design = array(
+			'page'     => array(
+				'w'     => 200,
+				'h'     => 100,
+				'bg'    => '#fff',
+				'safe'  => 0,
+				'bleed' => 0,
+			),
+			'colors'   => array(
+				'text' => array(
+					'light' => '#000',
+					'dark'  => '#fff',
+				),
+			),
+			'elements' => array(),
+		);
+		$group  = array(
+			'id'       => 'g',
+			'type'     => 'group',
+			'x'        => 20,
+			'y'        => 10,
+			'w'        => 160,
+			'h'        => 80,
+			'fill'     => '',
+			'stroke'   => '',
+			'children' => array(
+				array(
+					'id'    => 'signature',
+					'type'  => 'signature',
+					'x'     => 5,
+					'y'     => 5,
+					'w'     => 120,
+					'h'     => 40,
+					'color' => '$text',
+				),
+			),
+		);
+		$signer = (string) wp_json_encode(
+			array(
+				'vw'    => 600,
+				'vh'    => 200,
+				'paths' => array( array( 'd' => 'M0 0L600 200L0 200Z' ) ),
+			)
+		);
+		$html   = Render\element_html( $group, $design, array( 'signature' => $signer ), array( 'mode' => 'light' ) );
+		$this->assertStringContainsString( '<img', $html, 'The signer\'s signature is drawn inside the group.' );
+		$this->assertSame( 2, substr_count( $html, '<img' ), 'The frame of the group and the signature.' );
+	}
+
+	/**
 	 * The signature element is a place for the signer's signature (docs/decisions/0048): it draws it, upright, and has no drawing of its own.
 	 */
 	public function test_the_signature_is_a_place_for_the_signers_signature() {

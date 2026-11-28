@@ -10,8 +10,9 @@ A template made by hand from a Figma file stacked rectangles and SVGs that belon
 ## Decision
 
 - **The element is `group`** (`draw/group` in the drawing package, `events-certificates/certificate-group` in a certificate file). It is a rectangle (fill, stroke, radius,
-  corner shape) whose inner blocks are what it holds, down to **3 groups deep and 300 elements in all**. The authenticity code, the verification and a signature
-  have their place on the certificate itself and are not held by a group (`Clean`, the layers' drag and `Group` all refuse them).
+  corner shape) whose inner blocks are what it holds, down to **3 groups deep and 300 elements in all**. The authenticity code and the verification
+  have their place on the certificate itself and are not held by a group (`Clean`, the layers' drag and `Group` all refuse them). A signature may be in a group (it is
+  where the signer signs, wherever that is; only the old signature picture slot of an image stays out).
 - **What is in a group is placed from its top-left corner**, and its anchors (`layout.ref: 'parent'`) are to the group's size: `x`, `y`, `%` and "fill" are of the group's box, not
   of the page's. The ids of what is in a group follow the group's (`group-2-rect-1`) and are made again by position like any id.
 - **Variations, in the core's order: Group, Row, Stack, Grid** (`arrange`: none, `row`, `stack`, `grid`). Row and stack place what is in it one after the other inside the
