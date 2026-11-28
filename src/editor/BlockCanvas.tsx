@@ -161,8 +161,15 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 		if ( el.hidden || ( editingId === el.id && el.type === 'text' ) ) {
 			return null;
 		}
-		const begin = ( event: React.PointerEvent ) => start( event, { kind: 'move', id: el.id, start: toPage( event ), origin: el } );
-		const ph = el.type === 'image' && ! el.src && el.slot !== 'logo' ? placeholder( el, () => select( el.id ), begin ) : null;
+		// A click on what is in a group selects the group (the outermost one) and drags it; a double click goes down one level, as in Figma. What is already selected stays the target.
+		const chain: Placed[] = [ el ];
+		for ( let up = parentOf( shownTree, el.id ); up; up = parentOf( shownTree, up.id ) ) {
+			chain.unshift( up as unknown as Placed );
+		}
+		const at = chain.findIndex( ( c ) => c.id === selected || many.includes( c.id ) );
+		const target = tab === 'content' ? el : at >= 0 ? chain[ at ] : chain[ 0 ];
+		const begin = ( event: React.PointerEvent ) => start( event, { kind: 'move', id: target.id, start: toPage( event ), origin: target } );
+		const ph = el.type === 'image' && ! el.src && el.slot !== 'logo' ? placeholder( el, () => select( target.id ), begin ) : null;
 		if ( ph ) {
 			return <g key={ el.id }>{ ph }</g>;
 		}
@@ -190,6 +197,12 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 				className={ `evcert-el${ el.locked ? ' is-locked' : '' }` }
 				onDoubleClick={ ( event ) => {
 					event.stopPropagation();
+					// Inside a selected group: the next level down toward what was clicked; at the bottom, edit it.
+					const down = tab !== 'content' && at >= 0 && at + 1 < chain.length ? chain[ at + 1 ] : null;
+					if ( down ) {
+						select( down.id );
+						return;
+					}
 					onEdit( el );
 				} }
 				onPointerDown={ ( event ) => {
@@ -197,15 +210,15 @@ export default function BlockCanvas( { design, mode, sample, zoom, edges = { x: 
 						return;
 					}
 					event.stopPropagation();
-					if ( ( event.shiftKey || event.metaKey || event.ctrlKey ) && extend( event, el.id ) ) {
+					if ( ( event.shiftKey || event.metaKey || event.ctrlKey ) && extend( event, target.id ) ) {
 						return;
 					}
-					select( el.id );
+					select( target.id );
 					if ( tab === 'content' ) {
 						onEdit( el );
 						return;
 					}
-					if ( ! el.locked && ! flowed( el ) ) {
+					if ( ! target.locked && ! flowed( target ) ) {
 						begin( event );
 					} else {
 						dragRef.current = null;
