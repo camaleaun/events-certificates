@@ -267,7 +267,7 @@ class SettingsScreenTest extends Test_Case {
 				$this->assertStringContainsString( '>' . $caption . '</a>', $html, $caption );
 			}
 			$this->assertStringContainsString( 'class="evcert-settings"', $html );
-			
+
 		}
 		// On its own screen the tabs are WordPress's, and Export and Import are beside the title (the page's, not the body's).
 		$own = $this->body();
